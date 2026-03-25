@@ -4,7 +4,7 @@ import { useAddresses } from '../context/AddressContext';
 import { useToast } from '../context/ToastContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchOrders } from '../services/api';
+import { fetchOrders, rateOrder } from '../services/api';
 import { Order } from '../types';
 import AddressForm from '../components/AddressForm';
 import RestaurantCard from '../components/RestaurantCard';
@@ -25,7 +25,9 @@ import {
   Utensils,
   ChevronRight,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Star,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -50,6 +52,8 @@ const Profile: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -77,6 +81,19 @@ const Profile: React.FC = () => {
     loadOrders();
   }, [user, navigate, activeTab, authLoading]);
 
+  const handleRateOrder = async (orderId: number, rating: number) => {
+    try {
+      await rateOrder(orderId, rating);
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, rating } : o));
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(prev => prev ? { ...prev, rating } : null);
+      }
+      showToast('Thank you for your rating!', 'success');
+    } catch (error) {
+      showToast('Failed to submit rating', 'error');
+    }
+  };
+
   const handleLogout = () => {
     logout();
     showToast('Logged out successfully. See you soon!', 'info');
@@ -91,6 +108,23 @@ const Profile: React.FC = () => {
   const handleTabChange = (tabId: Tab) => {
     setActiveTab(tabId);
     setSearchParams({ tab: tabId });
+  };
+
+  const [profileForm, setProfileForm] = useState({
+    name: user.name,
+    phone: '9876543210'
+  });
+
+  const handleUpdateProfile = () => {
+    if (profileForm.name.trim().length < 3) {
+      showToast('Name must be at least 3 characters', 'error');
+      return;
+    }
+    if (profileForm.phone.length !== 10) {
+      showToast('Phone number must be 10 digits', 'error');
+      return;
+    }
+    showToast('Profile updated successfully!', 'success');
   };
 
   if (!user) return null;
@@ -147,7 +181,7 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex-1 p-6 md:p-12 overflow-y-auto max-h-[800px] bg-white no-scrollbar">
+          <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-white no-scrollbar">
             
             {activeTab === 'orders' && (
               <div className="animate-in fade-in duration-300">
@@ -172,7 +206,14 @@ const Profile: React.FC = () => {
                 ) : (
                   <div className="space-y-6">
                     {orders.map((order) => (
-                      <div key={order.id} className="border border-gray-200 p-4 md:p-6 rounded-md hover:shadow-lg transition-all bg-white group border-l-4 hover:border-l-primary">
+                      <div 
+                        key={order.id} 
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setIsOrderModalOpen(true);
+                        }}
+                        className="border border-gray-200 p-4 md:p-6 rounded-md hover:shadow-lg transition-all bg-white group border-l-4 hover:border-l-primary cursor-pointer"
+                      >
                         <div className="flex flex-col md:flex-row justify-between md:items-start gap-3 md:gap-4 mb-3 md:mb-4 border-b border-gray-100 pb-3 md:pb-4">
                           <div className="flex items-start gap-3 md:gap-4">
                             <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl bg-gray-50 overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-100 group-hover:shadow-md transition-all">
@@ -201,13 +242,19 @@ const Profile: React.FC = () => {
                                </div>
                             </div>
                           </div>
-                          <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start">
+                          <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-2">
                              <div className={`flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-wider ${
                                order.status === 'DELIVERED' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600 animate-pulse'
                              }`}>
                                <span>{order.status}</span>
                                <CheckCircle2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
                              </div>
+                             {order.rating && (
+                               <div className="flex items-center gap-1 bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full text-[8px] md:text-[10px] font-black">
+                                 <Star className="w-2.5 h-2.5 fill-yellow-600" />
+                                 <span>{order.rating}</span>
+                               </div>
+                             )}
                           </div>
                         </div>
 
@@ -247,6 +294,17 @@ const Profile: React.FC = () => {
                              <button className="px-3 md:px-6 py-2 md:py-2.5 border border-gray-200 text-gray-600 text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-all rounded-lg">
                                Help
                              </button>
+                             {order.status === 'DELIVERED' && !order.rating && (
+                               <button 
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   navigate(`/order-rating/${order.id}`);
+                                 }}
+                                 className="px-3 md:px-6 py-2 md:py-2.5 bg-yellow-400 text-dark text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:bg-yellow-500 transition-all rounded-lg"
+                               >
+                                 Rate Order
+                               </button>
+                             )}
                            </div>
                         </div>
                       </div>
@@ -322,7 +380,12 @@ const Profile: React.FC = () => {
                 <div className="max-w-md space-y-6">
                    <div className="border border-gray-300 px-4 py-3 bg-white focus-within:border-black transition-colors">
                       <label className="block text-xs text-gray-400 mb-1">Name</label>
-                      <input type="text" defaultValue={user.name} className="w-full outline-none text-dark font-medium" />
+                      <input 
+                        type="text" 
+                        value={profileForm.name} 
+                        onChange={e => setProfileForm({...profileForm, name: e.target.value})}
+                        className="w-full outline-none text-dark font-medium" 
+                      />
                    </div>
                    <div className="border border-gray-300 px-4 py-3 bg-white focus-within:border-black transition-colors">
                       <label className="block text-xs text-gray-400 mb-1">Email</label>
@@ -330,9 +393,19 @@ const Profile: React.FC = () => {
                    </div>
                    <div className="border border-gray-300 px-4 py-3 bg-white focus-within:border-black transition-colors">
                       <label className="block text-xs text-gray-400 mb-1">Phone Number</label>
-                      <input type="tel" defaultValue="9876543210" className="w-full outline-none text-dark font-medium" />
+                      <input 
+                        type="tel" 
+                        value={profileForm.phone} 
+                        onChange={e => setProfileForm({...profileForm, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})}
+                        className="w-full outline-none text-dark font-medium" 
+                      />
                    </div>
-                   <button className="bg-primary text-white font-bold py-3 px-8 uppercase text-sm shadow hover:bg-[#e26e10] transition-colors">Update</button>
+                   <button 
+                    onClick={handleUpdateProfile}
+                    className="bg-primary text-white font-bold py-3 px-8 uppercase text-sm shadow hover:bg-[#e26e10] transition-colors"
+                   >
+                    Update
+                   </button>
                 </div>
               </div>
             )}
@@ -353,6 +426,142 @@ const Profile: React.FC = () => {
           showToast(`Address "${newAddr.type}" added successfully.`, "success");
           setIsAddressModalOpen(false);
       }} />
+
+      {/* Order Details Modal */}
+      <AnimatePresence>
+        {isOrderModalOpen && selectedOrder && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div>
+                  <h3 className="text-xl font-black text-dark">Order Details</h3>
+                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Order #{selectedOrder.id}</p>
+                </div>
+                <button onClick={() => setIsOrderModalOpen(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
+                  <X className="w-6 h-6 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-8 no-scrollbar">
+                {/* Restaurant Info */}
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden border border-gray-100 shadow-sm">
+                    <img src={selectedOrder.restaurantImageUrl || (selectedOrder.items && selectedOrder.items[0]?.imageUrl)} alt="Restaurant" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <h4 className="text-2xl font-black text-dark">{selectedOrder.restaurantName}</h4>
+                    <p className="text-gray-500 flex items-center gap-1 text-sm mt-1">
+                      <MapPin className="w-4 h-4" /> {selectedOrder.deliveryAddress}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                        selectedOrder.status === 'DELIVERED' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'
+                      }`}>
+                        {selectedOrder.status}
+                      </span>
+                      <span className="text-gray-300">•</span>
+                      <span className="text-xs text-gray-400 font-bold">{new Date(selectedOrder.date).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Items List */}
+                <div>
+                  <h5 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Items Ordered</h5>
+                  <div className="space-y-4">
+                    {selectedOrder.items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
+                          <div>
+                            <p className="font-bold text-dark">{item.name}</p>
+                            <p className="text-xs text-gray-400">₹{item.price} x {item.quantity}</p>
+                          </div>
+                        </div>
+                        <p className="font-black text-dark">₹{item.price * item.quantity}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Rating Section */}
+                {selectedOrder.status === 'DELIVERED' && (
+                  <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                    <div className="flex justify-between items-center mb-3">
+                      <h5 className="text-sm font-black text-dark">Rate your experience</h5>
+                      {!selectedOrder.rating && (
+                        <button 
+                          onClick={() => navigate(`/order-rating/${selectedOrder.id}`)}
+                          className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline"
+                        >
+                          Detailed Review
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRateOrder(selectedOrder.id, star);
+                          }}
+                          className="transition-transform hover:scale-110 active:scale-95"
+                        >
+                          <Star 
+                            className={`w-8 h-8 ${
+                              (selectedOrder.rating || 0) >= star 
+                                ? 'fill-yellow-400 text-yellow-400' 
+                                : 'text-gray-300'
+                            }`} 
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    {selectedOrder.rating && (
+                      <p className="text-xs text-green-600 font-bold mt-2">You rated this order {selectedOrder.rating} stars!</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Bill Summary */}
+                <div className="border-t border-dashed border-gray-200 pt-6 space-y-2">
+                  <div className="flex justify-between text-gray-500 text-sm">
+                    <span>Item Total</span>
+                    <span>₹{selectedOrder.totalAmount - 40}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-500 text-sm">
+                    <span>Delivery Fee</span>
+                    <span>₹40</span>
+                  </div>
+                  <div className="flex justify-between text-dark font-black text-xl pt-2">
+                    <span>Total Amount</span>
+                    <span>₹{selectedOrder.totalAmount}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 bg-gray-50 border-t border-gray-100">
+                <button 
+                  onClick={() => {
+                    const rid = selectedOrder.restaurantId || (selectedOrder.items && selectedOrder.items[0]?.restaurantId);
+                    if (rid) navigate(`/restaurant/${rid}`);
+                    setIsOrderModalOpen(false);
+                  }}
+                  className="w-full bg-primary text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#e26e10] transition-all uppercase tracking-widest text-sm"
+                >
+                  Reorder from this restaurant
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

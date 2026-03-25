@@ -4,13 +4,13 @@ import { ChevronDown, X, MapPin, Store } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import RestaurantCard, { RestaurantCardSkeleton } from '../components/RestaurantCard';
 import { Restaurant } from '../types';
-import { fetchRestaurants } from '../services/api';
+import { fetchRestaurants, calculateDistance } from '../services/api';
 import { useLocationContext } from '../context/LocationContext';
 
-type SortOption = 'Relevance' | 'Delivery Time' | 'Rating' | 'Cost: Low to High' | 'Cost: High to Low';
+type SortOption = 'Relevance' | 'Nearest' | 'Delivery Time' | 'Rating' | 'Cost: Low to High' | 'Cost: High to Low';
 
 const Home: React.FC = () => {
-  const { city } = useLocationContext();
+  const { city, coordinates, setCoordinates } = useLocationContext();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -18,6 +18,24 @@ const Home: React.FC = () => {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
   const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Detect user location on mount
+    if (navigator.geolocation && !coordinates) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCoordinates({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+          setSortBy('Nearest');
+        },
+        (error) => {
+          console.error("Error detecting location:", error);
+        }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -56,6 +74,7 @@ const Home: React.FC = () => {
 
   const sortOptions: SortOption[] = [
     'Relevance', 
+    'Nearest',
     'Delivery Time', 
     'Rating', 
     'Cost: Low to High', 
@@ -117,6 +136,15 @@ const Home: React.FC = () => {
     }
 
     switch (sortBy) {
+      case 'Nearest':
+        if (coordinates) {
+          result.sort((a, b) => {
+            const distA = a.latitude && a.longitude ? calculateDistance(coordinates.latitude, coordinates.longitude, a.latitude, a.longitude) : Infinity;
+            const distB = b.latitude && b.longitude ? calculateDistance(coordinates.latitude, coordinates.longitude, b.latitude, b.longitude) : Infinity;
+            return distA - distB;
+          });
+        }
+        break;
       case 'Delivery Time':
         result.sort((a, b) => parseInt(a.deliveryTime) - parseInt(b.deliveryTime));
         break;
@@ -134,7 +162,7 @@ const Home: React.FC = () => {
     }
 
     return result;
-  }, [restaurants, activeFilters, sortBy]);
+  }, [restaurants, activeFilters, sortBy, coordinates]);
 
   const displayedRestaurants = processedRestaurants.slice(0, visibleCount);
   const hasMore = processedRestaurants.length > visibleCount;
@@ -237,10 +265,6 @@ const Home: React.FC = () => {
                   Only restaurants registered in this city will appear here. Be the first to start the journey!
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                   <Link to="/partner/register" className="bg-primary text-white font-bold py-4 px-10 rounded-xl shadow-xl shadow-orange-500/20 hover:scale-105 transition-transform flex items-center gap-2 uppercase text-sm">
-                      <Store className="w-5 h-5" />
-                      Register as a Partner
-                   </Link>
                    {activeFilters.length > 0 && (
                      <button onClick={clearFilters} className="text-dark font-bold py-4 px-10 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors uppercase text-sm">
                         Clear Filters
@@ -282,6 +306,7 @@ const Home: React.FC = () => {
           </>
         )}
       </div>
+
     </div>
   );
 };

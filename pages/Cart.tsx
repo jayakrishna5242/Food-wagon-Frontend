@@ -52,7 +52,8 @@ const Cart: React.FC = () => {
     const loadOffers = async () => {
       setIsLoadingOffers(true);
       try {
-        const data = await fetchOffers();
+        const restaurantId = items.length > 0 ? items[0].restaurantId : undefined;
+        const data = await fetchOffers(restaurantId);
         setOffers(data);
       } catch (err) {
         console.error("Failed to fetch offers", err);
@@ -61,7 +62,7 @@ const Cart: React.FC = () => {
       }
     };
     loadOffers();
-  }, []);
+  }, [items]);
 
   // Reset selected offer if cart total falls below min order value
   useEffect(() => {
@@ -153,7 +154,7 @@ const Cart: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#e9ecee] py-4 md:py-8">
+    <div className="min-h-screen bg-[#e9ecee] pb-40 md:py-8">
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="flex flex-col md:flex-row gap-6 md:gap-8">
           
@@ -188,34 +189,36 @@ const Cart: React.FC = () => {
                   {selectedAddressId && <CheckCircle2 className="w-5 h-5 text-green-500" />}
                 </h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                   {addresses.map((addr) => (
-                      <div 
-                        key={addr.id}
-                        onClick={() => setSelectedAddressId(addr.id)}
-                        className={`border-2 p-4 rounded-md cursor-pointer transition-all relative group ${
-                          selectedAddressId === addr.id ? 'border-primary bg-orange-50' : 'border-gray-100 hover:border-gray-200'
-                        }`}
-                      >
-                         <div className="flex items-start gap-3">
-                            <MapPin className={`w-5 h-5 mt-1 ${selectedAddressId === addr.id ? 'text-primary' : 'text-gray-400'}`} />
-                            <div>
-                               <p className="font-bold text-sm text-dark">{addr.type}</p>
-                               <p className="text-xs text-graytext mt-1 leading-relaxed">
-                                 {addr.flatNo}, {addr.area}, {addr.city}
-                               </p>
-                            </div>
-                         </div>
-                      </div>
-                   ))}
+                <div className="max-h-[400px] overflow-y-auto pr-1 mb-6 no-scrollbar">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     {addresses.map((addr) => (
+                        <div 
+                          key={addr.id}
+                          onClick={() => setSelectedAddressId(addr.id)}
+                          className={`border-2 p-4 rounded-md cursor-pointer transition-all relative group ${
+                            selectedAddressId === addr.id ? 'border-primary bg-orange-50' : 'border-gray-100 hover:border-gray-200'
+                          }`}
+                        >
+                           <div className="flex items-start gap-3">
+                              <MapPin className={`w-5 h-5 mt-1 ${selectedAddressId === addr.id ? 'text-primary' : 'text-gray-400'}`} />
+                              <div>
+                                 <p className="font-bold text-sm text-dark">{addr.type}</p>
+                                 <p className="text-xs text-graytext mt-1 leading-relaxed">
+                                   {addr.flatNo}, {addr.area}, {addr.city}
+                                 </p>
+                              </div>
+                           </div>
+                        </div>
+                     ))}
 
-                   <button 
-                     onClick={() => setIsAddressModalOpen(true)}
-                     className="border-2 border-dashed border-gray-200 p-4 rounded-md flex flex-col items-center justify-center gap-2 text-graytext hover:text-primary hover:border-primary transition-all group min-h-[100px]"
-                   >
-                      <PlusIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                      <span className="text-xs font-bold uppercase">Add New Address</span>
-                   </button>
+                     <button 
+                       onClick={() => setIsAddressModalOpen(true)}
+                       className="border-2 border-dashed border-gray-200 p-4 rounded-md flex flex-col items-center justify-center gap-2 text-graytext hover:text-primary hover:border-primary transition-all group min-h-[100px]"
+                     >
+                        <PlusIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-bold uppercase">Add New Address</span>
+                     </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -406,7 +409,7 @@ const Cart: React.FC = () => {
           </div>
 
           <div className="w-full md:w-[380px]">
-             <div className="bg-white shadow-sm pt-6 pb-0 rounded-none md:rounded-sm relative sticky top-24">
+             <div className="bg-white shadow-sm pt-6 pb-0 rounded-none md:rounded-sm relative md:sticky md:top-24">
                 <div className="flex items-center gap-3 mb-6 px-6">
                   <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                      <img src="https://picsum.photos/id/163/100/100" className="w-full h-full object-cover" alt="restaurant" />
@@ -417,7 +420,7 @@ const Cart: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="space-y-0 max-h-[300px] overflow-y-auto px-6 no-scrollbar">
+                <div className="space-y-0 max-h-[300px] overflow-y-auto px-6">
                   {items.map((item) => (
                     <div key={item.id} className="flex items-center justify-between py-4 group border-b border-gray-50 last:border-0">
                        <div className="flex items-start gap-3 w-3/5">

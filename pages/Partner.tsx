@@ -20,7 +20,7 @@ const Partner: React.FC = () => {
                 Join 100,000+ restaurants who trust us to grow their business.
               </p>
               <div className="flex gap-4">
-                 <Link to="/partner/register" className="bg-[#fc8019] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#e66f0f] transition-colors shadow-lg shadow-orange-500/20">
+                 <Link to="/join-us" className="bg-[#fc8019] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#e66f0f] transition-colors shadow-lg shadow-orange-500/20">
                     Register Your Restaurant
                  </Link>
                  <Link to="/login" className="bg-white/10 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 transition-colors">
@@ -170,7 +170,7 @@ const Partner: React.FC = () => {
       {/* CTA Bottom */}
       <div className="bg-[#fc8019] py-16 text-center text-white px-4">
          <h2 className="text-3xl font-bold mb-6">Ready to grow your business?</h2>
-         <button onClick={() => navigate('/partner/register')} className="bg-white text-[#fc8019] px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors shadow-xl">
+         <button onClick={() => navigate('/join-us')} className="bg-white text-[#fc8019] px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors shadow-xl">
             Get Started Today
          </button>
       </div>

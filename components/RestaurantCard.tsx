@@ -1,9 +1,11 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Heart } from 'lucide-react';
+import { Star, Heart, MapPin } from 'lucide-react';
 import { Restaurant } from '../types';
 import { useFavorites } from '../context/FavoritesContext';
+import { useLocationContext } from '../context/LocationContext';
+import { calculateDistance } from '../services/api';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -11,7 +13,20 @@ interface RestaurantCardProps {
 
 const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   const { toggleFavorite, isFavorite } = useFavorites();
+  const { coordinates } = useLocationContext();
   const favorited = isFavorite(restaurant.id);
+
+  const distance = useMemo(() => {
+    if (coordinates && restaurant.latitude && restaurant.longitude) {
+      return calculateDistance(
+        coordinates.latitude,
+        coordinates.longitude,
+        restaurant.latitude,
+        restaurant.longitude
+      );
+    }
+    return null;
+  }, [coordinates, restaurant.latitude, restaurant.longitude]);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -30,6 +45,14 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90"></div>
           
+          {/* Distance Badge */}
+          {distance !== null && (
+            <div className="absolute top-3 left-3 z-10 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg flex items-center gap-1 shadow-sm">
+              <MapPin className="w-3 h-3 text-primary" />
+              <span className="text-[10px] font-black text-dark">{distance} km</span>
+            </div>
+          )}
+
           {/* Favorite Toggle */}
           <button 
             onClick={handleFavoriteClick}
@@ -55,7 +78,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
             <div className="bg-green-600 rounded-full p-0.5">
               <Star className="w-3 h-3 text-white fill-white" />
             </div>
-            <span>{restaurant.rating}</span>
+            <span>{restaurant.rating > 0 ? restaurant.rating : '--'}</span>
             <span className="mx-1">•</span>
             <span>{restaurant.deliveryTime}</span>
           </div>

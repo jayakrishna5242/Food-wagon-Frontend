@@ -4,7 +4,15 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
-  role?: 'CUSTOMER' | 'PARTNER';
+  role: 'CUSTOMER' | 'PARTNER' | 'ADMIN' | 'DELIVERY';
+  restaurantId?: number; // For partners
+  isVerified?: boolean;
+  isNew?: boolean;
+  rating?: number;
+  ratingCount?: number;
+  vehicleType?: string;
+  vehicleNumber?: string;
+  drivingLicense?: string;
 }
 
 export interface UserAddress {
@@ -24,13 +32,19 @@ export interface Restaurant {
   name: string;
   imageUrl: string;
   rating: number;
+  ratingCount?: number;
   deliveryTime: string;
   costForTwo: string;
   cuisines: string[];
   location: string;
   city: string;
+  latitude?: number;
+  longitude?: number;
+  fssaiLicense?: string;
   isNew?: boolean;
   isPureVeg?: boolean;
+  isVerified?: boolean;
+  operatingHours?: string;
   aggregatedDiscountInfo?: {
     header: string;
     subHeader: string;
@@ -48,6 +62,8 @@ export interface MenuItem {
   restaurantId: number;
   restaurantName?: string;
   inStock?: boolean;
+  rating?: number;
+  ratingCount?: number;
 }
 
 export interface CartItem extends MenuItem {
@@ -67,6 +83,49 @@ export interface Order {
   restaurantName?: string;
   restaurantId?: number;
   restaurantImageUrl?: string;
+  rating?: number;
+  review?: string;
+  deliveryBoyId?: number;
+  deliveryBoyName?: string;
+  appliedOffer?: string;
+}
+
+export interface Trip {
+  id: number;
+  orderId: number;
+  restaurantName: string;
+  restaurantAddress: string;
+  deliveryAddress: string;
+  customerName: string;
+  payout: number;
+  basePay: number;
+  tips: number;
+  deductions: number;
+  distance: number;
+  date: string;
+  status: 'COMPLETED' | 'CANCELLED';
+  rating?: number;
+  feedback?: string;
+}
+
+export interface EarningsSummary {
+  daily: number;
+  weekly: number;
+  monthly: number;
+  totalTrips: number;
+  totalTips: number;
+  totalDeductions: number;
+}
+
+export interface OrderRequest {
+  id: number;
+  orderId: number;
+  restaurantName: string;
+  restaurantAddress: string;
+  deliveryAddress: string;
+  payout: number;
+  distance: number;
+  expiresAt: number; // Timestamp in ms
 }
 
 export interface Offer {
@@ -76,4 +135,5 @@ export interface Offer {
   discountType: 'PERCENTAGE' | 'FIXED';
   discountValue: number;
   minOrderValue: number;
+  restaurantId?: number; // Optional: if undefined, it's a global offer
 }

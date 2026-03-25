@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Star } from 'lucide-react';
 import { MenuItem as MenuItemType } from '../types';
 import { useCart } from '../context/CartContext';
 
@@ -19,6 +20,13 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
           <div className={`w-full h-full rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
         </div>
         <h3 className="text-base md:text-xl font-bold text-dark leading-tight">{item.name}</h3>
+        {item.rating !== undefined && (
+          <div className="flex items-center gap-1 text-yellow-600 text-[10px] md:text-xs font-black mt-1">
+            <Star className="w-2.5 h-2.5 md:w-3 md:h-3 fill-yellow-600" />
+            <span>{item.rating > 0 ? item.rating : '--'}</span>
+            <span className="text-gray-300 font-medium ml-1">({item.ratingCount || 0})</span>
+          </div>
+        )}
         <p className="text-sm font-bold text-dark mt-0.5 md:mt-1">₹{item.price}</p>
         <p className="text-xs md:text-sm text-gray-400 mt-2 md:mt-3 leading-relaxed line-clamp-2 md:line-clamp-none">{item.description}</p>
       </div>

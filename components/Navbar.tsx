@@ -204,6 +204,11 @@ const Navbar: React.FC = () => {
             <span>About</span>
           </Link>
 
+          <Link to="/join-us" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
+            <Store className="w-5 h-5" />
+            <span>Join Us</span>
+          </Link>
+
           <Link to="/cart" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors relative">
             <div className={`relative transition-transform duration-300 ${animateCart ? 'scale-125' : 'scale-100'}`}>
               <ShoppingBag className="w-6 h-6" />
@@ -217,10 +222,30 @@ const Navbar: React.FC = () => {
           </Link>
 
           {user ? (
-            <Link to="/profile" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
-              <User className="w-5 h-5" />
-              <span className="font-bold">{user.name}</span>
-            </Link>
+            <div className="flex items-center gap-4">
+              {user.role === 'ADMIN' && (
+                <Link to="/admin/dashboard" className="hidden md:flex items-center gap-2 text-primary font-bold hover:underline transition-all">
+                  <Settings className="w-5 h-5" />
+                  <span>Admin</span>
+                </Link>
+              )}
+              {user.role === 'PARTNER' && (
+                <Link to="/partner/dashboard" className="hidden md:flex items-center gap-2 text-primary font-bold hover:underline transition-all">
+                  <Store className="w-5 h-5" />
+                  <span>Partner</span>
+                </Link>
+              )}
+              {user.role === 'DELIVERY' && (
+                <Link to="/delivery/dashboard" className="hidden md:flex items-center gap-2 text-primary font-bold hover:underline transition-all">
+                  <ShoppingBag className="w-5 h-5" />
+                  <span>Delivery</span>
+                </Link>
+              )}
+              <Link to="/profile" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
+                <User className="w-5 h-5" />
+                <span className="font-bold">{user.name}</span>
+              </Link>
+            </div>
           ) : (
             <Link to="/login" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
               <User className="w-5 h-5" />

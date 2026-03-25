@@ -102,6 +102,15 @@ const Login: React.FC = () => {
 
       if (isLogin) {
         authResponse = await loginUser(identifier, password);
+        
+        // Check verification status for partners and delivery boys
+        if ((authResponse.user.role === 'PARTNER' || authResponse.user.role === 'DELIVERY') && !authResponse.user.isVerified) {
+          // Allow login but they will be restricted in the dashboard
+          // Or we can prevent login entirely. The user said "until then they can only view their profile and details"
+          // This implies they CAN login but have limited access.
+          // My dashboard updates already handle this.
+        }
+        
         showToast(`Welcome back, ${authResponse.user.name}!`, 'success');
       } else {
         authResponse = await registerUser(name.trim(), email.trim(), phone.trim(), password);
@@ -109,7 +118,17 @@ const Login: React.FC = () => {
       }
       
       login(authResponse.user);
-      navigate('/');
+      
+      // Role-based redirection
+      if (authResponse.user.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (authResponse.user.role === 'PARTNER') {
+        navigate('/partner/dashboard');
+      } else if (authResponse.user.role === 'DELIVERY') {
+        navigate('/delivery/dashboard');
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred. Please try again.');
     } finally {

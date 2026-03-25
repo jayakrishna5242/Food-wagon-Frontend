@@ -102,9 +102,9 @@ const RestaurantDetail: React.FC = () => {
               <div className="border border-gray-100 rounded-lg md:rounded-xl p-1.5 md:p-3 flex flex-col items-center justify-center shadow-sm min-w-[50px] md:min-w-[80px] bg-white flex-shrink-0">
                  <div className="flex items-center gap-0.5 md:gap-1 font-black text-green-700 border-b border-gray-100 pb-1 md:pb-2 mb-1 md:mb-2 w-full justify-center text-xs md:text-base">
                    <Star className="w-2.5 h-2.5 md:w-4 md:h-4 fill-green-700" />
-                   <span>{restaurant.rating}</span>
+                   <span>{restaurant.rating > 0 ? restaurant.rating : '--'}</span>
                  </div>
-                 <span className="text-[7px] md:text-[10px] text-graytext font-black tracking-tight uppercase text-center">1K+ ratings</span>
+                 <span className="text-[7px] md:text-[10px] text-graytext font-black tracking-tight uppercase text-center">{restaurant.ratingCount > 0 ? `${restaurant.ratingCount}+` : 'No'} ratings</span>
               </div>
             </div>
 

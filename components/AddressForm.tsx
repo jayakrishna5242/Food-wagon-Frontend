@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Home, Briefcase, MapPin, Crosshair, Loader2, CheckCircle2 } from 'lucide-react';
 import { UserAddress } from '../types';
 import { useLocationContext } from '../context/LocationContext';
+import { useToast } from '../context/ToastContext';
 
 interface AddressFormProps {
   isOpen: boolean;
@@ -12,21 +13,32 @@ interface AddressFormProps {
 
 const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) => {
   const { city: currentCity, address: currentAddress, setCity: setGlobalCity, setAddress: setGlobalAddress } = useLocationContext();
+  const { showToast } = useToast();
   
   const [flatNo, setFlatNo] = useState('');
   const [area, setArea] = useState('');
   const [city, setCity] = useState('');
   const [type, setType] = useState<'Home' | 'Work' | 'Other'>('Home');
   const [isDetecting, setIsDetecting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Pre-fill from global location when modal opens
   useEffect(() => {
     if (isOpen) {
       setCity(currentCity || '');
-      // Try to extract area from current address (e.g. "Indiranagar, Bangalore" -> "Indiranagar")
-      const areaPart = currentAddress.split(',')[0];
-      if (areaPart && areaPart !== currentCity) {
-        setArea(areaPart);
+      
+      // Try to extract area from current address
+      if (currentAddress) {
+        const parts = currentAddress.split(',').map(p => p.trim());
+        const areaPart = parts[0];
+        
+        // If the first part isn't just the city, use it as area
+        if (areaPart && areaPart.toLowerCase() !== currentCity.toLowerCase()) {
+          setArea(areaPart);
+        } else if (parts.length > 1) {
+          // If first part was city, try second part if it exists
+          setArea(parts[1]);
+        }
       }
     }
   }, [isOpen, currentCity, currentAddress]);
@@ -34,7 +46,10 @@ const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) =>
   if (!isOpen) return null;
 
   const handleDetectLocation = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      showToast("Geolocation is not supported by your browser", "error");
+      return;
+    }
     
     setIsDetecting(true);
     navigator.geolocation.getCurrentPosition(
@@ -42,11 +57,13 @@ const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) =>
         const { latitude, longitude } = position.coords;
         try {
           const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          if (!response.ok) throw new Error("Failed to fetch address");
+          
           const data = await response.json();
           const addr = data.address;
           
           const detectedCity = addr.city || addr.town || addr.village || addr.state_district || '';
-          const detectedArea = addr.suburb || addr.neighbourhood || addr.road || '';
+          const detectedArea = addr.suburb || addr.neighbourhood || addr.road || addr.quarter || '';
           
           setCity(detectedCity);
           setArea(detectedArea);
@@ -54,32 +71,58 @@ const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) =>
           // Also update global context for consistency
           setGlobalCity(detectedCity);
           setGlobalAddress(detectedArea ? `${detectedArea}, ${detectedCity}` : detectedCity);
+          showToast("Location detected successfully", "success");
         } catch (error) {
           console.error("Detection failed", error);
+          showToast("Could not determine your exact address. Please enter manually.", "info");
         } finally {
           setIsDetecting(false);
         }
       },
-      () => setIsDetecting(false),
-      { enableHighAccuracy: true }
+      (error) => {
+        console.error("Geolocation error", error);
+        setIsDetecting(false);
+        showToast("Location access denied or unavailable", "error");
+      },
+      { enableHighAccuracy: true, timeout: 5000 }
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!flatNo || !area || !city) return;
+    if (!flatNo || flatNo.length < 1) {
+      showToast("Flat/House No. is required", "error");
+      return;
+    }
+    if (!area || area.length < 3) {
+      showToast("Area must be at least 3 characters", "error");
+      return;
+    }
+    if (!city || city.length < 3) {
+      showToast("City must be at least 3 characters", "error");
+      return;
+    }
     
-    onSave({ flatNo, area, city, type });
-    setFlatNo('');
-    setArea('');
-    setCity('');
-    onClose();
+    setIsSaving(true);
+    try {
+      // Small delay for better UX feel
+      await new Promise(resolve => setTimeout(resolve, 400));
+      onSave({ flatNo, area, city, type });
+      setFlatNo('');
+      setArea('');
+      setCity('');
+      onClose();
+    } catch (err) {
+      showToast("Failed to save address", "error");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden border border-gray-100 animate-in zoom-in-95 duration-300">
-        <div className="p-8 border-b border-gray-50 flex justify-between items-center">
+      <div className="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden border border-gray-100 animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col">
+        <div className="p-8 border-b border-gray-50 flex justify-between items-center flex-shrink-0">
           <div>
             <h2 className="text-2xl font-black text-dark tracking-tight">Save Address</h2>
             <p className="text-xs text-graytext font-medium mt-1">Provide your delivery details</p>
@@ -92,7 +135,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) =>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto no-scrollbar">
           {/* Address Type Selector */}
           <div className="space-y-3">
             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Address Label</label>
@@ -172,9 +215,14 @@ const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) =>
 
           <button 
             type="submit" 
-            className="w-full bg-primary text-white font-black py-4 rounded-2xl shadow-xl shadow-orange-500/20 hover:scale-[1.02] transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-4"
+            disabled={isSaving}
+            className="w-full bg-primary text-white font-black py-4 rounded-2xl shadow-xl shadow-orange-500/20 hover:scale-[1.02] transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-4 disabled:opacity-70 disabled:scale-100"
           >
-            Save & Continue <CheckCircle2 size={18} />
+            {isSaving ? (
+              <>Saving... <Loader2 size={18} className="animate-spin" /></>
+            ) : (
+              <>Save & Continue <CheckCircle2 size={18} /></>
+            )}
           </button>
         </form>
       </div>

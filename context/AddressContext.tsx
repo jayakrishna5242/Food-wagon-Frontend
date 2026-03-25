@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UserAddress } from '../types';
+import { useAuth } from './AuthContext';
 
 interface AddressContextType {
   addresses: UserAddress[];
@@ -13,22 +14,35 @@ interface AddressContextType {
 const AddressContext = createContext<AddressContextType | undefined>(undefined);
 
 export const AddressProvider = ({ children }: { children?: ReactNode }) => {
+  const { user } = useAuth();
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
-  // Initial load
+  // Key for localStorage, unique per user if logged in
+  const storageKey = user ? `foodwagon_addresses_${user.id}` : 'foodwagon_addresses_guest';
+
+  // Initial load when user changes
   useEffect(() => {
-    const saved = localStorage.getItem('foodwagon_addresses');
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         setAddresses(parsed);
-        if (parsed.length > 0) setSelectedAddressId(parsed[0].id);
+        if (parsed.length > 0) {
+          setSelectedAddressId(parsed[0].id);
+        } else {
+          setSelectedAddressId(null);
+        }
       } catch (e) {
         console.error("Failed to parse addresses", e);
+        setAddresses([]);
+        setSelectedAddressId(null);
       }
+    } else {
+      setAddresses([]);
+      setSelectedAddressId(null);
     }
-  }, []);
+  }, [storageKey]);
 
   const addAddress = (newAddr: Omit<UserAddress, 'id'>) => {
     const addressWithId: UserAddress = {
@@ -38,7 +52,7 @@ export const AddressProvider = ({ children }: { children?: ReactNode }) => {
     
     setAddresses(prev => {
       const updated = [...prev, addressWithId];
-      localStorage.setItem('foodwagon_addresses', JSON.stringify(updated));
+      localStorage.setItem(storageKey, JSON.stringify(updated));
       return updated;
     });
     
@@ -48,40 +62,17 @@ export const AddressProvider = ({ children }: { children?: ReactNode }) => {
   const removeAddress = (id: string) => {
     setAddresses(prev => {
       const updated = prev.filter(a => a.id !== id);
-      localStorage.setItem('foodwagon_addresses', JSON.stringify(updated));
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+      
+      // If the removed address was selected, select another one or null
+      if (selectedAddressId === id) {
+        setSelectedAddressId(updated.length > 0 ? updated[0].id : null);
+      }
+      
       return updated;
     });
-    
-    if (selectedAddressId === id) {
-      setAddresses(prev => {
-        setSelectedAddressId(prev.length > 0 ? prev[0].id : null);
-        return prev;
-      });
-    }
   };
 
-  return (
-    <AuthAwareAddressProvider 
-      addresses={addresses} 
-      addAddress={addAddress} 
-      removeAddress={removeAddress}
-      selectedAddressId={selectedAddressId}
-      setSelectedAddressId={setSelectedAddressId}
-    >
-      {children}
-    </AuthAwareAddressProvider>
-  );
-};
-
-// Helper component to provide the context value
-const AuthAwareAddressProvider = ({ 
-  children, 
-  addresses, 
-  addAddress, 
-  removeAddress, 
-  selectedAddressId, 
-  setSelectedAddressId 
-}: AddressContextType & { children: ReactNode }) => {
   return (
     <AddressContext.Provider value={{ addresses, addAddress, removeAddress, selectedAddressId, setSelectedAddressId }}>
       {children}

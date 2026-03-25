@@ -3,8 +3,10 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface LocationContextType {
   city: string;
   address: string;
+  coordinates: { latitude: number; longitude: number } | null;
   setCity: (city: string) => void;
   setAddress: (address: string) => void;
+  setCoordinates: (coords: { latitude: number; longitude: number } | null) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
   error: string | null;
@@ -17,6 +19,7 @@ export const LocationProvider = ({ children }: { children?: ReactNode }) => {
   // Default to Bangalore for initial experience if nothing detected
   const [city, setCity] = useState<string>('Bangalore');
   const [address, setAddress] = useState<string>('Bangalore, India');
+  const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,6 +30,8 @@ export const LocationProvider = ({ children }: { children?: ReactNode }) => {
         setCity, 
         address, 
         setAddress, 
+        coordinates,
+        setCoordinates,
         isLoading, 
         setIsLoading, 
         error, 
