@@ -12,7 +12,9 @@ const RestaurantDetail: React.FC = () => {
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItemType[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   
   const { toggleFavorite, isFavorite } = useFavorites();
 
@@ -53,8 +55,31 @@ const RestaurantDetail: React.FC = () => {
 
   const favorited = isFavorite(restaurant.id);
 
+  const filteredItems = menuItems.filter(item => 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // Group items by category for realistic layout
-  const categories = Array.from(new Set(menuItems.map(item => item.category)));
+  const categories: string[] = Array.from(new Set(filteredItems.map(item => item.category)));
+
+  const scrollToCategory = (category: string) => {
+    const element = document.getElementById(`category-${category}`);
+    if (element) {
+      const offset = 100; // Account for sticky header
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      setActiveCategory(category);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24 md:pb-8">
@@ -133,29 +158,61 @@ const RestaurantDetail: React.FC = () => {
              <input 
                type="text" 
                placeholder="Search for your favorites..." 
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
                className="w-full bg-white border border-gray-200 rounded-2xl py-3 md:py-4 px-10 md:px-12 text-xs md:text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm group-hover:shadow-md"
              />
              <Search className="absolute left-3.5 md:left-4 top-3 md:top-4 text-gray-400 w-4 h-4 md:w-5 md:h-5 group-hover:text-primary transition-colors" />
            </div>
         </div>
 
+        {/* Category Navigation */}
+        {!searchQuery && categories.length > 1 && (
+          <div className="sticky top-0 z-30 bg-gray-50/80 backdrop-blur-md py-4 -mx-4 px-4 mb-6 overflow-x-auto no-scrollbar flex gap-2 border-b border-gray-100">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => scrollToCategory(category)}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${
+                  activeCategory === category 
+                    ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                    : 'bg-white text-gray-400 hover:text-dark border border-gray-100'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Menu Categories */}
         <div className="space-y-6">
-          {categories.map((category) => {
-            const itemsInCategory = menuItems.filter(item => item.category === category);
-            return (
-              <div key={category} className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm border border-gray-100 overflow-hidden">
-                <div className="flex justify-between items-center cursor-pointer mb-4 border-b border-gray-50 pb-4">
-                  <h3 className="font-black text-lg md:text-xl text-dark tracking-tight">{category} <span className="text-gray-300 ml-1">{itemsInCategory.length}</span></h3>
+          {categories.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-3xl border border-gray-100">
+              <Search className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+              <p className="text-gray-400 font-bold">No items found matching "{searchQuery}"</p>
+            </div>
+          ) : (
+            categories.map((category) => {
+              const itemsInCategory = filteredItems.filter(item => item.category === category);
+              return (
+                <div 
+                  key={category} 
+                  id={`category-${category}`}
+                  className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm border border-gray-100 overflow-hidden"
+                >
+                  <div className="flex justify-between items-center mb-4 border-b border-gray-50 pb-4">
+                    <h3 className="font-black text-lg md:text-xl text-dark tracking-tight">{category} <span className="text-gray-300 ml-1">{itemsInCategory.length}</span></h3>
+                  </div>
+                  <div className="divide-y divide-gray-50">
+                     {itemsInCategory.map(item => (
+                       <MenuItem key={item.id} item={item} />
+                     ))}
+                  </div>
                 </div>
-                <div className="divide-y divide-gray-50">
-                   {itemsInCategory.map(item => (
-                     <MenuItem key={item.id} item={item} />
-                   ))}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
     </div>

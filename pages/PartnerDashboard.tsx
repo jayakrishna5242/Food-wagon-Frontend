@@ -22,9 +22,24 @@ import {
   Edit2,
   Image as ImageIcon,
   Save,
-  PlusCircle
+  PlusCircle,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  LineChart, 
+  Line, 
+  AreaChart, 
+  Area 
+} from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 
@@ -258,10 +273,22 @@ const PartnerDashboard: React.FC = () => {
   };
 
   const stats = [
-    { label: 'Total Sales', value: `₹${orders.filter(o => o.status === 'DELIVERED').reduce((acc, o) => acc + o.totalAmount, 0)}`, icon: DollarSign, color: 'bg-green-500/10 text-green-500' },
-    { label: 'Active Orders', value: orders.filter(o => ['PENDING', 'PREPARING', 'READY', 'DISPATCHED'].includes(o.status)).length.toString(), icon: ShoppingBag, color: 'bg-blue-500/10 text-blue-500' },
-    { label: 'Total Customers', value: new Set(orders.map(o => o.userId)).size.toString(), icon: Users, color: 'bg-purple-500/10 text-purple-500' },
-    { label: 'Growth', value: '+12.5%', icon: TrendingUp, color: 'bg-orange-500/10 text-orange-500' },
+    { label: 'Total Sales', value: `₹${orders.filter(o => o.status === 'DELIVERED').reduce((acc, o) => acc + o.totalAmount, 0)}`, icon: DollarSign, color: 'bg-green-500/10 text-green-500', trend: '+15.2%', isPositive: true },
+    { label: 'Active Orders', value: orders.filter(o => ['PENDING', 'PREPARING', 'READY', 'DISPATCHED'].includes(o.status)).length.toString(), icon: ShoppingBag, color: 'bg-blue-500/10 text-blue-500', trend: '+5.4%', isPositive: true },
+    { label: 'Total Customers', value: new Set(orders.map(o => o.userId)).size.toString(), icon: Users, color: 'bg-purple-500/10 text-purple-500', trend: '+2.1%', isPositive: true },
+    { label: 'Growth', value: '+12.5%', icon: TrendingUp, color: 'bg-orange-500/10 text-orange-500', trend: '+1.2%', isPositive: true },
+  ];
+
+  const chartData = [
+    { name: 'Week 1', orders: 45, income: 12000 },
+    { name: 'Week 2', orders: 52, income: 15000 },
+    { name: 'Week 3', orders: 48, income: 13500 },
+    { name: 'Week 4', orders: 61, income: 18000 },
+  ];
+
+  const comparisonData = [
+    { month: 'Last Month', orders: 180, income: 52000, deliveries: 175 },
+    { month: 'This Month', orders: 210, income: 58500, deliveries: 205 },
   ];
 
   const handleLogout = () => {
@@ -921,9 +948,9 @@ const PartnerDashboard: React.FC = () => {
 
         {/* Dashboard Content */}
         {activeTab === 'dashboard' && (
-          <>
+          <div className="space-y-10">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map((stat, i) => (
                 <motion.div 
                   key={i}
@@ -936,12 +963,13 @@ const PartnerDashboard: React.FC = () => {
                     <div className={`p-3 rounded-2xl ${stat.color}`}>
                       <stat.icon size={24} />
                     </div>
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <MoreVertical size={20} />
-                    </button>
+                    <div className={`flex items-center gap-1 text-xs font-black ${stat.isPositive ? 'text-green-500' : 'text-red-500'}`}>
+                      {stat.isPositive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                      {stat.trend}
+                    </div>
                   </div>
-                  <div className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">{stat.label}</div>
-                  <div className="text-2xl font-black text-gray-900">{stat.value}</div>
+                  <div className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">{stat.label}</div>
+                  <div className="text-2xl font-black text-gray-900 tracking-tight">{stat.value}</div>
                 </motion.div>
               ))}
             </div>
@@ -949,28 +977,43 @@ const PartnerDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-black text-gray-900 tracking-tight">Sales Overview</h3>
-                  <select className="bg-gray-50 border-none rounded-xl py-2 px-4 text-xs font-bold outline-none">
-                    <option>Last 7 Days</option>
-                    <option>Last 30 Days</option>
-                  </select>
+                  <div>
+                    <h3 className="text-xl font-black text-gray-900 tracking-tight">Income Analysis</h3>
+                    <p className="text-xs text-gray-500 font-medium mt-1">Monthly revenue comparison</p>
+                  </div>
+                  <div className="bg-green-50 text-green-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                    +12.5% Growth
+                  </div>
                 </div>
-                <div className="h-64 flex items-end justify-between gap-2 px-4">
-                  {[40, 70, 45, 90, 65, 85, 55].map((h, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                      <motion.div 
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        transition={{ delay: i * 0.1 + 0.5, duration: 1 }}
-                        className="w-full bg-primary/20 hover:bg-primary rounded-t-xl transition-colors relative group"
-                      >
-                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-dark text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                          ₹{(h * 100).toLocaleString()}
-                        </div>
-                      </motion.div>
-                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]}</span>
-                    </div>
-                  ))}
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                      <defs>
+                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#fc8019" stopOpacity={0.1}/>
+                          <stop offset="95%" stopColor="#fc8019" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{fontSize: 10, fontWeight: 700, fill: '#9ca3af'}}
+                        dy={10}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{fontSize: 10, fontWeight: 700, fill: '#9ca3af'}}
+                      />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                        labelStyle={{ fontWeight: 900, color: '#111827', marginBottom: '4px' }}
+                      />
+                      <Area type="monotone" dataKey="income" stroke="#fc8019" strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
 
@@ -992,8 +1035,52 @@ const PartnerDashboard: React.FC = () => {
                   {menuItems.length === 0 && <p className="text-center text-gray-400 py-10">No items yet</p>}
                 </div>
               </div>
+
+              {/* Month over Month Comparison */}
+              <div className="lg:col-span-3 bg-dark p-8 md:p-10 rounded-[2.5rem] text-white shadow-xl">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                  <div>
+                    <h3 className="text-2xl font-black tracking-tight">Month over Month Performance</h3>
+                    <p className="text-gray-400 font-medium mt-1">Comparing this month's growth with the previous month.</p>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Income Growth</p>
+                      <p className="text-xl font-black text-green-400">+₹6,500</p>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Order Growth</p>
+                      <p className="text-xl font-black text-blue-400">+30 Orders</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="h-[350px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={comparisonData} layout="vertical" margin={{ left: 40 }}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
+                      <XAxis type="number" hide />
+                      <YAxis 
+                        dataKey="month" 
+                        type="category" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{fontSize: 12, fontWeight: 900, fill: '#fff'}}
+                      />
+                      <Tooltip 
+                        cursor={{fill: 'rgba(255,255,255,0.05)'}}
+                        contentStyle={{ backgroundColor: '#1f2937', borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                        itemStyle={{ color: '#fff', fontWeight: 700 }}
+                      />
+                      <Bar dataKey="income" fill="#fc8019" radius={[0, 10, 10, 0]} barSize={30} name="Income (₹)" />
+                      <Bar dataKey="orders" fill="#3b82f6" radius={[0, 10, 10, 0]} barSize={30} name="Orders" />
+                      <Bar dataKey="deliveries" fill="#10b981" radius={[0, 10, 10, 0]} barSize={30} name="Deliveries" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
-          </>
+          </div>
         )}
 
         {/* Orders Table */}

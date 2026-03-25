@@ -534,6 +534,21 @@ export const fetchAllUsers = async (): Promise<User[]> => {
   return getUsersDB();
 };
 
+export const verifyRestaurant = async (restaurantId: number): Promise<void> => {
+  const restaurants = getRestaurantsDB();
+  const updatedRestaurants = restaurants.map(r => 
+    r.id === restaurantId ? { ...r, isVerified: true } : r
+  );
+  saveRestaurantsDB(updatedRestaurants);
+
+  // Also verify the partner user associated with this restaurant
+  const users = getUsersDB();
+  const updatedUsers = users.map(u => 
+    u.restaurantId === restaurantId ? { ...u, isVerified: true } : u
+  );
+  saveUsersDB(updatedUsers);
+};
+
 export const verifyUser = async (userId: number): Promise<void> => {
   const users = getUsersDB();
   const restaurants = getRestaurantsDB();
