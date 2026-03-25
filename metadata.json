@@ -1,0 +1,7 @@
+{
+  "name": "FoodWagon - Swiggy Clone",
+  "description": "A modern, fully functional standalone food ordering prototype built with React, TypeScript, and Tailwind CSS. Features authentication, restaurant listings, cart management, and order placement using persistent in-memory mock data.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
