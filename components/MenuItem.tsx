@@ -31,12 +31,27 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
         <p className="text-xs md:text-sm text-gray-400 mt-2 md:mt-3 leading-relaxed line-clamp-2 md:line-clamp-none">{item.description}</p>
       </div>
       <div className="relative w-28 h-24 md:w-36 md:h-28 flex-shrink-0">
-        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover rounded-xl" />
-        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white shadow-lg rounded-lg border border-gray-200 w-20 md:w-24 overflow-hidden">
-          {item.inStock === false ? (
-            <div className="w-full py-1.5 md:py-2 text-gray-400 font-extrabold text-[8px] md:text-[10px] uppercase text-center bg-gray-50">
+        <img 
+          src={item.imageUrl} 
+          alt={item.name} 
+          className={`w-full h-full object-cover rounded-xl transition-all duration-300 ${item.inStock === false ? 'grayscale opacity-60' : ''}`} 
+          referrerPolicy="no-referrer"
+        />
+        {item.inStock === false && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/10 rounded-xl pointer-events-none">
+            <div className="bg-white/95 text-dark px-2 py-1 rounded-md text-[10px] md:text-xs font-black uppercase tracking-tighter shadow-lg border border-gray-100">
               Sold Out
             </div>
+          </div>
+        )}
+        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white shadow-lg rounded-lg border border-gray-200 w-20 md:w-24 overflow-hidden">
+          {item.inStock === false ? (
+            <button 
+              disabled
+              className="w-full py-1.5 md:py-2 text-gray-400 font-extrabold text-[10px] md:text-xs uppercase text-center bg-gray-50 cursor-not-allowed"
+            >
+              Sold Out
+            </button>
           ) : quantity === 0 ? (
             <button 
               onClick={() => addToCart(item)}

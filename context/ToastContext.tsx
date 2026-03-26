@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -29,37 +29,44 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     }, 3000);
   }, []);
 
-  const removeToast = (id: string) => {
+  const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  };
+  }, []);
+
+  const contextValue = useMemo(() => ({ showToast }), [showToast]);
 
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
-      <div className="fixed top-4 left-1/2 -translate-x-1/2 md:top-auto md:bottom-6 md:right-6 md:left-auto md:translate-x-0 z-[9999] flex flex-col gap-3 pointer-events-none w-full max-w-[calc(100vw-32px)] md:max-w-md items-center md:items-end">
-        <AnimatePresence>
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-3 pointer-events-none w-full items-center px-4">
+        <AnimatePresence mode="multiple">
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              className={`
-                pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl w-full md:min-w-[300px] 
-                ${toast.type === 'success' ? 'bg-green-600 text-white' : ''}
-                ${toast.type === 'error' ? 'bg-red-600 text-white' : ''}
-                ${toast.type === 'info' ? 'bg-gray-900 text-white' : ''}
-              `}
+              initial={{ opacity: 0, y: -40, scale: 0.9, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.9, y: -20, filter: 'blur(10px)' }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-[24px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] bg-white border border-gray-100 w-full max-w-[380px]"
             >
-              {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 flex-shrink-0" />}
-              {toast.type === 'error' && <AlertCircle className="w-5 h-5 flex-shrink-0" />}
-              {toast.type === 'info' && <Info className="w-5 h-5 flex-shrink-0" />}
+              <div className={`
+                w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0
+                ${toast.type === 'success' ? 'bg-green-50 text-green-600' : ''}
+                ${toast.type === 'error' ? 'bg-red-50 text-red-600' : ''}
+                ${toast.type === 'info' ? 'bg-blue-50 text-blue-600' : ''}
+              `}>
+                {toast.type === 'success' && <CheckCircle2 className="w-5 h-5" />}
+                {toast.type === 'error' && <AlertCircle className="w-5 h-5" />}
+                {toast.type === 'info' && <Info className="w-5 h-5" />}
+              </div>
               
-              <p className="text-sm font-bold flex-1">{toast.message}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-black text-gray-900 leading-tight">{toast.message}</p>
+              </div>
               
               <button 
                 onClick={() => removeToast(toast.id)}
-                className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-50 rounded-xl transition-colors text-gray-400 hover:text-gray-600"
               >
                 <X className="w-4 h-4" />
               </button>

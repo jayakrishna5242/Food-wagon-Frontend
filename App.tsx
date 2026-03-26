@@ -25,6 +25,29 @@ import { FavoritesProvider } from './context/FavoritesContext';
 import AdminDashboard from './pages/AdminDashboard';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import JoinWithUs from './pages/JoinWithUs';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+
+const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        navigate('/login');
+      } else if (allowedRoles && !allowedRoles.includes(user.role)) {
+        navigate('/');
+      }
+    }
+  }, [user, isLoading, navigate, allowedRoles]);
+
+  if (isLoading) return <div className="h-screen flex items-center justify-center font-bold text-primary animate-pulse">Loading...</div>;
+  if (!user) return null;
+  if (allowedRoles && !allowedRoles.includes(user.role)) return null;
+
+  return <>{children}</>;
+};
 
 const Layout = ({ children }: { children?: React.ReactNode }) => {
   const location = useLocation();
@@ -67,11 +90,11 @@ const App: React.FC = () => {
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/login" element={<Login />} />
                       <Route path="/forgot-password" element={<ForgotPassword />} />
-                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                       <Route path="/partner" element={<Partner />} />
-                      <Route path="/partner/dashboard" element={<PartnerDashboard />} />
-                      <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                      <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+                      <Route path="/partner/dashboard" element={<ProtectedRoute allowedRoles={['PARTNER']}><PartnerDashboard /></ProtectedRoute>} />
+                      <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
+                      <Route path="/delivery/dashboard" element={<ProtectedRoute allowedRoles={['DELIVERY']}><DeliveryDashboard /></ProtectedRoute>} />
                       <Route path="/join-us" element={<JoinWithUs />} />
                       <Route path="/about" element={<AboutUs />} />
                       <Route path="/order-rating/:orderId" element={<OrderRating />} />

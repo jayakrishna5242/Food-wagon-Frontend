@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { fetchOrders, fetchRestaurants, clearStoredUser, fetchAllUsers, verifyUser, verifyRestaurant } from '../services/api';
 import { Order, Restaurant, User } from '../types';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -103,7 +103,7 @@ const AdminDashboard: React.FC = () => {
     { label: 'Total Revenue', value: `₹${orders.reduce((acc, o) => acc + o.totalAmount, 0).toLocaleString()}`, icon: BarChart3, trend: '+12.5%', trendUp: true, color: 'bg-blue-500' },
     { label: 'Total Orders', value: orders.length, icon: ShoppingBag, trend: '+8.2%', trendUp: true, color: 'bg-orange-500' },
     { label: 'Active Restaurants', value: restaurants.length, icon: Store, trend: '+3.1%', trendUp: true, color: 'bg-green-500' },
-    { label: 'Total Customers', value: '1,284', icon: Users, trend: '-1.4%', trendUp: false, color: 'bg-purple-500' },
+    { label: 'Total Customers', value: users.filter(u => u.role === 'CUSTOMER').length.toLocaleString(), icon: Users, trend: '-1.4%', trendUp: false, color: 'bg-purple-500' },
   ];
 
   if (loading) return <div className="h-screen flex items-center justify-center font-bold text-primary animate-pulse">Loading Admin Dashboard...</div>;
@@ -111,74 +111,92 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-dark text-white hidden lg:flex flex-col">
-        <div className="p-6 border-b border-gray-800">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-black text-white">F</div>
-            <span className="text-xl font-black tracking-tighter">FOODWAGON <span className="text-[10px] text-primary block -mt-1">ADMIN</span></span>
+      <motion.aside 
+        initial={{ width: 80 }}
+        whileHover={{ width: 260 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="bg-dark text-white hidden lg:flex flex-col sticky top-0 h-screen z-50 overflow-hidden group/sidebar"
+      >
+        <div className="p-6 border-b border-gray-800 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary rounded-lg flex-shrink-0 flex items-center justify-center font-black text-white">F</div>
+            <div className="text-xl font-black tracking-tighter whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-all duration-300 transform translate-x-[-10px] group-hover/sidebar:translate-x-0 overflow-hidden">
+              FOODWAGON <span className="text-[10px] text-primary block -mt-1">ADMIN</span>
+            </div>
           </div>
         </div>
         
-        <nav className="flex-grow p-4 space-y-2">
-          <button 
-            onClick={() => setActiveTab('overview')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'overview' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
-          >
-            <BarChart3 className="w-5 h-5" />
-            <span>Overview</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('restaurants')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'restaurants' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
-          >
-            <Store className="w-5 h-5" />
-            <span>Restaurants</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('orders')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'orders' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
-          >
-            <ShoppingBag className="w-5 h-5" />
-            <span>Orders</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('users')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'users' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
-          >
-            <Users className="w-5 h-5" />
-            <span>Users</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('verification')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeTab === 'verification' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
-          >
-            <CheckCircle2 className="w-5 h-5" />
-            <span>Verification</span>
-            {users.filter(u => !u.isVerified && (u.role === 'PARTNER' || u.role === 'DELIVERY')).length > 0 && (
-              <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                {users.filter(u => !u.isVerified && (u.role === 'PARTNER' || u.role === 'DELIVERY')).length}
+        <nav className="flex-grow p-4 space-y-2 overflow-y-auto no-scrollbar">
+          {[
+            { id: 'overview', icon: BarChart3, label: 'Overview' },
+            { id: 'restaurants', icon: Store, label: 'Restaurants' },
+            { id: 'orders', icon: ShoppingBag, label: 'Orders' },
+            { id: 'users', icon: Users, label: 'Users' },
+            { id: 'verification', icon: CheckCircle2, label: 'Verification', badge: users.filter(u => !u.isVerified && (u.role === 'PARTNER' || u.role === 'DELIVERY')).length }
+          ].map((item) => (
+            <button 
+              key={item.id}
+              onClick={() => setActiveTab(item.id as any)}
+              className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition-all relative group ${activeTab === item.id ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              <span className="whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity overflow-hidden">
+                {item.label}
               </span>
-            )}
-          </button>
+              {item.badge > 0 && (
+                <span className={`absolute right-4 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full transition-opacity ${activeTab === item.id ? 'opacity-100' : 'opacity-0 group-hover/sidebar:opacity-100'}`}>
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-4 border-t border-gray-800 shrink-0">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl font-bold transition-all"
+            className="w-full flex items-center gap-4 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl font-bold transition-all group"
           >
-            <LogOut className="w-5 h-5" />
-            <span>Logout</span>
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <span className="whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity overflow-hidden">Logout</span>
           </button>
         </div>
-      </aside>
+      </motion.aside>
+
+      {/* Mobile Bottom Nav */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-dark border-t border-gray-800 px-6 py-3 z-50 flex items-center justify-between">
+        {[
+          { id: 'overview', icon: BarChart3, label: 'Home' },
+          { id: 'restaurants', icon: Store, label: 'Shops' },
+          { id: 'orders', icon: ShoppingBag, label: 'Orders' },
+          { id: 'users', icon: Users, label: 'Users' },
+          { id: 'verification', icon: CheckCircle2, label: 'Verify' }
+        ].map((item) => (
+          <button 
+            key={item.id}
+            onClick={() => setActiveTab(item.id as any)}
+            className={`flex flex-col items-center gap-1 transition-all ${activeTab === item.id ? 'text-primary' : 'text-gray-400'}`}
+          >
+            <item.icon size={20} />
+            <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+          </button>
+        ))}
+      </div>
 
       {/* Main Content */}
-      <main className="flex-grow p-4 md:p-8 lg:p-12 overflow-y-auto pb-24 md:pb-12">
+      <main className="flex-grow p-4 md:p-8 lg:p-12 overflow-y-auto pb-24 lg:pb-12">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 md:mb-12">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-black text-dark tracking-tight">Global Overview</h1>
-            <p className="text-sm text-gray-400 font-medium">Welcome back, Admin. Here's what's happening today.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-black text-dark tracking-tight">Global Overview</h1>
+              <p className="text-sm text-gray-400 font-medium">Welcome back, Admin. Here's what's happening today.</p>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="lg:hidden p-3 bg-red-50 text-red-500 rounded-2xl"
+            >
+              <LogOut size={20} />
+            </button>
           </div>
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -201,23 +219,23 @@ const AdminDashboard: React.FC = () => {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-8"
+            className="space-y-6 md:space-y-8"
           >
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {stats.map((stat, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className={`${stat.color} p-3 rounded-2xl text-white shadow-lg shadow-current/20 group-hover:scale-110 transition-transform`}>
-                      <stat.icon className="w-6 h-6" />
+                <div key={idx} className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+                  <div className="flex justify-between items-start mb-3 md:mb-4">
+                    <div className={`${stat.color} p-2 md:p-3 rounded-xl md:rounded-2xl text-white shadow-lg shadow-current/20 group-hover:scale-110 transition-transform`}>
+                      <stat.icon className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <div className={`flex items-center gap-1 text-xs font-bold ${stat.trendUp ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className={`flex items-center gap-1 text-[10px] md:text-xs font-bold ${stat.trendUp ? 'text-green-500' : 'text-red-500'}`}>
                       {stat.trendUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                       <span>{stat.trend}</span>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-400 font-bold uppercase tracking-wider mb-1">{stat.label}</p>
-                  <h3 className="text-2xl font-black text-dark">{stat.value}</h3>
+                  <p className="text-[10px] md:text-sm text-gray-400 font-bold uppercase tracking-wider mb-1">{stat.label}</p>
+                  <h3 className="text-lg md:text-2xl font-black text-dark">{stat.value}</h3>
                 </div>
               ))}
             </div>

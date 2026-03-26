@@ -260,8 +260,8 @@ const Home: React.FC = () => {
                 <div className="w-32 h-32 bg-gray-50 rounded-full flex items-center justify-center mb-6">
                   <MapPin className="w-12 h-12 text-gray-200" />
                 </div>
-                <h3 className="text-2xl font-bold text-dark">No Restaurants Found in {city}</h3>
-                <p className="text-gray-500 mt-2 mb-10 max-w-md mx-auto">
+                <h3 className="text-xl md:text-2xl font-bold text-dark">No Restaurants Found in {city}</h3>
+                <p className="text-xs md:text-sm text-gray-500 mt-2 mb-10 max-w-md mx-auto">
                   Only restaurants registered in this city will appear here. Be the first to start the journey!
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -274,10 +274,10 @@ const Home: React.FC = () => {
               </div>
             ) : (
               <>
-                <h2 className="text-2xl font-bold text-dark mb-6">
+                <h2 className="text-xl md:text-2xl font-bold text-dark mb-6">
                   {processedRestaurants.length} Restaurant{processedRestaurants.length > 1 ? 's' : ''} in {city}
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 gap-y-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 gap-y-6 md:gap-y-10">
                   {displayedRestaurants.map((restaurant) => (
                     <RestaurantCard key={restaurant.id} restaurant={restaurant} />
                   ))}

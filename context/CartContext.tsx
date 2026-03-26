@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect, useCallback } from 'react';
 import { CartItem, MenuItem } from '../types';
 import { useToast } from './ToastContext';
 
@@ -48,20 +48,27 @@ export const CartProvider = ({ children }: { children?: ReactNode }) => {
     localStorage.setItem('foodwagon_discount', discount.toString());
   }, [discount]);
 
-  const addToCart = (item: MenuItem) => {
+  const addToCart = useCallback((item: MenuItem) => {
+    const existingItem = items.find((i) => i.id === item.id);
+    if (!existingItem) {
+      showToast(`Added ${item.name} to cart`, 'success');
+    }
     setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id);
-      if (existingItem) {
+      const isAlreadyInCart = prevItems.some((i) => i.id === item.id);
+      if (isAlreadyInCart) {
         return prevItems.map((i) =>
           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-      showToast(`Added ${item.name} to cart`, 'success');
       return [...prevItems, { ...item, quantity: 1 }];
     });
-  };
+  }, [items, showToast]);
 
-  const removeFromCart = (itemId: number) => {
+  const removeFromCart = useCallback((itemId: number) => {
+    const itemToRemove = items.find(i => i.id === itemId);
+    if (itemToRemove && itemToRemove.quantity === 1) {
+      showToast(`Removed ${itemToRemove.name} from cart`, 'info');
+    }
     setItems((prevItems) => {
       const existingItem = prevItems.find((i) => i.id === itemId);
       if (existingItem && existingItem.quantity > 1) {
@@ -69,19 +76,15 @@ export const CartProvider = ({ children }: { children?: ReactNode }) => {
           i.id === itemId ? { ...i, quantity: i.quantity - 1 } : i
         );
       }
-      const itemToRemove = prevItems.find(i => i.id === itemId);
-      if (itemToRemove) {
-        showToast(`Removed ${itemToRemove.name} from cart`, 'info');
-      }
       return prevItems.filter((i) => i.id !== itemId);
     });
-  };
+  }, [items, showToast]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([]);
     setAppliedCoupon(null);
     setDiscount(0);
-  };
+  }, []);
 
   const cartTotal = useMemo(() => {
     return items.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -91,7 +94,7 @@ export const CartProvider = ({ children }: { children?: ReactNode }) => {
     return items.reduce((count, item) => count + item.quantity, 0);
   }, [items]);
 
-  const applyCoupon = (code: string): boolean => {
+  const applyCoupon = useCallback((code: string): boolean => {
     const normalizedCode = code.toUpperCase();
     
     // Simple coupon logic
@@ -115,27 +118,40 @@ export const CartProvider = ({ children }: { children?: ReactNode }) => {
     
     showToast('Invalid coupon code or minimum order value not met', 'error');
     return false;
-  };
+  }, [cartTotal, showToast]);
 
-  const removeCoupon = () => {
+  const removeCoupon = useCallback(() => {
     setAppliedCoupon(null);
     setDiscount(0);
     showToast('Coupon removed', 'info');
-  };
+  }, [showToast]);
+
+  const contextValue = useMemo(() => ({
+    items, 
+    addToCart, 
+    removeFromCart, 
+    clearCart, 
+    cartTotal, 
+    cartCount,
+    discount,
+    appliedCoupon,
+    applyCoupon,
+    removeCoupon
+  }), [
+    items, 
+    addToCart, 
+    removeFromCart, 
+    clearCart, 
+    cartTotal, 
+    cartCount,
+    discount,
+    appliedCoupon,
+    applyCoupon,
+    removeCoupon
+  ]);
 
   return (
-    <CartContext.Provider value={{ 
-      items, 
-      addToCart, 
-      removeFromCart, 
-      clearCart, 
-      cartTotal, 
-      cartCount,
-      discount,
-      appliedCoupon,
-      applyCoupon,
-      removeCoupon
-    }}>
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );

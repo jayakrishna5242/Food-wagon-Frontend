@@ -265,6 +265,9 @@ export const placeOrder = async (orderData: any): Promise<Order> => {
   const user = getStoredUser();
   const orders = getOrdersDB();
 
+  const restaurants = getRestaurantsDB();
+  const restaurant = restaurants.find(r => r.id === orderData.restaurantId);
+
   const newOrder: Order = {
     id: Date.now(),
     userId: user?.id,
@@ -276,7 +279,9 @@ export const placeOrder = async (orderData: any): Promise<Order> => {
     customerPhone: user?.phone,
     deliveryAddress: orderData.deliveryAddress,
     restaurantName: orderData.restaurantName,
-    restaurantId: orderData.restaurantId
+    restaurantId: orderData.restaurantId,
+    restaurantAddress: restaurant ? `${restaurant.location}, ${restaurant.city}` : 'Restaurant Address',
+    restaurantImageUrl: restaurant?.imageUrl
   };
 
   orders.push(newOrder);
@@ -298,8 +303,8 @@ export const fetchOrders = async (): Promise<Order[]> => {
   }
   
   if (user.role === 'DELIVERY') {
-    // Delivery boys see orders that are READY (to pick up) or assigned to them
-    return orders.filter(o => o.deliveryBoyId === user.id || o.status === 'READY').sort((a, b) => b.id - a.id);
+    // Delivery boys see orders that are READY (and not yet assigned) or assigned to them
+    return orders.filter(o => o.deliveryBoyId === user.id || (o.status === 'READY' && !o.deliveryBoyId)).sort((a, b) => b.id - a.id);
   }
 
   return orders.filter(o => o.userId === user.id).sort((a, b) => b.id - a.id);
@@ -323,7 +328,7 @@ export const updateOrderStatus = async (orderId: number, status: Order['status']
           id: Date.now(),
           orderId: o.id,
           restaurantName: o.restaurantName || 'Unknown',
-          restaurantAddress: 'Restaurant Address',
+          restaurantAddress: o.restaurantAddress || 'Restaurant Address',
           deliveryAddress: o.deliveryAddress || 'Customer Address',
           customerName: o.customerName || 'Customer',
           payout: basePay + tips - deductions,
@@ -352,15 +357,24 @@ export const updateOrderStatus = async (orderId: number, status: Order['status']
 export const fetchEarningsSummary = async (deliveryBoyId: number): Promise<EarningsSummary> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   const trips = getTripsDB();
-  // In a real app, this would be calculated on the server
-  // For mock, we'll just return some values
+  
+  const today = new Date().toDateString();
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  
+  const daily = trips.filter(t => new Date(t.date).toDateString() === today)
+    .reduce((acc, t) => acc + (t.payout || 0), 0);
+    
+  const weekly = trips.filter(t => new Date(t.date) >= sevenDaysAgo)
+    .reduce((acc, t) => acc + (t.payout || 0), 0);
+    
   const totalTips = trips.reduce((acc, t) => acc + (t.tips || 0), 0);
   const totalDeductions = trips.reduce((acc, t) => acc + (t.deductions || 0), 0);
   const totalPayout = trips.reduce((acc, t) => acc + (t.payout || 0), 0);
   
   return {
-    daily: Math.floor(totalPayout * 0.1), // Mock
-    weekly: Math.floor(totalPayout * 0.5), // Mock
+    daily,
+    weekly,
     monthly: totalPayout,
     totalTrips: trips.length,
     totalTips,
@@ -423,30 +437,53 @@ export const fetchOrderRequests = async (deliveryBoyId: number): Promise<OrderRe
   await new Promise(resolve => setTimeout(resolve, 400));
   const requests = getOrderRequestsDB();
   
-  // If no requests, generate a mock one that expires in 30 seconds
-  if (requests.length === 0) {
-    const mockRequest: OrderRequest = {
-      id: Date.now(),
-      orderId: 201,
-      restaurantName: 'Taco Bell',
-      restaurantAddress: 'MG Road, Bangalore',
-      deliveryAddress: 'Whitefield, Bangalore',
-      payout: 120,
-      distance: 12.5,
-      expiresAt: Date.now() + 30000
-    };
-    // We don't save it to DB automatically to simulate "incoming" nature
-    return [mockRequest];
+  // Only return non-expired requests
+  const activeRequests = requests.filter(r => r.expiresAt > Date.now());
+  
+  // If no requests, occasionally generate a mock one (for demo purposes)
+  // but don't do it every single time if we just cleared them
+  if (activeRequests.length === 0) {
+    const lastGen = localStorage.getItem('last_request_gen');
+    const now = Date.now();
+    
+    if (!lastGen || now - parseInt(lastGen) > 60000) { // Only every 60 seconds
+      const mockRequest: OrderRequest = {
+        id: now,
+        orderId: 201 + Math.floor(Math.random() * 100),
+        restaurantName: 'Taco Bell',
+        restaurantAddress: 'MG Road, Bangalore',
+        deliveryAddress: 'Whitefield, Bangalore',
+        payout: 120,
+        distance: 12.5,
+        expiresAt: now + 30000
+      };
+      localStorage.setItem('last_request_gen', now.toString());
+      return [mockRequest];
+    }
+    return [];
   }
   
-  return requests.filter(r => r.expiresAt > Date.now());
+  return activeRequests;
 };
 
 export const acceptOrderRequest = async (requestId: number, deliveryBoyId: number): Promise<void> => {
   await new Promise(resolve => setTimeout(resolve, 800));
-  // In real app, this would assign the order to the delivery boy
-  // For mock, we'll just remove the request
+  
   const requests = getOrderRequestsDB();
+  const request = requests.find(r => r.id === requestId);
+  
+  if (request) {
+    const orders = getOrdersDB();
+    const updatedOrders = orders.map(o => {
+      if (o.id === request.orderId) {
+        const newStatus: Order['status'] = o.status === 'PENDING' || o.status === 'PREPARING' ? o.status : 'DISPATCHED';
+        return { ...o, deliveryBoyId, status: newStatus };
+      }
+      return o;
+    });
+    saveOrdersDB(updatedOrders);
+  }
+  
   const updated = requests.filter(r => r.id !== requestId);
   saveOrderRequestsDB(updated);
 };

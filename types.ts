@@ -82,6 +82,7 @@ export interface Order {
   deliveryAddress?: string;
   restaurantName?: string;
   restaurantId?: number;
+  restaurantAddress?: string;
   restaurantImageUrl?: string;
   rating?: number;
   review?: string;

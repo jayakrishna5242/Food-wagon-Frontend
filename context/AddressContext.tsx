@@ -60,17 +60,13 @@ export const AddressProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   const removeAddress = (id: string) => {
-    setAddresses(prev => {
-      const updated = prev.filter(a => a.id !== id);
-      localStorage.setItem(storageKey, JSON.stringify(updated));
-      
-      // If the removed address was selected, select another one or null
-      if (selectedAddressId === id) {
-        setSelectedAddressId(updated.length > 0 ? updated[0].id : null);
-      }
-      
-      return updated;
-    });
+    const updated = addresses.filter(a => a.id !== id);
+    setAddresses(updated);
+    localStorage.setItem(storageKey, JSON.stringify(updated));
+    
+    if (selectedAddressId === id) {
+      setSelectedAddressId(updated.length > 0 ? updated[0].id : null);
+    }
   };
 
   return (

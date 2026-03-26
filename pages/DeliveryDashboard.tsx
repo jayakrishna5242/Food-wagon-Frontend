@@ -33,11 +33,11 @@ import {
 import { Order, Trip, EarningsSummary, OrderRequest } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 const DeliveryDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user: currentUser, logout } = useAuth();
   const { showToast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -49,8 +49,6 @@ const DeliveryDashboard: React.FC = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [expandedTrip, setExpandedTrip] = useState<number | null>(null);
-  
-  const currentUser = getStoredUser();
 
   const loadData = useCallback(async () => {
     if (!currentUser) return;
@@ -77,7 +75,7 @@ const DeliveryDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, startDate, endDate]);
+  }, [currentUser?.id, startDate, endDate]);
 
   useEffect(() => {
     loadData();
@@ -85,7 +83,11 @@ const DeliveryDashboard: React.FC = () => {
 
   // Timer effect
   useEffect(() => {
+    if (orderRequests.length === 0 && Object.keys(requestTimers).length === 0) return;
+
     const interval = setInterval(() => {
+      const now = Date.now();
+      
       setRequestTimers(prev => {
         const next = { ...prev };
         let changed = false;
@@ -95,17 +97,21 @@ const DeliveryDashboard: React.FC = () => {
             next[numId] -= 1;
             changed = true;
           } else {
-            // Remove expired requests
-            setOrderRequests(current => current.filter(r => r.id !== numId));
             delete next[numId];
             changed = true;
           }
         });
         return changed ? next : prev;
       });
+
+      setOrderRequests(current => {
+        const filtered = current.filter(r => r.expiresAt > now);
+        return filtered.length !== current.length ? filtered : current;
+      });
     }, 1000);
+    
     return () => clearInterval(interval);
-  }, []);
+  }, [orderRequests.length, Object.keys(requestTimers).length]);
 
   const handleLogout = () => {
     clearStoredUser();
@@ -116,7 +122,7 @@ const DeliveryDashboard: React.FC = () => {
   const handleStatusUpdate = async (orderId: number, status: Order['status']) => {
     try {
       await updateOrderStatus(orderId, status, currentUser?.id, currentUser?.name);
-      showToast(`Order status updated to ${status}`, 'success');
+      showToast(`Order status updated to ${status.replace('_', ' ')}`, 'success');
       loadData();
     } catch (err) {
       showToast('Failed to update status', 'error');
@@ -126,26 +132,34 @@ const DeliveryDashboard: React.FC = () => {
   const handleAcceptRequest = async (requestId: number) => {
     if (!currentUser) return;
     try {
+      // Optimistically remove from UI
+      setOrderRequests(prev => prev.filter(r => r.id !== requestId));
       await acceptOrderRequest(requestId, currentUser.id);
       showToast('Order accepted! Head to the restaurant.', 'success');
-      setOrderRequests(prev => prev.filter(r => r.id !== requestId));
       loadData();
     } catch (err) {
       showToast('Failed to accept order', 'error');
+      loadData(); // Re-fetch on error
     }
   };
 
   const handleRejectRequest = async (requestId: number) => {
     if (!currentUser) return;
     try {
-      await rejectOrderRequest(requestId, currentUser.id);
+      // Optimistically remove from UI
       setOrderRequests(prev => prev.filter(r => r.id !== requestId));
+      await rejectOrderRequest(requestId, currentUser.id);
+      showToast('Order request rejected', 'info');
     } catch (err) {
       showToast('Failed to reject order', 'error');
+      loadData();
     }
   };
 
-  const activeDeliveries = orders.filter(o => o.status === 'READY' || o.status === 'DISPATCHED');
+  const activeDeliveries = orders.filter(o => 
+    (o.status === 'READY' || o.status === 'DISPATCHED' || o.status === 'PREPARING' || o.status === 'PENDING') && 
+    (o.deliveryBoyId === currentUser?.id || (o.status === 'READY' && !o.deliveryBoyId))
+  );
 
   if (loading) return <div className="h-screen flex items-center justify-center font-bold text-primary animate-pulse">Loading Delivery Dashboard...</div>;
 
@@ -196,399 +210,316 @@ const DeliveryDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 md:pb-0">
-      {/* Header */}
+    <div className="min-h-screen bg-[#F8F9FA] pb-24 md:pb-0">
+      {/* Header - Recipe 8 (Clean Utility) */}
       <header className="bg-white border-b border-gray-100 p-4 md:p-6 sticky top-0 z-50">
-        <div className="container mx-auto max-w-2xl flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-black shadow-lg shadow-primary/20">
+        <div className="container mx-auto max-w-4xl flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-dark rounded-2xl flex items-center justify-center text-white font-black shadow-xl shadow-dark/10">
               {currentUser?.name.charAt(0)}
             </div>
             <div>
-              <h1 className="text-lg font-black text-dark tracking-tight">Hello, {currentUser?.name}</h1>
+              <h1 className="text-xl font-black text-dark tracking-tight">Partner Dashboard</h1>
               <div className="flex items-center gap-2">
-                <p className="text-[10px] text-green-600 font-black uppercase tracking-widest flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                  Active & Online
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+                  Online & Accepting Orders
                 </p>
-                {currentUser?.rating && (
-                  <div className="flex items-center gap-0.5 bg-yellow-100 px-1.5 py-0.5 rounded text-[8px] font-black text-yellow-700">
-                    <span>★</span>
-                    <span>{currentUser.rating}</span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
-          <button 
-            onClick={handleLogout}
-            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex flex-col items-end">
+              <p className="text-xs font-black text-dark">{currentUser?.name}</p>
+              <p className="text-[10px] text-gray-400 font-bold">ID: #{currentUser?.id.toString().slice(-6)}</p>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="p-3 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="container mx-auto max-w-2xl p-4 md:p-6 space-y-6">
+      <main className="container mx-auto max-w-4xl p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Incoming Requests Overlay */}
-        <AnimatePresence>
-          {orderRequests.map(request => (
-            <motion.div
-              key={request.id}
-              initial={{ opacity: 0, y: -50, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-dark text-white rounded-[32px] p-6 shadow-2xl border border-white/10 relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-4">
-                <div className="bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse">
-                  NEW REQUEST
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center">
-                  <Bell className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black tracking-tight">₹{request.payout} Payout</h3>
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">{request.distance} km trip</p>
-                </div>
-              </div>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Pickup</p>
-                    <p className="text-sm font-bold">{request.restaurantName}</p>
-                    <p className="text-xs text-gray-500">{request.restaurantAddress}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Delivery</p>
-                    <p className="text-sm font-bold">{request.deliveryAddress}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => handleRejectRequest(request.id)}
-                  className="flex-1 bg-white/10 hover:bg-white/20 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all"
-                >
-                  Reject
-                </button>
-                <button 
-                  onClick={() => handleAcceptRequest(request.id)}
-                  className="flex-[2] bg-primary hover:bg-primary/90 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
-                >
-                  Accept ({requestTimers[request.id] || 0}s)
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {activeTab === 'trips' ? (
-          <>
-            {/* Stats Summary */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Today's Earnings</p>
-                <h3 className="text-xl font-black text-dark">₹{earnings?.daily || 0}</h3>
-                <div className="flex items-center gap-1 text-[10px] text-green-500 font-bold mt-1">
-                  <TrendingUp className="w-3 h-3" />
-                  <span>+15% vs yesterday</span>
-                </div>
-              </div>
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Total Trips</p>
-                <h3 className="text-xl font-black text-dark">{earnings?.totalTrips || 0}</h3>
-                <p className="text-[10px] text-gray-400 font-bold mt-1">Keep it up!</p>
-              </div>
-            </div>
-
-            {/* Active Deliveries */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-black text-dark tracking-tight">Active Deliveries</h2>
-                <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                  {activeDeliveries.length} Current
-                </span>
-              </div>
-
-              {activeDeliveries.length === 0 ? (
-                <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-200">
-                  <Package className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-                  <p className="text-sm text-gray-400 font-bold">No active deliveries right now.</p>
-                  <p className="text-[10px] text-gray-300 mt-1">Wait for new orders to be ready.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {activeDeliveries.map((order) => (
-                    <div key={order.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                      <div className="p-4 border-b border-gray-50 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-black text-dark">Order #{order.id.toString().slice(-6)}</span>
-                          <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">
-                            {order.status}
-                          </span>
-                        </div>
-                        <span className="text-xs font-black text-primary">₹{order.totalAmount}</span>
-                      </div>
-                      
-                      <div className="p-4 space-y-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center flex-shrink-0">
-                            <Store className="w-4 h-4 text-orange-500" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Pickup From</p>
-                            <h4 className="text-sm font-bold text-dark truncate">{order.restaurantName}</h4>
-                            <p className="text-xs text-gray-500 font-medium truncate">Restaurant address location...</p>
-                          </div>
-                          <button className="p-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
-                            <Navigation className="w-4 h-4 text-primary" />
-                          </button>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center flex-shrink-0">
-                            <MapPin className="w-4 h-4 text-blue-500" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Deliver To</p>
-                            <h4 className="text-sm font-bold text-dark truncate">{order.customerName}</h4>
-                            <p className="text-xs text-gray-500 font-medium truncate">{order.deliveryAddress}</p>
-                          </div>
-                          <button className="p-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
-                            <Phone className="w-4 h-4 text-green-500" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="p-4 bg-gray-50 flex gap-3">
-                        {order.status === 'READY' ? (
-                          <button 
-                            onClick={() => handleStatusUpdate(order.id, 'DISPATCHED')}
-                            className="flex-1 bg-dark text-white py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-2"
-                          >
-                            <Package className="w-4 h-4" />
-                            Pick Up Order
-                          </button>
-                        ) : (
-                          <button 
-                            onClick={() => handleStatusUpdate(order.id, 'DELIVERED')}
-                            className="flex-1 bg-green-600 text-white py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-700 transition-all flex items-center justify-center gap-2"
-                          >
-                            <CheckCircle2 className="w-4 h-4" />
-                            Mark Delivered
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          </>
-        ) : (
-          <>
-            {/* Earnings History */}
-            <section className="space-y-6">
-              <div className="bg-dark text-white rounded-[32px] p-8 shadow-xl">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Total Balance</p>
-                    <h2 className="text-4xl font-black">₹{earnings?.monthly.toLocaleString()}</h2>
-                  </div>
-                  <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-                    <Wallet className="w-7 h-7 text-white" />
+        {/* Left Column: Stats & Requests */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* Incoming Requests Overlay - Recipe 2 (Editorial) style for impact */}
+          <AnimatePresence>
+            {orderRequests.map(request => (
+              <motion.div
+                key={request.id}
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                className="bg-dark text-white rounded-[40px] p-8 shadow-2xl relative overflow-hidden border border-white/10"
+              >
+                <div className="absolute top-0 right-0 p-6">
+                  <div className="bg-primary text-white text-[10px] font-black px-4 py-1.5 rounded-full animate-bounce">
+                    NEW ORDER
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
-                    <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Total Tips</p>
-                    <p className="text-sm font-black text-green-400">₹{earnings?.totalTips || 0}</p>
+                <div className="flex items-center gap-6 mb-8">
+                  <div className="w-16 h-16 bg-primary/20 rounded-[24px] flex items-center justify-center">
+                    <Bell className="w-8 h-8 text-primary" />
                   </div>
-                  <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
-                    <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Deductions</p>
-                    <p className="text-sm font-black text-red-400">₹{earnings?.totalDeductions || 0}</p>
+                  <div>
+                    <h3 className="text-3xl font-black tracking-tighter">₹{request.payout}</h3>
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Estimated Payout • {request.distance} km</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
-                    <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Daily</p>
-                    <p className="text-sm font-black">₹{earnings?.daily}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Pickup</p>
+                    <h4 className="text-lg font-bold">{request.restaurantName}</h4>
+                    <p className="text-sm text-gray-400 leading-relaxed">{request.restaurantAddress}</p>
                   </div>
-                  <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
-                    <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Weekly</p>
-                    <p className="text-sm font-black">₹{earnings?.weekly}</p>
-                  </div>
-                  <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
-                    <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Trips</p>
-                    <p className="text-sm font-black">{earnings?.totalTrips}</p>
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Delivery</p>
+                    <h4 className="text-lg font-bold">Customer Location</h4>
+                    <p className="text-sm text-gray-400 leading-relaxed">{request.deliveryAddress}</p>
                   </div>
                 </div>
-              </div>
 
-              {/* Filters */}
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  <h3 className="text-xs font-black text-dark uppercase tracking-widest">Filter by Date</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1 block">From</label>
-                    <input 
-                      type="date" 
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full bg-gray-50 border-none rounded-xl p-2 text-xs font-bold text-dark focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1 block">To</label>
-                    <input 
-                      type="date" 
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full bg-gray-50 border-none rounded-xl p-2 text-xs font-bold text-dark focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
-                </div>
-                {(startDate || endDate) && (
+                <div className="flex gap-4">
                   <button 
-                    onClick={() => { setStartDate(''); setEndDate(''); }}
-                    className="mt-3 text-[8px] text-primary font-black uppercase tracking-widest flex items-center gap-1"
+                    onClick={() => handleRejectRequest(request.id)}
+                    className="flex-1 bg-white/5 hover:bg-white/10 text-white py-5 rounded-3xl font-black text-xs uppercase tracking-widest transition-all border border-white/10"
                   >
-                    <X className="w-3 h-3" /> Clear Filters
+                    Pass
                   </button>
-                )}
-              </div>
+                  <button 
+                    onClick={() => handleAcceptRequest(request.id)}
+                    className="flex-[2] bg-primary hover:bg-primary/90 text-white py-5 rounded-3xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3"
+                  >
+                    Accept Order ({requestTimers[request.id] || 0}s)
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
 
-              <div>
-                <h2 className="text-lg font-black text-dark tracking-tight mb-4">Trip History</h2>
-                <div className="space-y-3">
-                  {trips.length === 0 ? (
-                    <div className="bg-white rounded-3xl p-12 text-center border border-gray-100">
-                      <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-                      <p className="text-sm text-gray-400 font-bold">No trip history yet.</p>
+          {/* Stats Grid - Recipe 1 (Technical Dashboard) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: 'Today', value: `₹${earnings?.daily || 0}`, icon: TrendingUp, color: 'text-green-500' },
+              { label: 'Weekly', value: `₹${earnings?.weekly || 0}`, icon: Calendar, color: 'text-blue-500' },
+              { label: 'Trips', value: earnings?.totalTrips || 0, icon: Package, color: 'text-orange-500' },
+              { label: 'Rating', value: currentUser?.rating || '5.0', icon: Bell, color: 'text-yellow-500' }
+            ].map((stat, i) => (
+              <div key={i} className="bg-white p-5 rounded-[32px] border border-gray-100 shadow-sm">
+                <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center mb-3 ${stat.color}`}>
+                  <stat.icon className="w-4 h-4" />
+                </div>
+                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">{stat.label}</p>
+                <h3 className="text-xl font-black text-dark tracking-tight">{stat.value}</h3>
+              </div>
+            ))}
+          </div>
+
+          {/* Active Deliveries - Recipe 8 (Clean Utility) */}
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-dark tracking-tight">Active Deliveries</h2>
+              <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
+                {activeDeliveries.length} Active
+              </div>
+            </div>
+
+            {activeDeliveries.length === 0 ? (
+              <div className="bg-white rounded-[40px] p-20 text-center border border-dashed border-gray-200">
+                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Package className="w-10 h-10 text-gray-200" />
+                </div>
+                <h3 className="text-lg font-bold text-dark mb-2">No active orders</h3>
+                <p className="text-sm text-gray-400 font-medium">New orders will appear here once accepted.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6">
+                {activeDeliveries.map((order) => (
+                  <motion.div 
+                    layout
+                    key={order.id} 
+                    className="bg-white rounded-[40px] shadow-sm border border-gray-100 overflow-hidden"
+                  >
+                    <div className="p-6 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                          <Package className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Order ID</p>
+                          <h4 className="text-sm font-black text-dark">#{order.id.toString().slice(-6)}</h4>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Earnings</p>
+                        <h4 className="text-lg font-black text-primary">₹{order.totalAmount}</h4>
+                      </div>
                     </div>
-                  ) : (
-                    trips.map((trip) => (
-                      <div key={trip.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div 
-                          onClick={() => setExpandedTrip(expandedTrip === trip.id ? null : trip.id)}
-                          className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
-                              <Package className="w-5 h-5 text-gray-400" />
-                            </div>
-                            <div>
-                              <h4 className="text-sm font-bold text-dark">{trip.restaurantName}</h4>
-                              <p className="text-[10px] text-gray-400 font-medium">
-                                {new Date(trip.date).toLocaleDateString()} • {new Date(trip.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="text-right">
-                              <p className="text-sm font-black text-green-600">+₹{trip.payout}</p>
-                              <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest">{trip.distance} km</p>
-                            </div>
-                            <ChevronRight className={`w-4 h-4 text-gray-300 transition-transform ${expandedTrip === trip.id ? 'rotate-90' : ''}`} />
+                    
+                    <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center flex-shrink-0">
+                          <Store className="w-6 h-6 text-orange-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Pickup</p>
+                          <h4 className="text-base font-bold text-dark truncate">{order.restaurantName}</h4>
+                          <p className="text-xs text-gray-500 font-medium mt-1">{order.restaurantAddress}</p>
+                          <button className="mt-3 flex items-center gap-2 text-[10px] text-primary font-black uppercase tracking-widest">
+                            <Navigation className="w-3 h-3" /> Get Directions
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center flex-shrink-0">
+                          <MapPin className="w-6 h-6 text-blue-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Delivery</p>
+                          <h4 className="text-base font-bold text-dark truncate">{order.customerName}</h4>
+                          <p className="text-xs text-gray-500 font-medium mt-1">{order.deliveryAddress}</p>
+                          <div className="flex gap-4 mt-3">
+                            <button className="flex items-center gap-2 text-[10px] text-green-600 font-black uppercase tracking-widest">
+                              <Phone className="w-3 h-3" /> Call Customer
+                            </button>
                           </div>
                         </div>
-                        
-                        <AnimatePresence>
-                          {expandedTrip === trip.id && (
-                            <motion.div 
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="px-4 pb-4 border-t border-gray-50"
-                            >
-                              <div className="pt-4 space-y-4">
-                                <div className="grid grid-cols-3 gap-2">
-                                  <div className="bg-gray-50 p-2 rounded-xl">
-                                    <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-0.5">Base Pay</p>
-                                    <p className="text-xs font-bold text-dark">₹{trip.basePay || 40}</p>
-                                  </div>
-                                  <div className="bg-gray-50 p-2 rounded-xl">
-                                    <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-0.5">Tips</p>
-                                    <p className="text-xs font-bold text-green-600">₹{trip.tips || 0}</p>
-                                  </div>
-                                  <div className="bg-gray-50 p-2 rounded-xl">
-                                    <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-0.5">Deductions</p>
-                                    <p className="text-xs font-bold text-red-500">₹{trip.deductions || 0}</p>
-                                  </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                  <div className="flex items-start gap-2">
-                                    <MapPin className="w-3 h-3 text-gray-300 mt-0.5" />
-                                    <p className="text-[10px] text-gray-500 font-medium">{trip.deliveryAddress}</p>
-                                  </div>
-                                  {trip.rating && (
-                                    <div className="bg-yellow-50 p-3 rounded-2xl border border-yellow-100">
-                                      <div className="flex items-center gap-1 mb-1">
-                                        {[...Array(5)].map((_, i) => (
-                                          <span key={i} className={`text-xs ${i < (trip.rating || 0) ? 'text-yellow-500' : 'text-gray-200'}`}>★</span>
-                                        ))}
-                                        <span className="text-[10px] font-black text-yellow-700 ml-1">Customer Rating</span>
-                                      </div>
-                                      {trip.feedback && (
-                                        <p className="text-[10px] text-yellow-800 italic font-medium">"{trip.feedback}"</p>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
                       </div>
-                    ))
-                  )}
-                </div>
+                    </div>
+
+                    <div className="p-6 bg-gray-50/50 border-t border-gray-50">
+                      {order.status === 'READY' ? (
+                        <button 
+                          onClick={() => handleStatusUpdate(order.id, 'DISPATCHED')}
+                          className="w-full bg-dark text-white py-5 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-3 shadow-xl shadow-dark/10"
+                        >
+                          <Package className="w-5 h-5" />
+                          Confirm Pickup
+                        </button>
+                      ) : order.status === 'DISPATCHED' ? (
+                        <button 
+                          onClick={() => handleStatusUpdate(order.id, 'DELIVERED')}
+                          className="w-full bg-green-600 text-white py-5 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-green-700 transition-all flex items-center justify-center gap-3 shadow-xl shadow-green-600/10"
+                        >
+                          <CheckCircle2 className="w-5 h-5" />
+                          Complete Delivery
+                        </button>
+                      ) : (
+                        <div className="w-full bg-white border border-gray-200 text-gray-400 py-5 rounded-3xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3">
+                          <Clock className="w-5 h-5 animate-spin" />
+                          Order is being prepared
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-            </section>
-          </>
-        )}
+            )}
+          </section>
+        </div>
+
+        {/* Right Column: Earnings & History */}
+        <div className="space-y-8">
+          
+          {/* Earnings Card - Recipe 4 (Dark Luxury) */}
+          <div className="bg-dark text-white rounded-[40px] p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl"></div>
+            
+            <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-2">Available Balance</p>
+            <h2 className="text-5xl font-black tracking-tighter mb-8">₹{earnings?.monthly.toLocaleString()}</h2>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                <div className="flex items-center gap-3">
+                  <Wallet className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-bold text-gray-400">Tips</span>
+                </div>
+                <span className="text-sm font-black text-green-400">₹{earnings?.totalTips || 0}</span>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="w-4 h-4 text-red-400" />
+                  <span className="text-xs font-bold text-gray-400">Fees</span>
+                </div>
+                <span className="text-sm font-black text-red-400">₹{earnings?.totalDeductions || 0}</span>
+              </div>
+            </div>
+
+            <button className="w-full mt-8 bg-white text-dark py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-100 transition-all">
+              Withdraw Funds
+            </button>
+          </div>
+
+          {/* Trip History - Recipe 1 (Technical Dashboard) */}
+          <section className="bg-white rounded-[40px] p-8 border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-black text-dark tracking-tight">Recent Trips</h2>
+              <button 
+                onClick={() => setActiveTab(activeTab === 'history' ? 'trips' : 'history')}
+                className="text-[10px] text-primary font-black uppercase tracking-widest"
+              >
+                View All
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {trips.slice(0, 5).map((trip) => (
+                <div key={trip.id} className="flex items-center justify-between group cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                      <Package className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-dark">{trip.restaurantName}</h4>
+                      <p className="text-[10px] text-gray-400 font-medium">
+                        {new Date(trip.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-dark">₹{trip.payout}</p>
+                    <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest">{trip.distance}km</p>
+                  </div>
+                </div>
+              ))}
+              
+              {trips.length === 0 && (
+                <p className="text-center text-xs text-gray-400 font-medium py-10">No trips recorded yet.</p>
+              )}
+            </div>
+          </section>
+        </div>
       </main>
 
-      {/* Mobile Bottom Nav - Specific for Delivery */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 md:hidden flex justify-around items-center z-50">
-        <button 
-          onClick={() => setActiveTab('trips')}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'trips' ? 'text-primary' : 'text-gray-300'}`}
-        >
-          <Navigation className="w-6 h-6" />
-          <span className="text-[8px] font-black uppercase tracking-widest">Trips</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('history')}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'history' ? 'text-primary' : 'text-gray-300'}`}
-        >
-          <Clock className="w-6 h-6" />
-          <span className="text-[8px] font-black uppercase tracking-widest">History</span>
-        </button>
-        <button 
-          onClick={() => navigate('/profile')}
-          className="flex flex-col items-center gap-1 text-gray-300"
-        >
-          <User className="w-6 h-6" />
-          <span className="text-[8px] font-black uppercase tracking-widest">Profile</span>
-        </button>
+      {/* Mobile Bottom Nav - Recipe 8 (Clean Utility) */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 md:hidden flex justify-around items-center z-50 shadow-2xl">
+        {[
+          { id: 'trips', icon: Navigation, label: 'Trips' },
+          { id: 'history', icon: Clock, label: 'History' },
+          { id: 'profile', icon: User, label: 'Profile' }
+        ].map((item) => (
+          <button 
+            key={item.id}
+            onClick={() => item.id === 'profile' ? navigate('/profile') : setActiveTab(item.id as any)}
+            className={`flex flex-col items-center gap-1 transition-all ${
+              (activeTab === item.id || (item.id === 'profile' && window.location.pathname === '/profile')) 
+                ? 'text-primary' 
+                : 'text-gray-300'
+            }`}
+          >
+            <item.icon className="w-6 h-6" />
+            <span className="text-[8px] font-black uppercase tracking-widest">{item.label}</span>
+          </button>
+        ))}
       </div>
     </div>
   );

@@ -355,81 +355,99 @@ const PartnerDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex">
       {/* Sidebar */}
-      <aside className="w-72 bg-[#171a29] text-white hidden lg:flex flex-col sticky top-0 h-screen">
-        <div className="p-8 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#fc8019] rounded-xl flex items-center justify-center font-black text-xl">F</div>
-            <span className="text-xl font-black tracking-tight">FoodWagon <span className="text-[#fc8019] text-xs uppercase tracking-widest block font-black">Partner</span></span>
+      <motion.aside 
+        initial={{ width: 80 }}
+        whileHover={{ width: 280 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="bg-[#171a29] text-white hidden lg:flex flex-col sticky top-0 h-screen z-50 overflow-hidden group/sidebar"
+      >
+        <div className="px-5 py-8 border-b border-white/10 shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-[#fc8019] rounded-xl flex-shrink-0 flex items-center justify-center font-black text-xl">F</div>
+            <div className="text-xl font-black tracking-tight whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-all duration-300 transform translate-x-[-10px] group-hover/sidebar:translate-x-0 overflow-hidden">
+              FoodWagon <span className="text-[#fc8019] text-xs uppercase tracking-widest block font-black">Partner</span>
+            </div>
           </div>
         </div>
 
-        <nav className="flex-1 p-6 space-y-2">
-          <button 
-            onClick={() => setActiveTab('dashboard')}
-            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${activeTab === 'dashboard' ? 'bg-primary text-white shadow-lg shadow-orange-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
-          >
-            <LayoutDashboard size={20} />
-            <span>Dashboard</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('orders')}
-            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${activeTab === 'orders' ? 'bg-primary text-white shadow-lg shadow-orange-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
-          >
-            <ShoppingBag size={20} />
-            <span>Orders</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('menu')}
-            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${activeTab === 'menu' ? 'bg-primary text-white shadow-lg shadow-orange-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
-          >
-            <Plus size={20} />
-            <span>Menu Items</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('offers')}
-            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${activeTab === 'offers' ? 'bg-primary text-white shadow-lg shadow-orange-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
-          >
-            <Tag size={20} />
-            <span>Offers & Coupons</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('settings')}
-            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${activeTab === 'settings' ? 'bg-primary text-white shadow-lg shadow-orange-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
-          >
-            <Settings size={20} />
-            <span>Settings</span>
-          </button>
+        <nav className="flex-1 px-5 py-6 space-y-2 overflow-y-auto no-scrollbar">
+          {[
+            { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+            { id: 'orders', icon: ShoppingBag, label: 'Orders' },
+            { id: 'menu', icon: Plus, label: 'Menu Items' },
+            { id: 'offers', icon: Tag, label: 'Offers & Coupons' },
+            { id: 'settings', icon: Settings, label: 'Settings' }
+          ].map((item) => (
+            <button 
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`w-full flex items-center gap-4 px-2.5 py-3.5 rounded-2xl font-bold transition-all whitespace-nowrap group ${activeTab === item.id ? 'bg-primary text-white shadow-lg shadow-orange-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+            >
+              <item.icon size={20} className="flex-shrink-0" />
+              <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity overflow-hidden">
+                {item.label}
+              </span>
+            </button>
+          ))}
         </nav>
 
-        <div className="p-6 border-t border-white/10">
+        <div className="px-5 py-6 border-t border-white/10 shrink-0">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-red-400 hover:bg-red-500/10 transition-all"
+            className="w-full flex items-center gap-4 px-2.5 py-3.5 rounded-2xl font-bold text-red-400 hover:bg-red-500/10 transition-all whitespace-nowrap"
           >
-            <LogOut size={20} />
-            <span>Logout</span>
+            <LogOut size={20} className="flex-shrink-0" />
+            <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity overflow-hidden">Logout</span>
           </button>
         </div>
-      </aside>
+      </motion.aside>
+
+      {/* Mobile Bottom Nav */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#171a29] border-t border-white/10 px-6 py-3 z-50 flex items-center justify-between">
+        {[
+          { id: 'dashboard', icon: LayoutDashboard, label: 'Home' },
+          { id: 'orders', icon: ShoppingBag, label: 'Orders' },
+          { id: 'menu', icon: Plus, label: 'Menu' },
+          { id: 'offers', icon: Tag, label: 'Offers' },
+          { id: 'settings', icon: Settings, label: 'Settings' }
+        ].map((item) => (
+          <button 
+            key={item.id}
+            onClick={() => setActiveTab(item.id)}
+            className={`flex flex-col items-center gap-1 transition-all ${activeTab === item.id ? 'text-primary' : 'text-gray-400'}`}
+          >
+            <item.icon size={20} />
+            <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+          </button>
+        ))}
+      </div>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 md:p-10">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-           <div>
-              <h1 className="text-3xl font-black text-gray-900 tracking-tight">Welcome back, {restaurant?.name}!</h1>
-              <p className="text-gray-500 font-medium mt-1">Here's what's happening with your restaurant today.</p>
+      <main className="flex-1 p-4 md:p-10 pb-24 lg:pb-10">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 md:mb-10">
+           <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-xl md:text-3xl font-black text-gray-900 tracking-tight">Welcome back, {restaurant?.name}!</h1>
+                <p className="text-xs md:text-sm text-gray-500 font-medium mt-1">Here's what's happening with your restaurant today.</p>
+              </div>
+              <button 
+                onClick={handleLogout}
+                className="lg:hidden p-2.5 bg-red-50 text-red-500 rounded-xl"
+              >
+                <LogOut size={18} />
+              </button>
            </div>
-           <div className="flex items-center gap-4">
-              <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+           <div className="flex items-center gap-3 md:gap-4">
+              <div className="relative group flex-1 md:flex-none">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input 
                   type="text" 
                   placeholder="Search orders..." 
-                  className="bg-white border border-gray-200 rounded-2xl py-3 pl-12 pr-4 text-sm font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all w-64"
+                  className="bg-white border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-xs md:text-sm font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all w-full md:w-64"
                 />
               </div>
-              <button className="bg-white border border-gray-200 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
-                <Filter size={20} className="text-gray-600" />
+              <button className="bg-white border border-gray-200 p-2.5 rounded-xl hover:bg-gray-50 transition-colors">
+                <Filter size={18} className="text-gray-600" />
               </button>
            </div>
         </header>
@@ -948,28 +966,28 @@ const PartnerDashboard: React.FC = () => {
 
         {/* Dashboard Content */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-10">
+          <div className="space-y-6 md:space-y-10">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {stats.map((stat, i) => (
                 <motion.div 
                   key={i}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100"
+                  className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100"
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-2xl ${stat.color}`}>
-                      <stat.icon size={24} />
+                  <div className="flex items-center justify-between mb-3 md:mb-4">
+                    <div className={`p-2 md:p-3 rounded-xl md:rounded-2xl ${stat.color}`}>
+                      <stat.icon size={20} className="md:w-6 md:h-6" />
                     </div>
-                    <div className={`flex items-center gap-1 text-xs font-black ${stat.isPositive ? 'text-green-500' : 'text-red-500'}`}>
-                      {stat.isPositive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                    <div className={`flex items-center gap-1 text-[10px] md:text-xs font-black ${stat.isPositive ? 'text-green-500' : 'text-red-500'}`}>
+                      {stat.isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                       {stat.trend}
                     </div>
                   </div>
-                  <div className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">{stat.label}</div>
-                  <div className="text-2xl font-black text-gray-900 tracking-tight">{stat.value}</div>
+                  <div className="text-gray-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">{stat.label}</div>
+                  <div className="text-lg md:text-2xl font-black text-gray-900 tracking-tight">{stat.value}</div>
                 </motion.div>
               ))}
             </div>

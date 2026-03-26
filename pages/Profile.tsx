@@ -111,9 +111,18 @@ const Profile: React.FC = () => {
   };
 
   const [profileForm, setProfileForm] = useState({
-    name: user.name,
+    name: user?.name || '',
     phone: '9876543210'
   });
+
+  useEffect(() => {
+    if (user) {
+      setProfileForm(prev => ({
+        ...prev,
+        name: user.name
+      }));
+    }
+  }, [user]);
 
   const handleUpdateProfile = () => {
     if (profileForm.name.trim().length < 3) {
@@ -140,22 +149,40 @@ const Profile: React.FC = () => {
     <div className="min-h-screen bg-[#35728a] py-8 md:py-16 px-4">
       <div className="container mx-auto max-w-6xl">
         
-        <div className="flex justify-between items-center mb-8 text-white px-2">
+        <div className="flex justify-between items-center mb-6 md:mb-8 text-white px-2">
            <div>
-             <h1 className="text-3xl font-bold">My Account</h1>
-             <p className="text-sm opacity-80 mt-1">{user.name} • {user.email}</p>
+             <h1 className="text-2xl md:text-3xl font-bold">My Account</h1>
+             <p className="text-xs md:text-sm opacity-80 mt-1">{user.name} • {user.email}</p>
            </div>
            <button 
              onClick={handleLogout}
-             className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-colors text-white"
+             className="p-2 md:p-2.5 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-colors text-white"
              title="Logout"
            >
-             <LogOut className="w-5 h-5" />
+             <LogOut className="w-4 h-4 md:w-5 md:h-5" />
            </button>
         </div>
 
-        <div className="bg-white min-h-[600px] shadow-2xl overflow-hidden rounded-2xl flex flex-col">
+        <div className="bg-white min-h-[500px] md:min-h-[600px] shadow-2xl overflow-hidden rounded-2xl flex flex-col">
           
+          {/* Mobile Tab Navigation - Visible on Mobile */}
+          <div className="md:hidden border-b border-gray-100 bg-gray-50/50 overflow-x-auto no-scrollbar">
+            <div className="flex p-2 gap-1 min-w-max">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+                    activeTab === tab.id ? 'bg-primary text-white' : 'text-gray-500 hover:bg-gray-100'
+                  }`}
+                >
+                  <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`} />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Desktop Tab Navigation - Hidden on Mobile */}
           <div className="hidden md:block border-b border-gray-100 p-6 bg-gray-50/50">
             <div className="flex flex-wrap gap-2">
@@ -185,26 +212,26 @@ const Profile: React.FC = () => {
             
             {activeTab === 'orders' && (
               <div className="animate-in fade-in duration-300">
-                <h2 className="text-2xl font-extrabold text-dark mb-8">Past Orders</h2>
+                <h2 className="text-xl md:text-2xl font-extrabold text-dark mb-6 md:mb-8">Past Orders</h2>
                 
                 {loadingOrders ? (
                   <div className="space-y-4">
                      {[1,2,3].map(i => (
-                       <div key={i} className="h-40 bg-gray-100 rounded-lg animate-pulse"></div>
+                       <div key={i} className="h-32 md:h-40 bg-gray-100 rounded-lg animate-pulse"></div>
                      ))}
                   </div>
                 ) : orders.length === 0 ? (
-                  <div className="text-center py-20">
-                     <div className="w-48 h-48 mx-auto mb-4 bg-gray-50 rounded-full flex items-center justify-center">
-                        <ShoppingBag className="w-20 h-20 text-gray-200" />
+                  <div className="text-center py-12 md:py-20">
+                     <div className="w-32 h-32 md:w-48 md:h-48 mx-auto mb-4 bg-gray-50 rounded-full flex items-center justify-center">
+                        <ShoppingBag className="w-12 h-12 md:w-20 md:h-20 text-gray-200" />
                      </div>
-                     <p className="text-gray-500 font-medium">No orders found.</p>
-                     <button onClick={() => navigate('/')} className="mt-4 text-primary font-bold hover:underline">
+                     <p className="text-gray-500 font-medium text-sm md:text-base">No orders found.</p>
+                     <button onClick={() => navigate('/')} className="mt-4 text-primary font-bold hover:underline text-sm md:text-base">
                         Order food now
                      </button>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-4 md:space-y-6">
                     {orders.map((order) => (
                       <div 
                         key={order.id} 
@@ -212,7 +239,7 @@ const Profile: React.FC = () => {
                           setSelectedOrder(order);
                           setIsOrderModalOpen(true);
                         }}
-                        className="border border-gray-200 p-4 md:p-6 rounded-md hover:shadow-lg transition-all bg-white group border-l-4 hover:border-l-primary cursor-pointer"
+                        className="border border-gray-200 p-4 md:p-6 rounded-xl md:rounded-md hover:shadow-lg transition-all bg-white group border-l-4 hover:border-l-primary cursor-pointer"
                       >
                         <div className="flex flex-col md:flex-row justify-between md:items-start gap-3 md:gap-4 mb-3 md:mb-4 border-b border-gray-100 pb-3 md:pb-4">
                           <div className="flex items-start gap-3 md:gap-4">
@@ -227,9 +254,9 @@ const Profile: React.FC = () => {
                             </div>
                             <div>
                                <h3 className="font-bold text-sm md:text-lg text-dark group-hover:text-primary transition-colors">{order.restaurantName || "The Sizzling Grill"}</h3>
-                               <div className="flex items-center gap-1.5 text-[10px] md:text-xs text-gray-500 mt-0.5">
+                               <div className="flex items-center gap-1.5 text-[9px] md:text-xs text-gray-500 mt-0.5">
                                  <MapPin className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-400" />
-                                 <span className="truncate max-w-[150px] md:max-w-none">{order.deliveryAddress || "FoodWagon Hub Location"}</span>
+                                 <span className="truncate max-w-[120px] md:max-w-none">{order.deliveryAddress || "FoodWagon Hub Location"}</span>
                                </div>
                                <div className="flex items-center gap-2 md:gap-3 mt-1.5 md:mt-2">
                                   <p className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest">
@@ -244,7 +271,7 @@ const Profile: React.FC = () => {
                           </div>
                           <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-2">
                              <div className={`flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-wider ${
-                               order.status === 'DELIVERED' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600 animate-pulse'
+                                order.status === 'DELIVERED' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600 animate-pulse'
                              }`}>
                                <span>{order.status}</span>
                                <CheckCircle2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
@@ -261,14 +288,14 @@ const Profile: React.FC = () => {
                         <div className="mb-4 md:mb-6">
                            <div className="space-y-1.5 md:space-y-2">
                              {order.items && order.items.map((item, idx) => (
-                               <div key={idx} className="flex justify-between items-center text-xs md:text-sm">
+                               <div key={idx} className="flex justify-between items-center text-[10px] md:text-sm">
                                   <div className="flex items-center gap-2">
                                     <div className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${item.isVeg !== false ? 'bg-green-600' : 'bg-red-600'}`}></div>
                                     <span className="text-gray-700 font-medium">
-                                       {item.name} <span className="text-gray-400 font-black text-[10px] md:text-xs ml-1">x{item.quantity}</span>
+                                       {item.name} <span className="text-gray-400 font-black text-[9px] md:text-xs ml-1">x{item.quantity}</span>
                                     </span>
                                   </div>
-                                  <span className="text-gray-500 text-[10px] md:text-xs font-bold">₹{item.price * item.quantity}</span>
+                                  <span className="text-gray-500 text-[9px] md:text-xs font-bold">₹{item.price * item.quantity}</span>
                                </div>
                              ))}
                            </div>
@@ -277,17 +304,17 @@ const Profile: React.FC = () => {
                         <div className="flex flex-row justify-between items-center pt-3 md:pt-4 border-t border-dashed border-gray-200 gap-2 md:gap-4">
                            <div className="flex flex-col">
                               <span className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount Paid</span>
-                              <span className="font-black text-dark text-base md:text-lg">₹{order.totalAmount}</span>
+                              <span className="font-black text-dark text-sm md:text-lg">₹{order.totalAmount}</span>
                            </div>
                            
-                           <div className="flex gap-2 md:gap-3">
+                           <div className="flex gap-1.5 md:gap-3">
                              <button 
                                onClick={() => {
                                  const rid = order.restaurantId || (order.items && order.items[0]?.restaurantId);
                                  if (rid) navigate(`/restaurant/${rid}`);
                                  else navigate('/search');
                                }} 
-                               className="px-3 md:px-6 py-2 md:py-2.5 bg-gray-900 text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-1.5 md:gap-2 rounded-lg"
+                               className="px-2.5 md:px-6 py-2 md:py-2.5 bg-gray-900 text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-1 md:gap-2 rounded-lg"
                              >
                                View Menu <ArrowRight className="w-2.5 h-2.5 md:w-3 md:h-3" />
                              </button>
@@ -300,9 +327,9 @@ const Profile: React.FC = () => {
                                    e.stopPropagation();
                                    navigate(`/order-rating/${order.id}`);
                                  }}
-                                 className="px-3 md:px-6 py-2 md:py-2.5 bg-yellow-400 text-dark text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:bg-yellow-500 transition-all rounded-lg"
+                                 className="px-2.5 md:px-6 py-2 md:py-2.5 bg-yellow-400 text-dark text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:bg-yellow-500 transition-all rounded-lg"
                                >
-                                 Rate Order
+                                 Rate
                                </button>
                              )}
                            </div>
