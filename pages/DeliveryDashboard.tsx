@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   MapPin, 
   Navigation, 
@@ -36,6 +36,9 @@ import { useToast } from '../context/ToastContext';
 import { motion, AnimatePresence } from 'motion/react';
 
 const DeliveryDashboard: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'trips';
+  const setActiveTab = (tab: string) => setSearchParams({ tab });
   const navigate = useNavigate();
   const { user: currentUser, logout } = useAuth();
   const { showToast } = useToast();
@@ -43,7 +46,6 @@ const DeliveryDashboard: React.FC = () => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [earnings, setEarnings] = useState<EarningsSummary | null>(null);
   const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
-  const [activeTab, setActiveTab] = useState<'trips' | 'history'>('trips');
   const [loading, setLoading] = useState(true);
   const [requestTimers, setRequestTimers] = useState<Record<number, number>>({});
   const [startDate, setStartDate] = useState('');
@@ -499,28 +501,6 @@ const DeliveryDashboard: React.FC = () => {
           </section>
         </div>
       </main>
-
-      {/* Mobile Bottom Nav - Recipe 8 (Clean Utility) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 md:hidden flex justify-around items-center z-50 shadow-2xl">
-        {[
-          { id: 'trips', icon: Navigation, label: 'Trips' },
-          { id: 'history', icon: Clock, label: 'History' },
-          { id: 'profile', icon: User, label: 'Profile' }
-        ].map((item) => (
-          <button 
-            key={item.id}
-            onClick={() => item.id === 'profile' ? navigate('/profile') : setActiveTab(item.id as any)}
-            className={`flex flex-col items-center gap-1 transition-all ${
-              (activeTab === item.id || (item.id === 'profile' && window.location.pathname === '/profile')) 
-                ? 'text-primary' 
-                : 'text-gray-300'
-            }`}
-          >
-            <item.icon className="w-6 h-6" />
-            <span className="text-[8px] font-black uppercase tracking-widest">{item.label}</span>
-          </button>
-        ))}
-      </div>
     </div>
   );
 };

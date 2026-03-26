@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   BarChart3, 
   Users, 
@@ -33,6 +33,9 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 const AdminDashboard: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'overview';
+  const setActiveTab = (tab: string) => setSearchParams({ tab });
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { showToast } = useToast();
@@ -40,7 +43,6 @@ const AdminDashboard: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'restaurants' | 'orders' | 'users' | 'verification'>('overview');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
@@ -162,26 +164,6 @@ const AdminDashboard: React.FC = () => {
           </button>
         </div>
       </motion.aside>
-
-      {/* Mobile Bottom Nav */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-dark border-t border-gray-800 px-6 py-3 z-50 flex items-center justify-between">
-        {[
-          { id: 'overview', icon: BarChart3, label: 'Home' },
-          { id: 'restaurants', icon: Store, label: 'Shops' },
-          { id: 'orders', icon: ShoppingBag, label: 'Orders' },
-          { id: 'users', icon: Users, label: 'Users' },
-          { id: 'verification', icon: CheckCircle2, label: 'Verify' }
-        ].map((item) => (
-          <button 
-            key={item.id}
-            onClick={() => setActiveTab(item.id as any)}
-            className={`flex flex-col items-center gap-1 transition-all ${activeTab === item.id ? 'text-primary' : 'text-gray-400'}`}
-          >
-            <item.icon size={20} />
-            <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
-          </button>
-        ))}
-      </div>
 
       {/* Main Content */}
       <main className="flex-grow p-4 md:p-8 lg:p-12 overflow-y-auto pb-24 lg:pb-12">
@@ -946,49 +928,6 @@ const AdminDashboard: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Mobile Bottom Nav */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-2 md:hidden flex justify-around items-center z-50">
-        <button 
-          onClick={() => setActiveTab('overview')}
-          className={`flex flex-col items-center gap-1 p-2 ${activeTab === 'overview' ? 'text-primary' : 'text-gray-400'}`}
-        >
-          <BarChart3 className="w-5 h-5" />
-          <span className="text-[8px] font-black uppercase tracking-widest">Overview</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('restaurants')}
-          className={`flex flex-col items-center gap-1 p-2 ${activeTab === 'restaurants' ? 'text-primary' : 'text-gray-400'}`}
-        >
-          <Store className="w-5 h-5" />
-          <span className="text-[8px] font-black uppercase tracking-widest">Stores</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('orders')}
-          className={`flex flex-col items-center gap-1 p-2 ${activeTab === 'orders' ? 'text-primary' : 'text-gray-400'}`}
-        >
-          <ShoppingBag className="w-5 h-5" />
-          <span className="text-[8px] font-black uppercase tracking-widest">Orders</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('verification')}
-          className={`flex flex-col items-center gap-1 p-2 relative ${activeTab === 'verification' ? 'text-primary' : 'text-gray-400'}`}
-        >
-          <CheckCircle2 className="w-5 h-5" />
-          <span className="text-[8px] font-black uppercase tracking-widest">Verify</span>
-          {users.filter(u => !u.isVerified && (u.role === 'PARTNER' || u.role === 'DELIVERY')).length > 0 && (
-            <span className="absolute top-1 right-1 bg-red-500 text-white text-[8px] w-3 h-3 flex items-center justify-center rounded-full">
-              {users.filter(u => !u.isVerified && (u.role === 'PARTNER' || u.role === 'DELIVERY')).length}
-            </span>
-          )}
-        </button>
-        <button 
-          onClick={handleLogout}
-          className="flex flex-col items-center gap-1 p-2 text-red-400"
-        >
-          <LogOut className="w-5 h-5" />
-          <span className="text-[8px] font-black uppercase tracking-widest">Logout</span>
-        </button>
-      </div>
     </div>
   );
 };

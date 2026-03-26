@@ -51,14 +51,7 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode,
 
 const Layout = ({ children }: { children?: React.ReactNode }) => {
   const location = useLocation();
-  const hideNavFooterPaths = [
-    '/login', 
-    '/forgot-password', 
-    '/partner/dashboard',
-    '/admin/dashboard',
-    '/delivery/dashboard',
-    '/join-us'
-  ];
+  const hideNavFooterPaths: string[] = [];
   const shouldHide = hideNavFooterPaths.includes(location.pathname);
 
   return (

@@ -40,9 +40,8 @@ import {
   AreaChart, 
   Area 
 } from 'recharts';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
-
 import { useAuth } from '../context/AuthContext';
 import { 
   fetchOrders, 
@@ -63,7 +62,9 @@ import {
 import { Order, Restaurant, Offer, MenuItem } from '../types';
 
 const PartnerDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('orders');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'overview';
+  const setActiveTab = (tab: string) => setSearchParams({ tab });
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { logout } = useAuth();
@@ -355,16 +356,13 @@ const PartnerDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex">
       {/* Sidebar */}
-      <motion.aside 
-        initial={{ width: 80 }}
-        whileHover={{ width: 280 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="bg-[#171a29] text-white hidden lg:flex flex-col sticky top-0 h-screen z-50 overflow-hidden group/sidebar"
+      <aside 
+        className="bg-[#171a29] text-white hidden lg:flex flex-col sticky top-0 h-screen z-50 overflow-hidden w-72"
       >
         <div className="px-5 py-8 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-[#fc8019] rounded-xl flex-shrink-0 flex items-center justify-center font-black text-xl">F</div>
-            <div className="text-xl font-black tracking-tight whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-all duration-300 transform translate-x-[-10px] group-hover/sidebar:translate-x-0 overflow-hidden">
+            <div className="text-xl font-black tracking-tight whitespace-nowrap overflow-hidden">
               FoodWagon <span className="text-[#fc8019] text-xs uppercase tracking-widest block font-black">Partner</span>
             </div>
           </div>
@@ -381,10 +379,10 @@ const PartnerDashboard: React.FC = () => {
             <button 
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-4 px-2.5 py-3.5 rounded-2xl font-bold transition-all whitespace-nowrap group ${activeTab === item.id ? 'bg-primary text-white shadow-lg shadow-orange-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+              className={`w-full flex items-center gap-4 px-2.5 py-3.5 rounded-2xl font-bold whitespace-nowrap ${activeTab === item.id ? 'bg-primary text-white' : 'text-gray-400'}`}
             >
               <item.icon size={20} className="flex-shrink-0" />
-              <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity overflow-hidden">
+              <span className="overflow-hidden">
                 {item.label}
               </span>
             </button>
@@ -394,33 +392,13 @@ const PartnerDashboard: React.FC = () => {
         <div className="px-5 py-6 border-t border-white/10 shrink-0">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-4 px-2.5 py-3.5 rounded-2xl font-bold text-red-400 hover:bg-red-500/10 transition-all whitespace-nowrap"
+            className="w-full flex items-center gap-4 px-2.5 py-3.5 rounded-2xl font-bold text-red-400 whitespace-nowrap"
           >
             <LogOut size={20} className="flex-shrink-0" />
-            <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity overflow-hidden">Logout</span>
+            <span className="overflow-hidden">Logout</span>
           </button>
         </div>
-      </motion.aside>
-
-      {/* Mobile Bottom Nav */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#171a29] border-t border-white/10 px-6 py-3 z-50 flex items-center justify-between">
-        {[
-          { id: 'dashboard', icon: LayoutDashboard, label: 'Home' },
-          { id: 'orders', icon: ShoppingBag, label: 'Orders' },
-          { id: 'menu', icon: Plus, label: 'Menu' },
-          { id: 'offers', icon: Tag, label: 'Offers' },
-          { id: 'settings', icon: Settings, label: 'Settings' }
-        ].map((item) => (
-          <button 
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={`flex flex-col items-center gap-1 transition-all ${activeTab === item.id ? 'text-primary' : 'text-gray-400'}`}
-          >
-            <item.icon size={20} />
-            <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
-          </button>
-        ))}
-      </div>
+      </aside>
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-10 pb-24 lg:pb-10">
@@ -443,10 +421,10 @@ const PartnerDashboard: React.FC = () => {
                 <input 
                   type="text" 
                   placeholder="Search orders..." 
-                  className="bg-white border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-xs md:text-sm font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all w-full md:w-64"
+                  className="bg-white border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-xs md:text-sm font-medium outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 w-full md:w-64"
                 />
               </div>
-              <button className="bg-white border border-gray-200 p-2.5 rounded-xl hover:bg-gray-50 transition-colors">
+              <button className="bg-white border border-gray-200 p-2.5 rounded-xl">
                 <Filter size={18} className="text-gray-600" />
               </button>
            </div>
@@ -462,7 +440,7 @@ const PartnerDashboard: React.FC = () => {
               </div>
               <button 
                 onClick={() => setShowAddOffer(true)}
-                className="bg-primary text-white px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-2 hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+                className="bg-primary text-white px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-2 shadow-lg shadow-orange-500/20"
               >
                 <Plus size={18} />
                 Create New Offer
@@ -471,16 +449,14 @@ const PartnerDashboard: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {offers.filter(o => o.restaurantId === user?.restaurantId).map((offer) => (
-                <motion.div 
+                <div 
                   key={offer.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group"
+                  className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-0 right-0 p-4">
                     <button 
                       onClick={() => handleDeleteOffer(offer.id)}
-                      className="p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors"
+                      className="p-2 bg-red-50 text-red-500 rounded-xl"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -510,7 +486,7 @@ const PartnerDashboard: React.FC = () => {
                       <div className="text-lg font-black text-gray-900">₹{offer.minOrderValue}</div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
               {offers.filter(o => o.restaurantId === user?.restaurantId).length === 0 && (
                 <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
@@ -539,7 +515,7 @@ const PartnerDashboard: React.FC = () => {
                   setNewMenuItem({ name: '', description: '', price: 0, imageUrl: '', isVeg: true, category: '' });
                   setShowAddMenuItem(true);
                 }}
-                className="bg-primary text-white px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-2 hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+                className="bg-primary text-white px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-2 shadow-lg shadow-orange-500/20"
               >
                 <PlusCircle size={18} />
                 Add New Item
@@ -548,17 +524,15 @@ const PartnerDashboard: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {menuItems.map((item) => (
-                <motion.div 
+                <div 
                   key={item.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden group"
+                  className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
                 >
                   <div className="relative h-48 overflow-hidden">
                     <img 
                       src={item.imageUrl} 
                       alt={item.name} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute top-4 right-4 flex gap-2">
@@ -568,13 +542,13 @@ const PartnerDashboard: React.FC = () => {
                           setNewMenuItem(item);
                           setShowAddMenuItem(true);
                         }}
-                        className="p-2 bg-white/90 backdrop-blur-sm text-gray-700 rounded-xl hover:bg-white transition-colors shadow-lg"
+                        className="p-2 bg-white/90 backdrop-blur-sm text-gray-700 rounded-xl shadow-lg"
                       >
                         <Edit2 size={16} />
                       </button>
                       <button 
                         onClick={() => handleDeleteMenuItem(item.id)}
-                        className="p-2 bg-red-500/90 backdrop-blur-sm text-white rounded-xl hover:bg-red-600 transition-colors shadow-lg"
+                        className="p-2 bg-red-500/90 backdrop-blur-sm text-white rounded-xl shadow-lg"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -608,7 +582,7 @@ const PartnerDashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
               {menuItems.length === 0 && (
                 <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
@@ -970,11 +944,8 @@ const PartnerDashboard: React.FC = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {stats.map((stat, i) => (
-                <motion.div 
+                <div 
                   key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
                   className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100"
                 >
                   <div className="flex items-center justify-between mb-3 md:mb-4">
@@ -988,7 +959,7 @@ const PartnerDashboard: React.FC = () => {
                   </div>
                   <div className="text-gray-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">{stat.label}</div>
                   <div className="text-lg md:text-2xl font-black text-gray-900 tracking-tight">{stat.value}</div>
-                </motion.div>
+                </div>
               ))}
             </div>
 
@@ -1103,10 +1074,14 @@ const PartnerDashboard: React.FC = () => {
 
         {/* Orders Table */}
         {activeTab === 'orders' && (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+          >
             <div className="p-8 border-b border-gray-50 flex items-center justify-between">
               <h2 className="text-xl font-black text-gray-900">Recent Orders</h2>
-              <button className="text-primary font-black text-sm hover:underline">View All Orders</button>
+              <button className="text-primary font-black text-sm">View All Orders</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
@@ -1128,7 +1103,7 @@ const PartnerDashboard: React.FC = () => {
                     </tr>
                   ) : (
                     orders.map((order, i) => (
-                      <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={i} className="border-b border-gray-50">
                         <td className="px-8 py-6 font-black text-gray-900">#{order.id.toString().slice(-6)}</td>
                         <td className="px-8 py-6 font-bold text-gray-700">{order.customerName}</td>
                         <td className="px-8 py-6 text-sm text-gray-500 font-medium max-w-xs truncate">
@@ -1155,7 +1130,7 @@ const PartnerDashboard: React.FC = () => {
                             {order.status === 'PENDING' && (
                               <button 
                                 onClick={() => handleStatusUpdate(order.id, 'PREPARING')}
-                                className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors" 
+                                className="p-2 bg-blue-50 text-blue-600 rounded-xl" 
                                 title="Start Preparing"
                               >
                                 <Clock size={18} />
@@ -1164,7 +1139,7 @@ const PartnerDashboard: React.FC = () => {
                             {order.status === 'PREPARING' && (
                               <button 
                                 onClick={() => handleStatusUpdate(order.id, 'READY')}
-                                className="p-2 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 transition-colors" 
+                                className="p-2 bg-purple-50 text-purple-600 rounded-xl" 
                                 title="Mark Ready for Pickup"
                               >
                                 <Package size={18} />
@@ -1193,7 +1168,7 @@ const PartnerDashboard: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+          </motion.div>
         )}
       </main>
     </div>

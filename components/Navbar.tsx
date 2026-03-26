@@ -250,9 +250,9 @@ const Navbar: React.FC = () => {
           )}
 
           
-          <Link to="/join-us" className={`${location.pathname === '/' ? 'flex' : 'hidden md:flex'} items-center gap-2 text-dark hover:text-primary font-medium transition-colors`}>
+          <Link to="/join-us" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
             <Store className="w-5 h-5" />
-            <span className="hidden sm:inline md:inline">Join Us</span>
+            <span className="hidden sm:inline">Join Us</span>
           </Link>
 
           {/* Account Toggler - Mobile Only */}
