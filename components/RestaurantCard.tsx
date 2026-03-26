@@ -7,6 +7,8 @@ import { useFavorites } from '../context/FavoritesContext';
 import { useLocationContext } from '../context/LocationContext';
 import { calculateDistance } from '../services/api';
 
+import { motion } from 'motion/react';
+
 interface RestaurantCardProps {
   restaurant: Restaurant;
 }
@@ -35,63 +37,61 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   };
 
   return (
-    <Link to={`/restaurant/${restaurant.id}`} className="block group hover:scale-[0.98] transition-transform duration-100">
-      <div className="bg-transparent hover:shadow-none p-0 rounded-2xl overflow-hidden relative">
-        <div className="relative h-40 md:h-48 w-full rounded-2xl overflow-hidden shadow-lg">
+    <motion.div
+      whileHover={{ y: -5, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100 flex flex-col h-full"
+    >
+      <Link to={`/restaurant/${restaurant.id}`} className="block group h-full">
+        <div className="relative h-48 w-full overflow-hidden">
           <img 
             src={restaurant.imageUrl} 
             alt={restaurant.name} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90"></div>
           
-          {/* Distance Badge */}
-          {distance !== null && (
-            <div className="absolute top-3 left-3 z-10 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg flex items-center gap-1 shadow-sm">
-              <MapPin className="w-2.5 h-2.5 text-primary" />
-              <span className="text-[9px] md:text-[10px] font-black text-dark">{distance} km</span>
-            </div>
-          )}
-
           {/* Favorite Toggle */}
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={handleFavoriteClick}
-            className="absolute top-3 right-3 z-10 p-1.5 md:p-2 bg-white/20 backdrop-blur-md rounded-full hover:bg-white/40 transition-all active:scale-125"
+            className="absolute top-4 right-4 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all"
             aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
           >
-            <Heart className={`w-4 h-4 md:w-5 md:h-5 transition-colors ${favorited ? 'fill-primary text-primary' : 'text-white'}`} />
-          </button>
+            <Heart className={`w-4 h-4 transition-colors ${favorited ? 'fill-primary text-primary' : 'text-gray-400'}`} />
+          </motion.button>
 
           {restaurant.aggregatedDiscountInfo && (
-            <div className="absolute bottom-3 left-3 right-3">
-              <p className="text-white font-extrabold text-xs md:text-xl font-sans uppercase leading-tight drop-shadow-md truncate">
-                {restaurant.aggregatedDiscountInfo.header} {restaurant.aggregatedDiscountInfo.subHeader}
-              </p>
+            <div className="absolute bottom-4 left-4 bg-primary text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm">
+              {restaurant.aggregatedDiscountInfo.header}
             </div>
           )}
         </div>
         
-        <div className="mt-3 px-1">
-          <h3 className="font-bold text-base md:text-lg text-dark/90 truncate">{restaurant.name}</h3>
-          
-          <div className="flex items-center gap-1 font-semibold text-dark/80 text-xs md:text-sm mt-0.5">
-            <div className="bg-green-600 rounded-full p-0.5">
-              <Star className="w-2.5 h-2.5 text-white fill-white" />
+        <div className="p-5 flex flex-col flex-grow">
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="font-bold text-gray-900 text-base line-clamp-1 group-hover:text-primary transition-colors">{restaurant.name}</h3>
+            <div className="flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-lg">
+              <Star className="w-3 h-3 text-green-600 fill-green-600" />
+              <span className="text-xs font-bold text-green-700">{restaurant.rating > 0 ? restaurant.rating : '4.2'}</span>
             </div>
-            <span>{restaurant.rating > 0 ? restaurant.rating : '--'}</span>
-            <span className="mx-1">•</span>
-            <span>{restaurant.deliveryTime}</span>
           </div>
-
-          <p className="text-graytext text-xs md:text-sm truncate mt-1">
+          
+          <p className="text-gray-500 text-xs mb-3 line-clamp-1">
             {restaurant.cuisines.join(', ')}
           </p>
-          <p className="text-graytext text-[10px] md:text-sm mt-0.5">
-            {restaurant.location}
-          </p>
+
+          <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            <div className="flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-primary" />
+              <span>{distance !== null ? `${distance} km` : restaurant.location}</span>
+            </div>
+            <span>{restaurant.deliveryTime}</span>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, ChevronLeft, Send, Utensils, MapPin, Clock, CheckCircle2, Bike } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { fetchOrders, rateOrder } from '../services/api';
@@ -91,13 +91,15 @@ const OrderRating: React.FC = () => {
         <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{label}</p>
         <div className="flex justify-center gap-3">
           {[1, 2, 3, 4, 5].map((star) => (
-            <button
+            <motion.button
               key={star}
               type="button"
+              whileHover={{ scale: 1.25 }}
+              whileTap={{ scale: 0.9 }}
               onMouseEnter={() => setHover(star)}
               onMouseLeave={() => setHover(0)}
               onClick={() => onChange(star)}
-              className="transition-all duration-200 hover:scale-125 active:scale-90"
+              className="transition-all duration-200"
             >
               <Star 
                 className={`${size} ${
@@ -106,7 +108,7 @@ const OrderRating: React.FC = () => {
                     : 'text-gray-100'
                 }`} 
               />
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -243,13 +245,15 @@ const OrderRating: React.FC = () => {
             </div>
 
             {/* Submit Button */}
-            <button
+            <motion.button
               type="submit"
+              whileHover={!(isSubmitting || restaurantRating === 0) ? { scale: 1.02, y: -4 } : {}}
+              whileTap={!(isSubmitting || restaurantRating === 0) ? { scale: 0.98 } : {}}
               disabled={isSubmitting || restaurantRating === 0}
               className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-xl transition-all flex items-center justify-center gap-3 ${
                 isSubmitting || restaurantRating === 0
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
-                  : 'bg-primary text-white hover:bg-[#e26e10] hover:-translate-y-1 active:translate-y-0'
+                  : 'bg-primary text-white hover:bg-[#e26e10]'
               }`}
             >
               {isSubmitting ? (
@@ -259,7 +263,7 @@ const OrderRating: React.FC = () => {
                   Submit All Reviews <Send className="w-4 h-4" />
                 </>
               )}
-            </button>
+            </motion.button>
           </form>
         </motion.div>
 

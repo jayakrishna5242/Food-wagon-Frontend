@@ -3,6 +3,7 @@ import React from 'react';
 import { Star } from 'lucide-react';
 import { MenuItem as MenuItemType } from '../types';
 import { useCart } from '../context/CartContext';
+import { motion } from 'motion/react';
 
 interface MenuItemProps {
   item: MenuItemType;
@@ -14,61 +15,61 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
   const quantity = cartItem ? cartItem.quantity : 0;
 
   return (
-    <div className="flex justify-between items-start py-4 md:py-6 border-b border-gray-100 last:border-0">
-      <div className="flex-1 pr-3 md:pr-4">
-        <div className={`w-2.5 h-2.5 md:w-3.5 md:h-3.5 border ${item.isVeg ? 'border-green-600' : 'border-red-600'} flex items-center justify-center p-[1.5px] mb-1 md:mb-1.5`}>
-          <div className={`w-full h-full rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
-        </div>
-        <h3 className="text-sm md:text-lg font-bold text-dark leading-tight">{item.name}</h3>
-        {item.rating !== undefined && (
-          <div className="flex items-center gap-1 text-yellow-600 text-[9px] md:text-xs font-black mt-0.5">
-            <Star className="w-2 md:w-2.5 h-2 md:h-2.5 fill-yellow-600" />
-            <span>{item.rating > 0 ? item.rating : '--'}</span>
-            <span className="text-gray-300 font-medium ml-0.5">({item.ratingCount || 0})</span>
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="flex justify-between items-center py-6 border-b border-gray-50 last:border-0 group"
+    >
+      <div className="flex-1 pr-6">
+        <div className="flex items-center gap-2 mb-2">
+          <div className={`w-3 h-3 border ${item.isVeg ? 'border-green-600' : 'border-red-600'} flex items-center justify-center p-[1.5px]`}>
+            <div className={`w-full h-full rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
           </div>
-        )}
-        <p className="text-xs md:text-sm font-bold text-dark mt-0.5">₹{item.price}</p>
-        <p className="text-[10px] md:text-xs text-gray-400 mt-1.5 md:mt-2 leading-relaxed line-clamp-2">{item.description}</p>
+          {item.rating !== undefined && (
+            <div className="flex items-center gap-1 text-yellow-600 text-xs font-bold">
+              <Star className="w-3 h-3 fill-yellow-600" />
+              <span>{item.rating > 0 ? item.rating : '4.5'}</span>
+            </div>
+          )}
+        </div>
+        <h3 className="text-base font-bold text-gray-900 mb-1 group-hover:text-primary transition-colors">{item.name}</h3>
+        <p className="text-sm font-bold text-gray-900 mb-2">₹{item.price}</p>
+        <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{item.description}</p>
       </div>
-      <div className="relative w-24 h-20 md:w-32 md:h-24 flex-shrink-0">
+      
+      <div className="relative w-32 h-28 flex-shrink-0">
         <img 
           src={item.imageUrl} 
           alt={item.name} 
-          className={`w-full h-full object-cover rounded-lg transition-all duration-300 ${item.inStock === false ? 'grayscale opacity-60' : ''}`} 
+          className={`w-full h-full object-cover rounded-2xl shadow-sm transition-all duration-500 group-hover:scale-105 ${item.inStock === false ? 'grayscale opacity-60' : ''}`} 
           referrerPolicy="no-referrer"
         />
-        {item.inStock === false && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/10 rounded-lg pointer-events-none">
-            <div className="bg-white/95 text-dark px-1.5 py-0.5 rounded-md text-[9px] md:text-[10px] font-black uppercase tracking-tighter shadow-lg border border-gray-100">
+        
+        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24">
+          {item.inStock === false ? (
+            <div className="bg-gray-100 text-gray-400 py-2 rounded-xl text-[10px] font-bold uppercase text-center shadow-sm border border-gray-200">
               Sold Out
             </div>
-          </div>
-        )}
-        <div className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 bg-white shadow-md rounded-lg border border-gray-200 w-16 md:w-20 overflow-hidden">
-          {item.inStock === false ? (
-            <button 
-              disabled
-              className="w-full py-1 md:py-1.5 text-gray-400 font-extrabold text-[9px] md:text-[10px] uppercase text-center bg-gray-50 cursor-not-allowed"
-            >
-              Sold Out
-            </button>
           ) : quantity === 0 ? (
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => addToCart(item)}
-              className="w-full py-1 md:py-1.5 text-green-600 font-extrabold text-[10px] md:text-xs uppercase hover:bg-gray-50 transition-colors"
+              className="w-full bg-white text-primary py-2 rounded-xl text-xs font-bold uppercase shadow-md border border-gray-100 hover:bg-gray-50 transition-all"
             >
-              ADD
-            </button>
+              Add
+            </motion.button>
           ) : (
-            <div className="flex items-center justify-between px-1.5 md:px-2 py-1 md:py-1.5 text-green-600 font-extrabold text-[10px] md:text-xs">
-              <button onClick={() => removeFromCart(item.id)} className="hover:scale-125 transition-transform">-</button>
+            <div className="flex items-center justify-between px-2 py-2 bg-primary text-white rounded-xl text-xs font-bold shadow-md">
+              <motion.button whileTap={{ scale: 0.8 }} onClick={() => removeFromCart(item.id)} className="w-6 h-6 flex items-center justify-center">-</motion.button>
               <span>{quantity}</span>
-              <button onClick={() => addToCart(item)} className="hover:scale-125 transition-transform">+</button>
+              <motion.button whileTap={{ scale: 0.8 }} onClick={() => addToCart(item)} className="w-6 h-6 flex items-center justify-center">+</motion.button>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

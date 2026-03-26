@@ -23,6 +23,7 @@ import {
 import { registerPartner, registerDelivery } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { motion, AnimatePresence } from 'motion/react';
 
 const JoinWithUs: React.FC = () => {
   const navigate = useNavigate();
@@ -198,13 +199,15 @@ const JoinWithUs: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Back Button */}
       <div className="absolute top-6 left-6 z-50">
-        <button 
+        <motion.button 
+          whileHover={{ x: -4 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/')}
           className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-white/20 transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
-        </button>
+        </motion.button>
       </div>
 
       {/* Hero Section */}
@@ -299,17 +302,29 @@ const JoinWithUs: React.FC = () => {
               <div className="flex border-b border-gray-50">
                 <button 
                   onClick={() => setActiveTab('PARTNER')}
-                  className={`flex-1 py-6 flex flex-col items-center gap-2 transition-all ${activeTab === 'PARTNER' ? 'bg-white border-b-4 border-primary' : 'bg-gray-50 text-gray-400'}`}
+                  className={`flex-1 py-6 flex flex-col items-center gap-2 transition-all relative ${activeTab === 'PARTNER' ? 'bg-white text-primary' : 'bg-gray-50 text-gray-400'}`}
                 >
                   <Store className={`w-6 h-6 ${activeTab === 'PARTNER' ? 'text-primary' : ''}`} />
                   <span className="text-xs font-black uppercase tracking-widest">Restaurant Partner</span>
+                  {activeTab === 'PARTNER' && (
+                    <motion.div 
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-primary"
+                    />
+                  )}
                 </button>
                 <button 
                   onClick={() => setActiveTab('DELIVERY')}
-                  className={`flex-1 py-6 flex flex-col items-center gap-2 transition-all ${activeTab === 'DELIVERY' ? 'bg-white border-b-4 border-primary' : 'bg-gray-50 text-gray-400'}`}
+                  className={`flex-1 py-6 flex flex-col items-center gap-2 transition-all relative ${activeTab === 'DELIVERY' ? 'bg-white text-primary' : 'bg-gray-50 text-gray-400'}`}
                 >
                   <Bike className={`w-6 h-6 ${activeTab === 'DELIVERY' ? 'text-primary' : ''}`} />
                   <span className="text-xs font-black uppercase tracking-widest">Delivery Partner</span>
+                  {activeTab === 'DELIVERY' && (
+                    <motion.div 
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-primary"
+                    />
+                  )}
                 </button>
               </div>
 
@@ -511,13 +526,15 @@ const JoinWithUs: React.FC = () => {
                       </div>
                     </div>
 
-                    <button 
+                    <motion.button 
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       disabled={loading}
-                      className="w-full bg-primary text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                      className="w-full bg-primary text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50"
                     >
                       {loading ? 'Processing...' : 'Register Restaurant'}
                       <ArrowRight className="w-5 h-5" />
-                    </button>
+                    </motion.button>
                   </form>
                 ) : (
                   <form onSubmit={handleDeliverySubmit} className="space-y-6">
@@ -627,13 +644,15 @@ const JoinWithUs: React.FC = () => {
                       </div>
                     </div>
 
-                    <button 
+                    <motion.button 
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       disabled={loading}
-                      className="w-full bg-primary text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                      className="w-full bg-primary text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-orange-600 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50"
                     >
                       {loading ? 'Processing...' : 'Join as Partner'}
                       <ArrowRight className="w-5 h-5" />
-                    </button>
+                    </motion.button>
                   </form>
                 )}
               </div>

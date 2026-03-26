@@ -118,182 +118,165 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow-md h-20 flex items-center">
-      <div className="container mx-auto px-4 max-w-7xl flex items-center justify-between">
+    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 h-16 flex items-center">
+      <div className="container mx-auto px-4 max-w-7xl flex items-center justify-between gap-4">
         {/* Logo Section */}
-        <Link to="/" className="flex items-center gap-2 group mr-2 flex-shrink-0">
-          <div className="bg-primary p-2 rounded-lg transform group-hover:rotate-12 transition-transform">
-            <Utensils className="text-white w-5 h-5 md:w-6 md:h-6" />
+        <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
+          <div className="bg-orange-500 p-1.5 rounded-xl transform group-hover:rotate-12 transition-transform duration-300">
+            <Utensils className="text-white w-5 h-5" />
           </div>
-          <span className="text-xl md:text-2xl font-bold text-dark tracking-tight hidden md:block">FoodWagon</span>
+          <span className="text-xl font-bold text-gray-900 tracking-tight hidden sm:block">FoodWagon</span>
         </Link>
 
-        {/* Location Selector (Dropdown) - Visible on Home page */}
-        {location.pathname === '/' && (
-          <div className="flex flex-1 items-center ml-2 md:ml-8" ref={dropdownRef}>
-             <div className="relative w-full max-w-[200px] md:max-w-none">
-               <div 
-                  onClick={() => setShowCityDropdown(!showCityDropdown)}
-                  className="flex items-center gap-2 cursor-pointer group p-1 md:p-2 rounded-md hover:bg-gray-50 transition-colors overflow-hidden"
-               >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2 text-graytext">
-                      <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin text-primary" />
-                      <span className="text-[10px] md:text-xs">Detecting...</span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col overflow-hidden">
-                      <div className="flex items-center gap-1 border-b-2 border-transparent group-hover:border-primary transition-all pb-0.5">
-                        <span className="text-xs md:text-sm font-bold text-dark group-hover:text-primary transition-colors truncate">
-                          {city}
-                        </span>
-                        <ChevronDown className={`w-3 h-3 md:w-4 md:h-4 text-primary transition-transform duration-200 ${showCityDropdown ? 'rotate-180' : ''}`} />
-                      </div>
-                      <span className="text-[9px] md:text-[10px] text-graytext truncate max-w-[120px] md:max-w-[200px]">
-                        {error ? <span className="text-red-500">{error}</span> : address}
-                      </span>
-                    </div>
-                  )}
-               </div>
+        {/* Location Selector - Minimal Version */}
+        <div className="flex-1 flex items-center max-w-md" ref={dropdownRef}>
+          <button 
+            onClick={() => setShowCityDropdown(!showCityDropdown)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-gray-50 transition-all group overflow-hidden border border-transparent hover:border-gray-200"
+          >
+            <MapPin className="w-4 h-4 text-orange-500 flex-shrink-0" />
+            <div className="flex flex-col items-start overflow-hidden">
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-bold text-gray-900 truncate">
+                  {isLoading ? 'Detecting...' : city}
+                </span>
+                <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform duration-300 ${showCityDropdown ? 'rotate-180' : ''}`} />
+              </div>
+            </div>
+          </button>
 
-               {/* Dropdown Menu */}
-               {showCityDropdown && (
-                 <div className="absolute top-full left-0 mt-2 w-64 md:w-72 bg-white shadow-xl rounded-lg border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
-                    <button 
-                       onClick={detectLocation}
-                       className="w-full text-left px-5 py-4 hover:bg-gray-50 flex items-start gap-3 group/btn border-b border-gray-100"
+          <AnimatePresence>
+            {showCityDropdown && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute top-full left-0 mt-2 w-72 bg-white shadow-2xl rounded-2xl border border-gray-100 py-3 z-50 overflow-hidden"
+              >
+                <button 
+                  onClick={detectLocation}
+                  className="w-full text-left px-4 py-3 hover:bg-orange-50 flex items-center gap-3 group/btn transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 group-hover/btn:bg-orange-500 group-hover/btn:text-white transition-colors">
+                    <Crosshair className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">Current Location</p>
+                    <p className="text-[10px] text-gray-500">Using GPS</p>
+                  </div>
+                </button>
+                
+                <div className="px-4 py-2 mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  Popular Cities
+                </div>
+                
+                <div className="max-h-60 overflow-y-auto scrollbar-hide">
+                  {availableCities.map(c => (
+                    <button
+                      key={c}
+                      onClick={() => handleManualCitySelect(c)}
+                      className={`w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm font-medium flex items-center gap-3 transition-colors ${city === c ? 'text-orange-500' : 'text-gray-700'}`}
                     >
-                       <Crosshair className="w-5 h-5 text-primary mt-0.5" />
-                       <div>
-                          <p className="text-sm font-bold text-primary group-hover/btn:text-[#e66f0f]">Detect Current Location</p>
-                          <p className="text-xs text-gray-400 font-normal mt-0.5">Using GPS</p>
-                       </div>
+                      <div className={`w-1.5 h-1.5 rounded-full ${city === c ? 'bg-orange-500' : 'bg-transparent'}`} />
+                      {c}
                     </button>
-                    
-                    <div className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50/50">
-                       Popular Cities
-                    </div>
-                    
-                    <div className="max-h-64 overflow-y-auto no-scrollbar">
-                       {availableCities.map(c => (
-                          <button
-                             key={c}
-                             onClick={() => handleManualCitySelect(c)}
-                             className={`w-full text-left px-5 py-3 hover:bg-gray-50 text-sm font-medium flex items-center gap-3 transition-colors ${city === c ? 'bg-orange-50 text-primary' : 'text-dark'}`}
-                          >
-                             <MapPin className={`w-4 h-4 ${city === c ? 'text-primary' : 'text-gray-300'}`} />
-                             {c}
-                          </button>
-                       ))}
-                    </div>
-                 </div>
-               )}
-             </div>
-          </div>
-        )}
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-        {/* Nav Links */}
-        <div className="flex items-center gap-4 sm:gap-8 ml-auto">
-          <Link to="/search" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
+        {/* Nav Links - Minimal */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Link to="/search" className="p-2 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all">
             <Search className="w-5 h-5" />
-            <span>Search</span>
           </Link>
           
-          <Link to="/about" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
-            <Info className="w-5 h-5" />
-            <span>About</span>
+          <Link to="/cart" className="p-2 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all relative">
+            <ShoppingBag className="w-5 h-5" />
+            {cartCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+                {cartCount}
+              </span>
+            )}
           </Link>
-
-          <Link to="/cart" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors relative">
-            <div className={`relative transition-transform duration-300 ${animateCart ? 'scale-125' : 'scale-100'}`}>
-              <ShoppingBag className="w-6 h-6" />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-secondary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                  {cartCount}
-                </span>
-              )}
-            </div>
-            <span>Cart</span>
-          </Link>
-
 
           {user ? (
-            <div className="flex items-center gap-4">
-              {user.role === 'ADMIN' && (
-                <Link to="/admin/dashboard" className="hidden md:flex items-center gap-2 text-primary font-bold hover:underline transition-all">
-                  <Settings className="w-5 h-5" />
-                  <span>Admin</span>
-                </Link>
-              )}
-              {user.role === 'PARTNER' && (
-                <Link to="/partner/dashboard" className="hidden md:flex items-center gap-2 text-primary font-bold hover:underline transition-all">
-                  <Store className="w-5 h-5" />
-                  <span>Partner</span>
-                </Link>
-              )}
-              {user.role === 'DELIVERY' && (
-                <Link to="/delivery/dashboard" className="hidden md:flex items-center gap-2 text-primary font-bold hover:underline transition-all">
-                  <ShoppingBag className="w-5 h-5" />
-                  <span>Delivery</span>
-                </Link>
-              )}
-              <Link to="/profile" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
-                <User className="w-5 h-5" />
-                <span className="font-bold">{user.name}</span>
-              </Link>
-            </div>
+            <Link to="/profile" className="flex items-center gap-2 pl-2 border-l border-gray-100">
+              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 overflow-hidden border border-gray-200">
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : (
+                  <User className="w-4 h-4" />
+                )}
+              </div>
+              <span className="text-sm font-bold text-gray-900 hidden lg:block">{user.name.split(' ')[0]}</span>
+            </Link>
           ) : (
-            <Link to="/login" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
-              <User className="w-5 h-5" />
-              <span>Sign In</span>
+            <Link to="/login" className="px-4 py-2 bg-gray-900 text-white text-sm font-bold rounded-full hover:bg-gray-800 transition-all active:scale-95">
+              Sign In
             </Link>
           )}
 
-          
-          <Link to="/join-us" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
-            <Store className="w-5 h-5" />
-            <span className="hidden sm:inline">Join Us</span>
-          </Link>
-
-          {/* Account Toggler - Mobile Only */}
+          {/* Mobile Menu Toggle */}
           <button 
             onClick={() => setShowMobileMenu(!showMobileMenu)}
-            className="md:hidden flex items-center justify-center w-10 h-10 bg-primary text-white rounded-full shadow-lg active:scale-95 transition-all"
+            className="sm:hidden p-2 text-gray-600 hover:bg-gray-50 rounded-full"
           >
             {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
-      {/* Account Menu Overlay - Mobile Only */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {showMobileMenu && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-20 left-0 right-0 bg-white shadow-2xl border-t border-gray-100 py-4 px-6 z-40"
-          >
-            <div className="grid grid-cols-1 gap-2">
-              {mobileMenuItems.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  onClick={() => setShowMobileMenu(false)}
-                  className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors"
-                >
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
-                    <item.icon className="w-5 h-5" />
-                  </div>
-                  <span className="font-bold text-dark">{item.label}</span>
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileMenu(false)}
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              className="fixed top-0 right-0 bottom-0 w-64 bg-white z-50 shadow-2xl p-6 flex flex-col gap-6"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-bold">Menu</span>
+                <button onClick={() => setShowMobileMenu(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="flex flex-col gap-2">
+                {mobileMenuItems.map((item) => (
+                  <Link
+                    key={item.label}
+                    to={item.path}
+                    onClick={() => setShowMobileMenu(false)}
+                    className="flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl transition-colors group"
+                  >
+                    <item.icon className="w-5 h-5 text-gray-400 group-hover:text-orange-500" />
+                    <span className="font-bold text-gray-700 group-hover:text-gray-900">{item.label}</span>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mt-auto pt-6 border-t border-gray-100">
+                <Link to="/join-us" className="flex items-center gap-3 p-3 text-orange-500 font-bold">
+                  <Store className="w-5 h-5" />
+                  Join as Partner
                 </Link>
-              ))}
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
-
-      {/* Mobile Location Bar - Removed as it's now integrated in the main navbar */}
     </nav>
   );
 };

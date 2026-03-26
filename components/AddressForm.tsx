@@ -120,16 +120,16 @@ const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) =>
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden border border-gray-100 animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col">
-        <div className="p-8 border-b border-gray-50 flex justify-between items-center flex-shrink-0">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="glass-dark w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden border border-white/10 animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col">
+        <div className="p-8 border-b border-white/5 flex justify-between items-center flex-shrink-0">
           <div>
-            <h2 className="text-2xl font-black text-dark tracking-tight">Save Address</h2>
-            <p className="text-xs text-graytext font-medium mt-1">Provide your delivery details</p>
+            <h2 className="text-2xl font-black text-white tracking-tight">Save Address</h2>
+            <p className="text-xs text-gray-500 font-medium mt-1">Provide your delivery details</p>
           </div>
           <button 
             onClick={onClose} 
-            className="p-2 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-dark"
+            className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-gray-500 hover:text-white"
           >
             <X size={20} />
           </button>
@@ -138,7 +138,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) =>
         <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto no-scrollbar">
           {/* Address Type Selector */}
           <div className="space-y-3">
-            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Address Label</label>
+            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest">Address Label</label>
             <div className="flex gap-3">
               {(['Home', 'Work', 'Other'] as const).map(t => (
                 <button
@@ -147,8 +147,8 @@ const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) =>
                   onClick={() => setType(t)}
                   className={`flex-1 py-3.5 rounded-2xl border-2 font-bold text-xs flex flex-col items-center justify-center gap-2 transition-all duration-200 ${
                     type === t 
-                      ? 'border-primary bg-orange-50 text-primary shadow-lg shadow-orange-500/10' 
-                      : 'border-gray-100 text-gray-400 hover:border-gray-200'
+                      ? 'border-primary bg-primary/10 text-primary shadow-lg shadow-orange-500/10' 
+                      : 'border-white/5 text-gray-500 hover:border-white/10'
                   }`}
                 >
                   {t === 'Home' && <Home size={18} />}
@@ -165,7 +165,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) =>
             type="button"
             onClick={handleDetectLocation}
             disabled={isDetecting}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all active:scale-[0.98] disabled:opacity-70"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-white/5 text-white border border-white/10 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all active:scale-[0.98] disabled:opacity-70"
           >
             {isDetecting ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -177,38 +177,38 @@ const AddressForm: React.FC<AddressFormProps> = ({ isOpen, onClose, onSave }) =>
 
           <div className="grid grid-cols-1 gap-5">
             <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Flat / House No.</label>
+              <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Flat / House No.</label>
               <input 
                 required 
                 placeholder="e.g. 402, Building 7"
                 value={flatNo} 
                 onChange={e => setFlatNo(e.target.value)} 
                 type="text" 
-                className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-bold" 
+                className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-bold text-white placeholder:text-gray-600" 
               />
             </div>
             
             <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Area / Locality</label>
+              <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Area / Locality</label>
               <input 
                 required 
                 placeholder="e.g. Indiranagar 100ft Rd"
                 value={area} 
                 onChange={e => setArea(e.target.value)} 
                 type="text" 
-                className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-bold" 
+                className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-bold text-white placeholder:text-gray-600" 
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">City</label>
+              <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">City</label>
               <input 
                 required 
                 placeholder="e.g. Bangalore"
                 value={city} 
                 onChange={e => setCity(e.target.value)} 
                 type="text" 
-                className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-bold" 
+                className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-bold text-white placeholder:text-gray-600" 
               />
             </div>
           </div>

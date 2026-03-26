@@ -22,6 +22,7 @@ import { AddressProvider } from './context/AddressContext';
 import { ToastProvider } from './context/ToastContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 
+import CartBottomSheet from './components/CartBottomSheet';
 import AdminDashboard from './pages/AdminDashboard';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import JoinWithUs from './pages/JoinWithUs';
@@ -62,6 +63,7 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
       </main>
       {!shouldHide && <Footer />}
       {!shouldHide && <BottomNav />}
+      <CartBottomSheet />
     </div>
   );
 };

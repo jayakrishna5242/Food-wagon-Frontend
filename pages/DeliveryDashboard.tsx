@@ -290,18 +290,22 @@ const DeliveryDashboard: React.FC = () => {
                 </div>
 
                 <div className="flex gap-4">
-                  <button 
+                  <motion.button 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => handleRejectRequest(request.id)}
                     className="flex-1 bg-white/5 hover:bg-white/10 text-white py-5 rounded-3xl font-black text-xs uppercase tracking-widest transition-all border border-white/10"
                   >
                     Pass
-                  </button>
-                  <button 
+                  </motion.button>
+                  <motion.button 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => handleAcceptRequest(request.id)}
                     className="flex-[2] bg-primary hover:bg-primary/90 text-white py-5 rounded-3xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3"
                   >
                     Accept Order ({requestTimers[request.id] || 0}s)
-                  </button>
+                  </motion.button>
                 </div>
               </motion.div>
             ))}
@@ -315,13 +319,20 @@ const DeliveryDashboard: React.FC = () => {
               { label: 'Trips', value: earnings?.totalTrips || 0, icon: Package, color: 'text-orange-500' },
               { label: 'Rating', value: currentUser?.rating || '5.0', icon: Bell, color: 'text-yellow-500' }
             ].map((stat, i) => (
-              <div key={i} className="bg-white p-5 rounded-[32px] border border-gray-100 shadow-sm">
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -4 }}
+                className="bg-white p-5 rounded-[32px] border border-gray-100 shadow-sm"
+              >
                 <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center mb-3 ${stat.color}`}>
                   <stat.icon className="w-4 h-4" />
                 </div>
                 <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">{stat.label}</p>
                 <h3 className="text-xl font-black text-dark tracking-tight">{stat.value}</h3>
-              </div>
+              </motion.div>
             ))}
           </div>
 

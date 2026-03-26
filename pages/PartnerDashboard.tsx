@@ -376,16 +376,18 @@ const PartnerDashboard: React.FC = () => {
             { id: 'offers', icon: Tag, label: 'Offers & Coupons' },
             { id: 'settings', icon: Settings, label: 'Settings' }
           ].map((item) => (
-            <button 
+            <motion.button 
               key={item.id}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-4 px-2.5 py-3.5 rounded-2xl font-bold whitespace-nowrap ${activeTab === item.id ? 'bg-primary text-white' : 'text-gray-400'}`}
+              className={`w-full flex items-center gap-4 px-2.5 py-3.5 rounded-2xl font-bold whitespace-nowrap transition-colors ${activeTab === item.id ? 'bg-primary text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
             >
               <item.icon size={20} className="flex-shrink-0" />
               <span className="overflow-hidden">
                 {item.label}
               </span>
-            </button>
+            </motion.button>
           ))}
         </nav>
 
@@ -438,19 +440,25 @@ const PartnerDashboard: React.FC = () => {
                 <h2 className="text-2xl font-black text-gray-900 tracking-tight">Offers & Coupons</h2>
                 <p className="text-gray-500 font-medium">Manage discounts and promotional codes for your customers.</p>
               </div>
-              <button 
+              <motion.button 
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowAddOffer(true)}
                 className="bg-primary text-white px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-2 shadow-lg shadow-orange-500/20"
               >
                 <Plus size={18} />
                 Create New Offer
-              </button>
+              </motion.button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {offers.filter(o => o.restaurantId === user?.restaurantId).map((offer) => (
-                <div 
+              {offers.filter(o => o.restaurantId === user?.restaurantId).map((offer, i) => (
+                <motion.div 
                   key={offer.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ y: -4 }}
                   className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 p-4">
@@ -486,7 +494,7 @@ const PartnerDashboard: React.FC = () => {
                       <div className="text-lg font-black text-gray-900">₹{offer.minOrderValue}</div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
               {offers.filter(o => o.restaurantId === user?.restaurantId).length === 0 && (
                 <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
@@ -509,7 +517,9 @@ const PartnerDashboard: React.FC = () => {
                 <h2 className="text-2xl font-black text-gray-900 tracking-tight">Menu Management</h2>
                 <p className="text-gray-500 font-medium">Add, edit or remove items from your restaurant's menu.</p>
               </div>
-              <button 
+              <motion.button 
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setEditingMenuItem(null);
                   setNewMenuItem({ name: '', description: '', price: 0, imageUrl: '', isVeg: true, category: '' });
@@ -519,13 +529,17 @@ const PartnerDashboard: React.FC = () => {
               >
                 <PlusCircle size={18} />
                 Add New Item
-              </button>
+              </motion.button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {menuItems.map((item) => (
-                <div 
+              {menuItems.map((item, i) => (
+                <motion.div 
                   key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ y: -4 }}
                   className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
                 >
                   <div className="relative h-48 overflow-hidden">
@@ -582,7 +596,7 @@ const PartnerDashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
               {menuItems.length === 0 && (
                 <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
@@ -944,8 +958,12 @@ const PartnerDashboard: React.FC = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {stats.map((stat, i) => (
-                <div 
+                <motion.div 
                   key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ y: -4 }}
                   className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100"
                 >
                   <div className="flex items-center justify-between mb-3 md:mb-4">
@@ -959,7 +977,7 @@ const PartnerDashboard: React.FC = () => {
                   </div>
                   <div className="text-gray-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">{stat.label}</div>
                   <div className="text-lg md:text-2xl font-black text-gray-900 tracking-tight">{stat.value}</div>
-                </div>
+                </motion.div>
               ))}
             </div>
 

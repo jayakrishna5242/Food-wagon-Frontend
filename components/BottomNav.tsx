@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { motion } from 'motion/react';
 
 const BottomNav: React.FC = () => {
   const location = useLocation();
@@ -71,14 +72,17 @@ const BottomNav: React.FC = () => {
             to={item.path} 
             className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-gray-400'}`}
           >
-            <div className="relative">
+            <motion.div 
+              whileTap={{ scale: 0.8 }}
+              className="relative"
+            >
               <item.icon className={`w-6 h-6 ${isActive ? 'fill-primary/10' : ''}`} />
               {item.badge !== undefined && item.badge > 0 && (
                 <span className="absolute -top-1.5 -right-2 bg-secondary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
                   {item.badge}
                 </span>
               )}
-            </div>
+            </motion.div>
             <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-primary' : 'text-gray-400'}`}>
               {item.label}
             </span>

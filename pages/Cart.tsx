@@ -7,6 +7,7 @@ import { useAddresses } from '../context/AddressContext';
 import { useToast } from '../context/ToastContext';
 import { placeOrder, fetchOffers } from '../services/api';
 import { Minus, Plus, ArrowRight, MapPin, Plus as PlusIcon, CheckCircle2, Loader2, Banknote, CreditCard, Tag, Ticket, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import AddressForm from '../components/AddressForm';
 import { Offer } from '../types';
 
@@ -133,354 +134,260 @@ const Cart: React.FC = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
-        <div className="w-64 h-64 mb-6 relative">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen flex flex-col items-center justify-center bg-white p-4"
+      >
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", damping: 15 }}
+          className="w-64 h-64 mb-6 relative"
+        >
           <img 
             src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto/2xempty_cart_yfxml0" 
             alt="Empty Cart" 
             className="w-full h-full object-contain opacity-80"
           />
-        </div>
+        </motion.div>
         <h2 className="text-xl font-bold text-dark">Your cart is empty</h2>
         <p className="text-graytext text-sm mt-2 mb-8 text-center max-w-xs">Explore restaurants near you to add some delicious food!</p>
-        <Link 
-          to="/" 
-          className="bg-primary text-white font-bold py-3 px-6 rounded-md hover:shadow-lg hover:scale-105 transition-all duration-200 uppercase text-sm tracking-wide"
-        >
-          See Restaurants
-        </Link>
-      </div>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Link 
+            to="/" 
+            className="bg-primary text-white font-bold py-3 px-6 rounded-md hover:shadow-lg transition-all duration-200 uppercase text-sm tracking-wide block"
+          >
+            See Restaurants
+          </Link>
+        </motion.div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#e9ecee] pb-40 md:py-8">
+    <div className="min-h-screen bg-white pb-40 md:py-12">
       <div className="container mx-auto px-4 max-w-5xl">
-        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-          
-          <div className="flex-1 space-y-4 md:space-y-6">
-            <div className="bg-white p-6 md:p-8 shadow-sm rounded-none md:rounded-sm relative overflow-hidden">
-               <div className="absolute left-0 top-6 bottom-6 w-1 bg-black"></div>
-               {isAuthenticated && user ? (
-                 <div className="ml-4">
-                   <h3 className="font-bold text-lg text-dark mb-1">Logged in as {user.name}</h3>
-                   <div className="flex items-center gap-2">
-                      <span className="text-graytext text-xs uppercase font-black tracking-widest">{user.role || 'Customer'}</span>
-                      <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                      <span className="text-graytext text-sm">{user.email}</span>
-                   </div>
-                 </div>
-               ) : (
-                 <div className="ml-4">
-                   <div className="flex justify-between items-center mb-1">
-                    <h3 className="font-bold text-lg text-dark">Checkout as Guest</h3>
-                    <Link to="/login" className="text-primary text-xs font-bold hover:underline uppercase">Login for rewards</Link>
-                   </div>
-                   <p className="text-graytext text-sm">You are ordering as a guest. Your order history will not be saved.</p>
-                 </div>
-               )}
-            </div>
-            
-            <div className="bg-white p-6 md:p-8 shadow-sm rounded-none md:rounded-sm relative overflow-hidden">
-              <div className={`absolute left-0 top-6 bottom-6 w-1 ${selectedAddressId ? 'bg-black' : 'bg-gray-200'}`}></div>
-              <div className="ml-4">
-                <h3 className="font-bold text-lg text-dark mb-4 flex items-center gap-2">
-                  Select Delivery Address
-                  {selectedAddressId && <CheckCircle2 className="w-5 h-5 text-green-500" />}
-                </h3>
-                
-                <div className="max-h-[400px] overflow-y-auto pr-1 mb-6 no-scrollbar">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     {addresses.map((addr) => (
-                        <div 
-                          key={addr.id}
-                          onClick={() => setSelectedAddressId(addr.id)}
-                          className={`border-2 p-4 rounded-md cursor-pointer transition-all relative group ${
-                            selectedAddressId === addr.id ? 'border-primary bg-orange-50' : 'border-gray-100 hover:border-gray-200'
-                          }`}
-                        >
-                           <div className="flex items-start gap-3">
-                              <MapPin className={`w-5 h-5 mt-1 ${selectedAddressId === addr.id ? 'text-primary' : 'text-gray-400'}`} />
-                              <div>
-                                 <p className="font-bold text-sm text-dark">{addr.type}</p>
-                                 <p className="text-xs text-graytext mt-1 leading-relaxed">
-                                   {addr.flatNo}, {addr.area}, {addr.city}
-                                 </p>
-                              </div>
-                           </div>
-                        </div>
-                     ))}
-
-                     <button 
-                       onClick={() => setIsAddressModalOpen(true)}
-                       className="border-2 border-dashed border-gray-200 p-4 rounded-md flex flex-col items-center justify-center gap-2 text-graytext hover:text-primary hover:border-primary transition-all group min-h-[100px]"
-                     >
-                        <PlusIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-bold uppercase">Add New Address</span>
-                     </button>
-                  </div>
-                </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8 tracking-tight">Checkout</h1>
+        
+        <div className="flex flex-col lg:flex-row gap-12">
+          {/* Left Column: Details */}
+          <div className="flex-1 space-y-12">
+            {/* User Info */}
+            <section>
+              <div className="flex items-center gap-4 mb-6">
+                <h2 className="font-bold text-lg text-gray-900">Account</h2>
+                <div className="h-px bg-gray-100 flex-1" />
               </div>
-            </div>
-
-            {/* Offers Section - Visible only at checkout */}
-            <div className="bg-white p-6 md:p-8 shadow-sm rounded-none md:rounded-sm relative overflow-hidden">
-               <div className={`absolute left-0 top-6 bottom-6 w-1 ${selectedOffer ? 'bg-primary' : 'bg-gray-200'}`}></div>
-               <div className="ml-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-lg text-dark flex items-center gap-2">
-                      Apply Coupons
-                      <Tag className="w-5 h-5 text-primary" />
-                    </h3>
-                    {selectedOffer && (
-                      <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold uppercase tracking-wider animate-pulse">
-                        ₹{discountAmount} Saved!
-                      </span>
-                    )}
+              
+              <div className="bg-gray-50 rounded-3xl p-6 flex items-center justify-between">
+                {isAuthenticated && user ? (
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-500">
+                      <User className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900">{user.name}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
                   </div>
+                ) : (
+                  <div className="flex items-center justify-between w-full">
+                    <p className="text-sm text-gray-500">Ordering as guest</p>
+                    <Link to="/login" className="text-sm font-bold text-orange-500 hover:underline">Sign in for rewards</Link>
+                  </div>
+                )}
+              </div>
+            </section>
 
-                  {/* Coupon Input Field */}
-                  <div className="mb-6">
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <input 
-                          type="text" 
-                          value={couponInput}
-                          onChange={(e) => setCouponInput(e.target.value)}
-                          placeholder="Enter coupon code"
-                          className={`w-full px-4 py-3 bg-gray-50 border rounded-lg font-bold text-sm uppercase tracking-widest outline-none transition-all ${couponError ? 'border-red-500' : 'border-gray-100 focus:border-primary'}`}
-                        />
-                        {couponInput && (
-                          <button 
-                            onClick={() => setCouponInput('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-dark"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
+            {/* Address Selection */}
+            <section>
+              <div className="flex items-center gap-4 mb-6">
+                <h2 className="font-bold text-lg text-gray-900">Delivery Address</h2>
+                <div className="h-px bg-gray-100 flex-1" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {addresses.map((addr) => (
+                  <button 
+                    key={addr.id}
+                    onClick={() => setSelectedAddressId(addr.id)}
+                    className={`text-left p-5 rounded-3xl border-2 transition-all relative group ${
+                      selectedAddressId === addr.id 
+                        ? 'border-orange-500 bg-orange-50/50' 
+                        : 'border-gray-100 hover:border-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <MapPin className={`w-5 h-5 mt-0.5 ${selectedAddressId === addr.id ? 'text-orange-500' : 'text-gray-400'}`} />
+                      <div>
+                        <p className="font-bold text-gray-900 text-sm">{addr.type}</p>
+                        <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-2">
+                          {addr.flatNo}, {addr.area}, {addr.city}
+                        </p>
                       </div>
-                      <button 
-                        onClick={handleApplyCoupon}
-                        disabled={!couponInput.trim()}
-                        className="bg-dark text-white px-6 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-black transition-all disabled:opacity-50"
-                      >
-                        Apply
-                      </button>
                     </div>
-                    {couponError && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-wide">{couponError}</p>}
-                  </div>
-                  
-                  <div className="flex items-center gap-2 mb-4">
-                    <Ticket className="w-4 h-4 text-gray-400" />
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Available Offers</span>
-                  </div>
-                  
-                  {isLoadingOffers ? (
-                    <div className="flex items-center gap-2 text-graytext">
-                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      <span className="text-sm">Fetching best deals...</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {offers.length === 0 ? (
-                        <p className="text-sm text-graytext italic">No offers available right now.</p>
-                      ) : (
-                        offers.map((offer) => {
-                          const isEligible = cartTotal >= offer.minOrderValue;
-                          const isSelected = selectedOffer?.id === offer.id;
-                          
-                          return (
-                            <div 
-                              key={offer.id}
-                              onClick={() => isEligible && setSelectedOffer(isSelected ? null : offer)}
-                              className={`border-2 p-3 md:p-4 rounded-xl transition-all relative group ${
-                                isSelected 
-                                  ? 'border-primary bg-orange-50 shadow-md' 
-                                  : isEligible 
-                                    ? 'border-gray-100 cursor-pointer hover:border-orange-200 hover:bg-gray-50' 
-                                    : 'border-gray-50 opacity-60 grayscale cursor-not-allowed'
-                              }`}
-                            >
-                               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                                     <div className={`p-2 rounded-lg flex-shrink-0 ${isSelected ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
-                                        <Ticket className="w-4 h-4 md:w-5 md:h-5" />
-                                     </div>
-                                     <div className="min-w-0">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                          <p className="font-black text-xs md:text-sm text-dark tracking-tight truncate">{offer.code}</p>
-                                          {isSelected && (
-                                            <div className="flex items-center gap-1 bg-primary text-white text-[7px] md:text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase whitespace-nowrap">
-                                              <CheckCircle2 className="w-2 h-2" />
-                                              Applied
-                                            </div>
-                                          )}
-                                        </div>
-                                        <p className="text-[10px] md:text-xs text-graytext mt-1 font-medium line-clamp-2">{offer.description}</p>
-                                        {!isEligible && (
-                                          <div className="mt-2 flex items-center gap-1.5">
-                                            <div className="w-16 md:w-24 bg-gray-100 h-1 rounded-full overflow-hidden">
-                                              <div 
-                                                className="bg-primary h-full transition-all duration-500" 
-                                                style={{ width: `${(cartTotal / offer.minOrderValue) * 100}%` }}
-                                              ></div>
-                                            </div>
-                                            <p className="text-[8px] md:text-[9px] text-red-500 font-bold whitespace-nowrap uppercase">
-                                              ₹{offer.minOrderValue - cartTotal} more
-                                            </p>
-                                          </div>
-                                        )}
-                                     </div>
-                                  </div>
-                                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start w-full sm:w-auto gap-2 border-t sm:border-t-0 border-gray-100 pt-2 sm:pt-0">
-                                    <span className="text-[10px] md:text-xs font-black text-primary whitespace-nowrap">
-                                      {offer.discountType === 'PERCENTAGE' ? `${offer.discountValue}% OFF` : `₹${offer.discountValue} OFF`}
-                                    </span>
-                                    {isEligible && (
-                                      <button 
-                                        className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border transition-all ${
-                                          isSelected 
-                                            ? 'bg-red-50 text-red-500 border-red-100 hover:bg-red-100' 
-                                            : 'bg-white text-primary border-primary hover:bg-primary hover:text-white'
-                                        }`}
-                                      >
-                                        {isSelected ? 'Remove' : 'Apply'}
-                                      </button>
-                                    )}
-                                  </div>
-                               </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  )}
-               </div>
-            </div>
-            
-            <div className={`bg-white p-6 md:p-8 shadow-sm rounded-none md:rounded-sm relative overflow-hidden ${!selectedAddressId ? 'opacity-50 pointer-events-none' : ''}`}>
-               <div className={`absolute left-0 top-6 bottom-6 w-1 ${selectedAddressId ? 'bg-black' : 'bg-gray-200'}`}></div>
-               <div className="ml-4">
-                  <h3 className="font-bold text-lg text-dark mb-4">Choose Payment Method</h3>
-                  
-                  <div className="space-y-3">
-                     <label 
-                        className={`flex items-center justify-between p-4 border-2 rounded-md cursor-pointer transition-all ${
-                          paymentMethod === 'COD' ? 'border-primary bg-orange-50' : 'border-gray-100 hover:border-gray-200'
-                        }`}
-                        onClick={() => setPaymentMethod('COD')}
-                     >
-                        <div className="flex items-center gap-4">
-                           <div className={`w-10 h-10 flex items-center justify-center rounded-full ${paymentMethod === 'COD' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'}`}>
-                              <Banknote className="w-5 h-5" />
-                           </div>
-                           <div>
-                              <p className="font-bold text-sm text-dark">Cash on Delivery</p>
-                              <p className="text-[10px] text-graytext uppercase tracking-wider font-bold">Pay on arrival</p>
-                           </div>
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'COD' ? 'border-primary' : 'border-gray-300'}`}>
-                           {paymentMethod === 'COD' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                        </div>
-                     </label>
-
-                     <label 
-                        className={`flex items-center justify-between p-4 border-2 rounded-md cursor-pointer transition-all ${
-                          paymentMethod === 'ONLINE' ? 'border-primary bg-orange-50' : 'border-gray-100 hover:border-gray-200'
-                        }`}
-                        onClick={() => setPaymentMethod('ONLINE')}
-                     >
-                        <div className="flex items-center gap-4">
-                           <div className={`w-10 h-10 flex items-center justify-center rounded-full ${paymentMethod === 'ONLINE' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'}`}>
-                              <CreditCard className="w-5 h-5" />
-                           </div>
-                           <div>
-                              <p className="font-bold text-sm text-dark">Online Payment</p>
-                              <p className="text-[10px] text-graytext uppercase tracking-wider">Pay securely</p>
-                           </div>
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'ONLINE' ? 'border-primary' : 'border-gray-300'}`}>
-                           {paymentMethod === 'ONLINE' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                        </div>
-                     </label>
-                  </div>
-               </div>
-            </div>
-          </div>
-
-          <div className="w-full md:w-[380px]">
-             <div className="bg-white shadow-sm pt-6 pb-0 rounded-none md:rounded-sm relative md:sticky md:top-24">
-                <div className="flex items-center gap-3 mb-6 px-6">
-                  <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                     <img src="https://picsum.photos/id/163/100/100" className="w-full h-full object-cover" alt="restaurant" />
-                  </div>
-                  <div className="overflow-hidden">
-                    <h3 className="font-bold text-dark text-base truncate relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-8 after:h-[2px] after:bg-black pb-1">Order Summary</h3>
-                    <p className="text-xs text-graytext mt-1">{items.length} items selected</p>
-                  </div>
-                </div>
-
-                <div className="space-y-0 max-h-[300px] overflow-y-auto px-6">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between py-4 group border-b border-gray-50 last:border-0">
-                       <div className="flex items-start gap-3 w-3/5">
-                         <div className={`mt-1.5 flex-shrink-0 w-3 h-3 border ${item.isVeg ? 'border-green-600' : 'border-red-600'} flex items-center justify-center p-[2px]`}>
-                            <div className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
-                         </div>
-                         <div className="flex flex-col">
-                            <span className="text-sm text-dark font-medium">{item.name}</span>
-                            <span className="text-xs text-graytext">₹{item.price}</span>
-                         </div>
-                       </div>
-                       
-                       <div className="flex items-center gap-3">
-                          <div className="flex items-center border border-gray-200 bg-white shadow-sm rounded-[4px] h-8 w-[70px] justify-between overflow-hidden">
-                             <button onClick={() => removeFromCart(item.id)} className="w-8 h-full flex items-center justify-center text-gray-400 hover:text-green-600 transition-all"><Minus className="w-3 h-3" /></button>
-                             <span className="text-green-600 font-bold text-xs">{item.quantity}</span>
-                             <button onClick={() => addToCart(item)} className="w-8 h-full flex items-center justify-center text-green-600 hover:bg-green-50 transition-all"><Plus className="w-3 h-3" /></button>
-                          </div>
-                          <span className="text-xs text-graytext w-12 text-right">₹{item.price * item.quantity}</span>
-                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="p-6 space-y-3 bg-white border-t border-gray-100">
-                  <div className="flex justify-between text-xs text-graytext"><span>Item Total</span><span>₹{cartTotal}</span></div>
-                  <div className="flex justify-between text-xs text-graytext"><span>Delivery Fee</span><span>₹{deliveryFee}</span></div>
-                  <div className="flex justify-between text-xs text-graytext"><span>Platform Fee</span><span>₹{platformFee}</span></div>
-                  <div className="flex justify-between text-xs text-graytext"><span>Taxes</span><span>₹{gst}</span></div>
-                  
-                  {selectedOffer && (
-                    <div className="flex justify-between text-xs text-green-600 font-bold bg-green-50 p-2 rounded-md border border-green-100">
-                      <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> Offer Applied ({selectedOffer.code})</span>
-                      <span>-₹{discountAmount}</span>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                     <span className="font-bold text-dark text-sm uppercase">Amount Payable</span>
-                     <span className="font-bold text-dark text-lg">₹{finalTotal}</span>
-                  </div>
-                </div>
+                    {selectedAddressId === addr.id && (
+                      <div className="absolute top-4 right-4 text-orange-500">
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                    )}
+                  </button>
+                ))}
 
                 <button 
-                  onClick={handleCheckout}
-                  disabled={isPlacingOrder || !selectedAddressId}
-                  className="w-full bg-primary text-white font-bold py-5 px-6 text-sm flex items-center justify-between hover:bg-[#e66f0f] transition-all disabled:opacity-80 active:scale-[0.98]"
+                  onClick={() => setIsAddressModalOpen(true)}
+                  className="p-5 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-orange-500 hover:border-orange-500 transition-all group min-h-[110px]"
                 >
-                  <div className="flex flex-col items-start leading-none">
-                     <span className="text-[10px] opacity-80 uppercase tracking-widest mb-1">Final Amount</span>
-                     <span className="text-xl">₹{finalTotal}</span>
+                  <PlusIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-bold uppercase tracking-wider">Add New</span>
+                </button>
+              </div>
+            </section>
+
+            {/* Payment Method */}
+            <section className={!selectedAddressId ? 'opacity-50 pointer-events-none' : ''}>
+              <div className="flex items-center gap-4 mb-6">
+                <h2 className="font-bold text-lg text-gray-900">Payment</h2>
+                <div className="h-px bg-gray-100 flex-1" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button 
+                  onClick={() => setPaymentMethod('COD')}
+                  className={`flex items-center gap-4 p-5 rounded-3xl border-2 transition-all ${
+                    paymentMethod === 'COD' ? 'border-orange-500 bg-orange-50/50' : 'border-gray-100 hover:border-gray-200'
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${paymentMethod === 'COD' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                    <Banknote className="w-5 h-5" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="uppercase tracking-widest font-black">
-                      {isPlacingOrder ? 'Processing...' : (!selectedAddressId ? 'Choose Address' : 'Complete Order')}
-                    </span>
-                    {isPlacingOrder ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
+                  <div className="text-left">
+                    <p className="font-bold text-gray-900 text-sm">Cash on Delivery</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Pay on arrival</p>
                   </div>
                 </button>
-             </div>
+
+                <button 
+                  onClick={() => setPaymentMethod('ONLINE')}
+                  className={`flex items-center gap-4 p-5 rounded-3xl border-2 transition-all ${
+                    paymentMethod === 'ONLINE' ? 'border-orange-500 bg-orange-50/50' : 'border-gray-100 hover:border-gray-200'
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${paymentMethod === 'ONLINE' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                    <CreditCard className="w-5 h-5" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-gray-900 text-sm">Online Payment</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Secure checkout</p>
+                  </div>
+                </button>
+              </div>
+            </section>
+          </div>
+
+          {/* Right Column: Summary */}
+          <div className="w-full lg:w-[400px]">
+            <div className="bg-gray-50 rounded-[40px] p-8 sticky top-24">
+              <h2 className="text-xl font-bold text-gray-900 mb-8">Order Summary</h2>
+              
+              <div className="space-y-6 mb-8 max-h-[300px] overflow-y-auto scrollbar-hide pr-2">
+                <AnimatePresence mode="popLayout">
+                  {items.map((item) => (
+                    <motion.div 
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      className="flex items-center justify-between group"
+                    >
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className={`mt-1.5 w-3 h-3 border flex-shrink-0 flex items-center justify-center p-[2px] ${item.isVeg ? 'border-green-600' : 'border-red-600'}`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-900 leading-tight">{item.name}</p>
+                          <p className="text-xs text-gray-500 mt-1">₹{item.price} × {item.quantity}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center bg-white rounded-full border border-gray-200 p-1 shadow-sm">
+                          <button onClick={() => removeFromCart(item.id)} className="p-1 hover:text-orange-500 transition-colors"><Minus className="w-3 h-3" /></button>
+                          <span className="text-xs font-bold w-6 text-center">{item.quantity}</span>
+                          <button onClick={() => addToCart(item)} className="p-1 hover:text-orange-500 transition-colors"><Plus className="w-3 h-3" /></button>
+                        </div>
+                        <span className="text-sm font-bold text-gray-900 w-16 text-right">₹{item.price * item.quantity}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+
+              {/* Coupons */}
+              <div className="mb-8">
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value)}
+                    placeholder="Coupon code"
+                    className="flex-1 bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-wider focus:ring-2 focus:ring-orange-500/20 transition-all outline-none"
+                  />
+                  <button 
+                    onClick={handleApplyCoupon}
+                    disabled={!couponInput.trim()}
+                    className="bg-gray-900 text-white px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-all disabled:opacity-50"
+                  >
+                    Apply
+                  </button>
+                </div>
+                {couponError && <p className="text-red-500 text-[10px] font-bold mt-2 uppercase tracking-wide">{couponError}</p>}
+                
+                {selectedOffer && (
+                  <div className="mt-4 bg-green-50 border border-green-100 rounded-2xl p-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4 text-green-600" />
+                      <span className="text-xs font-bold text-green-700 uppercase tracking-wider">{selectedOffer.code} Applied</span>
+                    </div>
+                    <button onClick={() => setSelectedOffer(null)} className="text-green-700 hover:text-red-500"><X className="w-4 h-4" /></button>
+                  </div>
+                )}
+              </div>
+
+              {/* Price Breakdown */}
+              <div className="space-y-3 pt-6 border-t border-gray-200 mb-8">
+                <div className="flex justify-between text-sm text-gray-500"><span>Subtotal</span><span>₹{cartTotal}</span></div>
+                <div className="flex justify-between text-sm text-gray-500"><span>Delivery & Fees</span><span>₹{deliveryFee + platformFee}</span></div>
+                <div className="flex justify-between text-sm text-gray-500"><span>GST</span><span>₹{gst}</span></div>
+                {selectedOffer && (
+                  <div className="flex justify-between text-sm text-green-600 font-bold"><span>Discount</span><span>-₹{discountAmount}</span></div>
+                )}
+                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                  <span className="font-bold text-gray-900 text-lg">Total</span>
+                  <span className="font-bold text-gray-900 text-2xl">₹{finalTotal}</span>
+                </div>
+              </div>
+
+              <motion.button 
+                whileTap={{ scale: 0.98 }}
+                onClick={handleCheckout}
+                disabled={isPlacingOrder || !selectedAddressId}
+                className="w-full bg-orange-500 text-white font-bold py-5 rounded-3xl flex items-center justify-center gap-3 hover:bg-orange-600 transition-all disabled:opacity-50 shadow-xl shadow-orange-500/20"
+              >
+                {isPlacingOrder ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span className="uppercase tracking-widest text-sm">Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="uppercase tracking-widest text-sm">Place Order</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </motion.button>
+            </div>
           </div>
         </div>
       </div>
