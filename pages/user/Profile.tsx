@@ -703,6 +703,18 @@ const Profile: React.FC = () => {
               </div>
 
               <div className="p-6 bg-gray-50 border-t border-gray-100">
+                {selectedOrder.status === 'PENDING' && (new Date().getTime() - new Date(selectedOrder.date).getTime()) <= 60000 ? (
+                  <button 
+                    onClick={() => {
+                      setOrderToCancel(selectedOrder);
+                      setIsCancelModalOpen(true);
+                      setIsOrderModalOpen(false);
+                    }}
+                    className="w-full bg-red-500 text-white font-black py-4 rounded-xl shadow-lg hover:bg-red-600 transition-all uppercase tracking-widest text-sm mb-4"
+                  >
+                    Cancel Order
+                  </button>
+                ) : null}
                 <button 
                   onClick={() => {
                     const rid = selectedOrder.restaurantId || (selectedOrder.items && selectedOrder.items[0]?.restaurantId);

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Utensils, Store, ShoppingBag, Bike, ArrowRight } from 'lucide-react';
+import { Utensils, Store, ShoppingBag, Bike, ArrowRight, Heart, ChefHat } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLocationContext } from '../../context/LocationContext';
 import { motion } from 'motion/react';
@@ -108,6 +108,28 @@ const Home: React.FC = () => {
         </div>
 
         {/* Promotional Banner */}
+      </div>
+
+      {/* New Image */}
+      <div className="w-full">
+        <img 
+          src="https://res.cloudinary.com/dlbyx3pta/image/upload/v1774626995/1774626954957_lcvvoy.png" 
+          alt="New Banner" 
+          className="w-full shadow-2xl"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+
+      {/* Made for you / Crafted by us */}
+      <div className="container mx-auto px-4 max-w-7xl py-12 md:py-16 flex justify-center gap-12">
+        <div className="flex flex-col items-center gap-2">
+          <Heart className="w-10 h-10 text-primary" />
+          <span className="font-bold text-lg">Made for you</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <ChefHat className="w-10 h-10 text-primary" />
+          <span className="font-bold text-lg">Crafted by us</span>
+        </div>
       </div>
 
       {/* New Image at Bottom */}
