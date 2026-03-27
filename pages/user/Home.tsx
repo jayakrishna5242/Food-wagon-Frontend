@@ -2,7 +2,7 @@
 import React from 'react';
 import { Utensils, Store, ShoppingBag, Bike, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useLocationContext } from '../context/LocationContext';
+import { useLocationContext } from '../../context/LocationContext';
 import { motion } from 'motion/react';
 
 const Home: React.FC = () => {

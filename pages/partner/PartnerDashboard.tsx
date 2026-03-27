@@ -41,8 +41,8 @@ import {
   Area 
 } from 'recharts';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useToast } from '../context/ToastContext';
-import { useAuth } from '../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 import { 
   fetchOrders, 
   updateOrderStatus, 
@@ -58,8 +58,8 @@ import {
   deleteMenuItem,
   toggleStock,
   updateRestaurantDetails
-} from '../services/api';
-import { Order, Restaurant, Offer, MenuItem } from '../types';
+} from '../../services/api';
+import { Order, Restaurant, Offer, MenuItem } from '../../types';
 
 const PartnerDashboard: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();

@@ -75,7 +75,7 @@ export interface Order {
   userId?: number;
   items: CartItem[];
   totalAmount: number;
-  status: 'PENDING' | 'PREPARING' | 'READY' | 'DISPATCHED' | 'DELIVERED';
+  status: 'PENDING' | 'PREPARING' | 'READY' | 'DISPATCHED' | 'DELIVERED' | 'CANCELLED';
   date: string;
   customerName?: string;
   customerPhone?: string;
@@ -137,4 +137,15 @@ export interface Offer {
   discountValue: number;
   minOrderValue: number;
   restaurantId?: number; // Optional: if undefined, it's a global offer
+}
+
+export interface GenieBooking {
+  id: number;
+  userId: number;
+  type: 'pickup' | 'buy';
+  pickupLocation: string;
+  dropLocation: string;
+  itemDescription: string;
+  date: string;
+  status: 'PENDING' | 'ASSIGNED' | 'COMPLETED' | 'CANCELLED';
 }

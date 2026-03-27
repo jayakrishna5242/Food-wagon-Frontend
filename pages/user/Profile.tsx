@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useAddresses } from '../context/AddressContext';
-import { useToast } from '../context/ToastContext';
-import { useFavorites } from '../context/FavoritesContext';
+import { useAuth } from '../../context/AuthContext';
+import { useAddresses } from '../../context/AddressContext';
+import { useToast } from '../../context/ToastContext';
+import { useFavorites } from '../../context/FavoritesContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchOrders, rateOrder, updateUser } from '../services/api';
-import { Order } from '../types';
-import AddressForm from '../components/AddressForm';
-import RestaurantCard from '../components/RestaurantCard';
+import { fetchOrders, rateOrder, updateUser } from '../../services/api';
+import { Order } from '../../types';
+import AddressForm from '../../components/AddressForm';
+import RestaurantCard from '../../components/RestaurantCard';
 import { 
   LogOut, 
   User as UserIcon, 
@@ -55,8 +55,31 @@ const Profile: React.FC = () => {
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-  const [showAllOrders, setShowAllOrders] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'DELIVERED' | 'PENDING' | 'CANCELLED'>('ALL');
+  const [dateRangeFilter, setDateRangeFilter] = useState<'ALL' | '7' | '30'>('ALL');
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const filteredOrders = orders.filter(order => {
+    if (statusFilter !== 'ALL' && order.status !== statusFilter) return false;
+    if (dateRangeFilter !== 'ALL') {
+      const orderDate = new Date(order.date);
+      const now = new Date();
+      const diffDays = (now.getTime() - orderDate.getTime()) / (1000 * 3600 * 24);
+      if (diffDays > parseInt(dateRangeFilter)) return false;
+    }
+    return true;
+  });
+
+  const handleCancelOrder = async () => {
+    if (!orderToCancel) return;
+    // Update order status to CANCELLED
+    setOrders(prev => prev.map(o => o.id === orderToCancel.id ? { ...o, status: 'CANCELLED' } : o));
+    showToast('Order cancelled successfully', 'success');
+    setIsCancelModalOpen(false);
+    setOrderToCancel(null);
+  };
 
   useEffect(() => {
     if (authLoading) return;
@@ -350,52 +373,78 @@ const Profile: React.FC = () => {
 
               {activeTab === 'orders' && (
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <p className="text-graytext font-medium">
-                      {showAllOrders ? 'All Orders' : 'Recent Orders'}
-                    </p>
-                    {orders.length > 3 && (
-                      <button 
-                        onClick={() => setShowAllOrders(!showAllOrders)}
-                        className="text-primary font-bold text-sm hover:underline"
-                      >
-                        {showAllOrders ? 'Show Less' : 'View All'}
-                      </button>
-                    )}
+                  <div className="flex flex-wrap gap-4 mb-6">
+                    <select 
+                      value={statusFilter} 
+                      onChange={(e) => setStatusFilter(e.target.value as any)}
+                      className="p-2 border border-gray-100 rounded-lg text-sm"
+                    >
+                      <option value="ALL">All Statuses</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="DELIVERED">Delivered</option>
+                      <option value="CANCELLED">Cancelled</option>
+                    </select>
+                    <select 
+                      value={dateRangeFilter} 
+                      onChange={(e) => setDateRangeFilter(e.target.value as any)}
+                      className="p-2 border border-gray-100 rounded-lg text-sm"
+                    >
+                      <option value="ALL">All Time</option>
+                      <option value="7">Last 7 Days</option>
+                      <option value="30">Last 30 Days</option>
+                    </select>
                   </div>
                   
                   {loadingOrders ? (
                     <div className="space-y-4">
                       {[1,2,3].map(i => <div key={i} className="h-32 bg-gray-50 rounded-2xl animate-pulse"></div>)}
                     </div>
-                  ) : orders.length === 0 ? (
+                  ) : filteredOrders.length === 0 ? (
                     <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                       <ShoppingBag className="w-12 h-12 text-gray-200 mx-auto mb-2" />
-                      <p className="text-graytext font-medium">No orders yet</p>
+                      <p className="text-graytext font-medium">No orders found</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {(showAllOrders ? orders : orders.slice(0, 3)).map((order) => (
+                      {filteredOrders.map((order) => (
                         <div 
                           key={order.id}
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setIsOrderModalOpen(true);
-                          }}
-                          className="p-4 border border-gray-100 rounded-2xl flex items-center gap-4 bg-white shadow-sm hover:border-primary transition-all cursor-pointer"
+                          className="p-4 border border-gray-100 rounded-2xl flex items-center gap-4 bg-white shadow-sm hover:border-primary transition-all"
                         >
-                          <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
+                          <div 
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setIsOrderModalOpen(true);
+                            }}
+                            className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer"
+                          >
                             <img src={order.restaurantImageUrl || "https://picsum.photos/seed/food/200"} alt="" className="w-full h-full object-cover" />
                           </div>
-                          <div className="flex-1">
+                          <div 
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setIsOrderModalOpen(true);
+                            }}
+                            className="flex-1 cursor-pointer"
+                          >
                             <p className="font-bold text-dark line-clamp-1">{order.restaurantName}</p>
                             <p className="text-xs text-graytext mt-0.5">₹{order.totalAmount} • {new Date(order.date).toLocaleDateString()}</p>
                             <div className="flex items-center gap-1 mt-1">
-                              <div className={`w-1.5 h-1.5 rounded-full ${order.status === 'DELIVERED' ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                              <div className={`w-1.5 h-1.5 rounded-full ${order.status === 'DELIVERED' ? 'bg-green-500' : order.status === 'CANCELLED' ? 'bg-red-500' : 'bg-orange-500'}`}></div>
                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{order.status}</span>
                             </div>
                           </div>
-                          <ChevronRight className="w-5 h-5 text-gray-300" />
+                          {order.status === 'PENDING' && (new Date().getTime() - new Date(order.date).getTime()) <= 60000 && (
+                            <button 
+                              onClick={() => {
+                                setOrderToCancel(order);
+                                setIsCancelModalOpen(true);
+                              }}
+                              className="text-red-500 text-xs font-bold hover:underline"
+                            >
+                              Cancel
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -641,6 +690,39 @@ const Profile: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
+      {/* Cancel Order Modal */}
+      <AnimatePresence>
+        {isCancelModalOpen && orderToCancel && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 text-center shadow-2xl"
+            >
+              <h3 className="text-2xl font-black text-dark tracking-tight mb-2">Cancel Order?</h3>
+              <p className="text-graytext text-sm font-medium mb-8 leading-relaxed">
+                Are you sure you want to cancel this order? This action cannot be undone.
+              </p>
+              <div className="space-y-3">
+                <button 
+                  onClick={handleCancelOrder}
+                  className="w-full py-4 bg-red-500 text-white font-black rounded-2xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
+                >
+                  Yes, Cancel Order
+                </button>
+                <button 
+                  onClick={() => setIsCancelModalOpen(false)}
+                  className="w-full py-4 bg-gray-50 text-dark font-black rounded-2xl hover:bg-gray-100 transition-all"
+                >
+                  No, Keep It
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Delete Account Modal */}
       <AnimatePresence>
         {isDeleteModalOpen && (

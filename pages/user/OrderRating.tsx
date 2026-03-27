@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, ChevronLeft, Send, Utensils, MapPin, Clock, CheckCircle2, Bike } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
-import { fetchOrders, rateOrder } from '../services/api';
-import { Order } from '../types';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { fetchOrders, rateOrder } from '../../services/api';
+import { Order } from '../../types';
 
 const OrderRating: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();

@@ -2,10 +2,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, Clock, MapPin, Search, Heart, ArrowLeft } from 'lucide-react';
-import MenuItem from '../components/MenuItem';
-import { fetchMenu, fetchRestaurants } from '../services/api';
-import { Restaurant, MenuItem as MenuItemType } from '../types';
-import { useFavorites } from '../context/FavoritesContext';
+import MenuItem from '../../components/MenuItem';
+import { fetchMenu, fetchRestaurants } from '../../services/api';
+import { Restaurant, MenuItem as MenuItemType } from '../../types';
+import { useFavorites } from '../../context/FavoritesContext';
 import { motion, AnimatePresence } from 'motion/react';
 
 const RestaurantDetail: React.FC = () => {

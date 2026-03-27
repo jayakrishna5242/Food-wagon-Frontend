@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useToast } from '../context/ToastContext';
-import { generateOtp, resetPassword } from '../services/api';
+import { useToast } from '../../context/ToastContext';
+import { generateOtp, resetPassword } from '../../services/api';
 import { ArrowLeft, Utensils, Mail, Lock, Key, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 const ForgotPassword: React.FC = () => {

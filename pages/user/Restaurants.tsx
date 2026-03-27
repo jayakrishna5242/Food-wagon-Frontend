@@ -2,10 +2,10 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { ChevronDown, X, MapPin, Search as SearchIcon, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import RestaurantCard, { RestaurantCardSkeleton } from '../components/RestaurantCard';
-import { Restaurant } from '../types';
-import { fetchRestaurants, calculateDistance } from '../services/api';
-import { useLocationContext } from '../context/LocationContext';
+import RestaurantCard, { RestaurantCardSkeleton } from '../../components/RestaurantCard';
+import { Restaurant } from '../../types';
+import { fetchRestaurants, calculateDistance } from '../../services/api';
+import { useLocationContext } from '../../context/LocationContext';
 import { motion, AnimatePresence } from 'motion/react';
 
 type SortOption = 'Relevance' | 'Nearest' | 'Delivery Time' | 'Rating' | 'Cost: Low to High' | 'Cost: High to Low';

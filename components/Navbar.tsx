@@ -123,7 +123,7 @@ const Navbar: React.FC = () => {
                   {isLoading ? (
                     <div className="flex items-center gap-2 text-graytext">
                       <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin text-primary" />
-                      <span className="text-[10px] md:text-xs">Detecting...</span>
+                      <span className="text-[10px] md:text-xs">Getting your current location...</span>
                     </div>
                   ) : (
                     <div className="flex flex-col overflow-hidden">
@@ -176,21 +176,21 @@ const Navbar: React.FC = () => {
         {/* Nav Links */}
         <div className="flex items-center gap-4 sm:gap-8 ml-auto">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link to="/search" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
+            <Link to="/search" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors whitespace-nowrap">
               <Search className="w-5 h-5" />
-              <span>Search</span>
+              <span className="hidden md:inline">Search</span>
             </Link>
           </motion.div>
           
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link to="/about" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="hidden md:flex">
+            <Link to="/about" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors whitespace-nowrap">
               <Info className="w-5 h-5" />
-              <span>About</span>
+              <span className="hidden md:inline">About</span>
             </Link>
           </motion.div>
 
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link to="/cart" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors relative">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="hidden md:flex">
+            <Link to="/cart" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors relative whitespace-nowrap">
               <div className={`relative transition-transform duration-300 ${animateCart ? 'scale-125' : 'scale-100'}`}>
                 <ShoppingBag className="w-6 h-6" />
                 {cartCount > 0 && (
@@ -199,58 +199,58 @@ const Navbar: React.FC = () => {
                   </span>
                 )}
               </div>
-              <span>Cart</span>
+              <span className="hidden md:inline">Cart</span>
             </Link>
           </motion.div>
 
 
           {user ? (
-            <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
               {user.role === 'ADMIN' && (
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link to="/admin/dashboard" className="hidden md:flex items-center gap-2 text-primary font-bold hover:underline transition-all">
+                  <Link to="/admin/dashboard" className="flex items-center gap-2 text-primary font-bold hover:underline transition-all whitespace-nowrap">
                     <Settings className="w-5 h-5" />
-                    <span>Admin</span>
+                    <span className="hidden md:inline">Admin</span>
                   </Link>
                 </motion.div>
               )}
               {user.role === 'PARTNER' && (
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link to="/partner/dashboard" className="hidden md:flex items-center gap-2 text-primary font-bold hover:underline transition-all">
+                  <Link to="/partner/dashboard" className="flex items-center gap-2 text-primary font-bold hover:underline transition-all whitespace-nowrap">
                     <Store className="w-5 h-5" />
-                    <span>Partner</span>
+                    <span className="hidden md:inline">Partner</span>
                   </Link>
                 </motion.div>
               )}
               {user.role === 'DELIVERY' && (
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link to="/delivery/dashboard" className="hidden md:flex items-center gap-2 text-primary font-bold hover:underline transition-all">
+                  <Link to="/delivery/dashboard" className="flex items-center gap-2 text-primary font-bold hover:underline transition-all whitespace-nowrap">
                     <ShoppingBag className="w-5 h-5" />
-                    <span>Delivery</span>
+                    <span className="hidden md:inline">Delivery</span>
                   </Link>
                 </motion.div>
               )}
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link to="/profile" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
+                <Link to="/profile" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors whitespace-nowrap">
                   <User className="w-5 h-5" />
-                  <span className="font-bold">{user.name}</span>
+                  <span className="font-bold hidden md:inline">{user.name}</span>
                 </Link>
               </motion.div>
             </div>
           ) : (
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link to="/login" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="hidden md:flex">
+              <Link to="/login" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors whitespace-nowrap">
                 <User className="w-5 h-5" />
-                <span>Sign In</span>
+                <span className="hidden md:inline">Sign In</span>
               </Link>
             </motion.div>
           )}
 
           
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link to="/join-us" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex">
+            <Link to="/join-us" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors whitespace-nowrap">
               <Store className="w-5 h-5" />
-              <span className="hidden sm:inline">Join Us</span>
+              <span className="hidden sm:inline">Register with us</span>
             </Link>
           </motion.div>
         </div>

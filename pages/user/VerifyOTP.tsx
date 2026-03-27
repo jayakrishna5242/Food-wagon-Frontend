@@ -3,8 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Utensils, ArrowLeft, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 const PRIMARY = 'bg-[#fc8019]';
 const PRIMARY_HOVER = 'hover:bg-[#e66f0f]';

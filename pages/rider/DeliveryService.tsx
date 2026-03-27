@@ -1,9 +1,11 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Bike, Package, MapPin, Clock, ShieldCheck, ArrowRight, X, Loader2, CheckCircle2, Info, AlertTriangle, Navigation, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, Bike, Package, MapPin, Clock, ShieldCheck, ArrowRight, X, Loader2, CheckCircle2, Info, AlertTriangle, Navigation, ChevronLeft, History } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useLocationContext } from '../context/LocationContext';
+import { useLocationContext } from '../../context/LocationContext';
+import { GenieBooking } from '../../types';
+import { placeGenieBooking, fetchGenieBookings } from '../../services/api';
 
 type BookingType = 'pickup' | 'buy';
 
@@ -17,7 +19,16 @@ const DeliveryService: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [bookings, setBookings] = useState<GenieBooking[]>([]);
   const formRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const loadBookings = async () => {
+      const data = await fetchGenieBookings();
+      setBookings(data);
+    };
+    loadBookings();
+  }, [isSuccess]);
 
   const services = [
     { 
@@ -73,13 +84,22 @@ const DeliveryService: React.FC = () => {
     if (!validate()) return;
 
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    
-    setPickupLocation('');
-    setDropLocation('');
-    setItemDescription('');
+    try {
+      await placeGenieBooking({
+        type: bookingType,
+        pickupLocation,
+        dropLocation,
+        itemDescription
+      });
+      setIsSuccess(true);
+      setPickupLocation('');
+      setDropLocation('');
+      setItemDescription('');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const safetyTips = [
@@ -154,6 +174,39 @@ const DeliveryService: React.FC = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Recent Pickups */}
+              {bookings.length > 0 && (
+                <div className="mt-12">
+                  <h3 className="text-xl font-bold text-dark mb-6 flex items-center gap-2">
+                    <History className="text-primary" />
+                    Recent Pickups
+                  </h3>
+                  <div className="space-y-4">
+                    {bookings.map((booking) => (
+                      <div key={booking.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={`p-3 rounded-2xl ${booking.type === 'pickup' ? 'bg-pink-100 text-pink-600' : 'bg-orange-100 text-orange-600'}`}>
+                            {booking.type === 'pickup' ? <Package className="w-6 h-6" /> : <Bike className="w-6 h-6" />}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-dark">{booking.type === 'pickup' ? 'Pick up & Drop' : 'Buy from Store'}</h4>
+                            <p className="text-xs text-gray-500">{booking.pickupLocation} → {booking.dropLocation}</p>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{new Date(booking.date).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                          booking.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
+                          booking.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Safety Tips */}
               <div>

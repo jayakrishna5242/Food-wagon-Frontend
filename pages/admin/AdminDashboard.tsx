@@ -25,12 +25,12 @@ import {
   FileText,
   Truck
 } from 'lucide-react';
-import { fetchOrders, fetchRestaurants, clearStoredUser, fetchAllUsers, verifyUser, verifyRestaurant } from '../services/api';
-import { Order, Restaurant, User } from '../types';
+import { fetchOrders, fetchRestaurants, clearStoredUser, fetchAllUsers, verifyUser, verifyRestaurant } from '../../services/api';
+import { Order, Restaurant, User } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 const AdminDashboard: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -749,8 +749,8 @@ const AdminDashboard: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-8 mb-8">
-                  <div className="space-y-4">
+                <div className="space-y-4 mb-8">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="bg-gray-50 p-4 rounded-2xl">
                       <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Customer</p>
                       <p className="font-bold text-dark">{selectedOrder.customerName}</p>
@@ -761,21 +761,19 @@ const AdminDashboard: React.FC = () => {
                       <p className="font-bold text-dark">{selectedOrder.restaurantName}</p>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-2xl">
-                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Delivery Address</p>
-                      <p className="text-xs font-bold text-dark leading-relaxed">{selectedOrder.deliveryAddress}</p>
-                    </div>
-                    <div className="bg-gray-50 p-4 rounded-2xl">
-                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Order Status</p>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                        selectedOrder.status === 'DELIVERED' ? 'bg-green-100 text-green-700' :
-                        selectedOrder.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
-                        {selectedOrder.status}
-                      </span>
-                    </div>
+                  <div className="bg-gray-50 p-4 rounded-2xl">
+                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Delivery Address</p>
+                    <p className="text-sm font-bold text-dark leading-relaxed">{selectedOrder.deliveryAddress}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-2xl flex items-center justify-between">
+                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Order Status</p>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      selectedOrder.status === 'DELIVERED' ? 'bg-green-100 text-green-700' :
+                      selectedOrder.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>
+                      {selectedOrder.status}
+                    </span>
                   </div>
                 </div>
 
@@ -783,24 +781,24 @@ const AdminDashboard: React.FC = () => {
                   <table className="w-full text-left">
                     <thead className="bg-gray-50">
                       <tr className="text-[10px] uppercase tracking-widest font-black text-gray-400">
-                        <th className="px-4 py-3">Item</th>
-                        <th className="px-4 py-3 text-center">Qty</th>
-                        <th className="px-4 py-3 text-right">Price</th>
+                        <th className="px-6 py-4">Item</th>
+                        <th className="px-6 py-4 text-center">Qty</th>
+                        <th className="px-6 py-4 text-right">Price</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                       {selectedOrder.items.map((item, idx) => (
                         <tr key={idx}>
-                          <td className="px-4 py-3 font-bold text-dark text-sm">{item.name}</td>
-                          <td className="px-4 py-3 text-center font-bold text-dark text-sm">{item.quantity}</td>
-                          <td className="px-4 py-3 text-right font-black text-dark text-sm">₹{item.price * item.quantity}</td>
+                          <td className="px-6 py-4 font-bold text-dark text-sm">{item.name}</td>
+                          <td className="px-6 py-4 text-center font-bold text-dark text-sm">{item.quantity}</td>
+                          <td className="px-6 py-4 text-right font-black text-dark text-sm">₹{item.price * item.quantity}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot className="bg-gray-50">
                       <tr>
-                        <td colSpan={2} className="px-4 py-3 text-right font-black text-dark uppercase text-xs">Total Amount</td>
-                        <td className="px-4 py-3 text-right font-black text-primary text-lg">₹{selectedOrder.totalAmount}</td>
+                        <td colSpan={2} className="px-6 py-4 text-right font-black text-dark uppercase text-xs">Total Amount</td>
+                        <td className="px-6 py-4 text-right font-black text-primary text-lg">₹{selectedOrder.totalAmount}</td>
                       </tr>
                     </tfoot>
                   </table>

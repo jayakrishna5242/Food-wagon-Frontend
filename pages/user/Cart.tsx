@@ -1,15 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import { useAddresses } from '../context/AddressContext';
-import { useToast } from '../context/ToastContext';
-import { placeOrder, fetchOffers } from '../services/api';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import { useAddresses } from '../../context/AddressContext';
+import { useToast } from '../../context/ToastContext';
+import { placeOrder, fetchOffers } from '../../services/api';
 import { Minus, Plus, ArrowRight, MapPin, Plus as PlusIcon, CheckCircle2, Loader2, Banknote, CreditCard, Tag, Ticket, X, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import AddressForm from '../components/AddressForm';
-import { Offer } from '../types';
+import AddressForm from '../../components/AddressForm';
+import { Offer } from '../../types';
 
 type PaymentMethod = 'COD' | 'ONLINE';
 

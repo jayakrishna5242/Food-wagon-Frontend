@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Heart, MapPin } from 'lucide-react';
+import { Star, Heart, MapPin, Clock } from 'lucide-react';
 import { Restaurant } from '../types';
 import { useFavorites } from '../context/FavoritesContext';
 import { useLocationContext } from '../context/LocationContext';
@@ -78,16 +78,20 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
             </div>
           </div>
           
-          <p className="text-gray-500 text-xs mb-3 line-clamp-1">
+          <p className="text-gray-500 text-xs mb-2 line-clamp-1">
             {restaurant.cuisines.join(', ')}
           </p>
+
+          <div className="flex items-center gap-1 text-[10px] font-bold text-primary uppercase tracking-widest mb-3">
+            <Clock className="w-3 h-3" />
+            <span>{restaurant.deliveryTime}</span>
+          </div>
 
           <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
             <div className="flex items-center gap-1">
               <MapPin className="w-3 h-3 text-primary" />
               <span>{distance !== null ? `${distance} km` : restaurant.location}</span>
             </div>
-            <span>{restaurant.deliveryTime}</span>
           </div>
         </div>
       </Link>

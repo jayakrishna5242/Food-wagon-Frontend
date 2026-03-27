@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { Search as SearchIcon, X, ChevronRight, ArrowLeft, History, Star } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { searchGlobal } from '../services/api';
-import { Restaurant, MenuItem } from '../types';
-import RestaurantCard from '../components/RestaurantCard';
-import MenuItemComponent from '../components/MenuItem';
+import { searchGlobal } from '../../services/api';
+import { Restaurant, MenuItem } from '../../types';
+import RestaurantCard from '../../components/RestaurantCard';
+import MenuItemComponent from '../../components/MenuItem';
 
 const RECENT_SEARCHES_KEY = 'foodwagon_recent_searches';
 
@@ -109,6 +109,39 @@ const Search: React.FC = () => {
       </div>
 
       <div className="container mx-auto px-4 max-w-2xl pt-8">
+        {/* Recent Searches Section */}
+        {recentSearches.length > 0 && (
+          <div className="py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-xs text-gray-400 uppercase tracking-widest">Recent Searches</h3>
+              <button 
+                onClick={clearAllRecent}
+                className="text-xs font-bold text-orange-500 hover:underline"
+              >
+                Clear All
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {recentSearches.map(term => (
+                <div 
+                  key={term}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all group cursor-pointer"
+                  onClick={() => setQuery(term)}
+                >
+                  <History className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm font-medium text-gray-700">{term}</span>
+                  <button 
+                    onClick={(e) => removeRecentSearch(e, term)}
+                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Loading State */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -186,48 +219,14 @@ const Search: React.FC = () => {
           </div>
         )}
 
-        {/* Default State */}
-        {!hasSearched && !loading && (
-           <div className="py-4">
-              {recentSearches.length > 0 ? (
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-bold text-xs text-gray-400 uppercase tracking-widest">Recent Searches</h3>
-                    <button 
-                      onClick={clearAllRecent}
-                      className="text-xs font-bold text-orange-500 hover:underline"
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {recentSearches.map(term => (
-                      <div 
-                        key={term}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-all group cursor-pointer"
-                        onClick={() => setQuery(term)}
-                      >
-                        <History className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm font-medium text-gray-700">{term}</span>
-                        <button 
-                          onClick={(e) => removeRecentSearch(e, term)}
-                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-20 text-center">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <SearchIcon className="w-8 h-8 text-gray-300" />
-                  </div>
-                  <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Search for food or restaurants</p>
-                </div>
-              )}
-           </div>
+        {/* Default State (Empty) */}
+        {!hasSearched && !loading && recentSearches.length === 0 && (
+          <div className="mt-20 text-center">
+            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <SearchIcon className="w-8 h-8 text-gray-300" />
+            </div>
+            <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Search for food or restaurants</p>
+          </div>
         )}
       </div>
     </div>

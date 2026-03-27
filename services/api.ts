@@ -1,5 +1,5 @@
 
-import { Restaurant, MenuItem, Order, AuthResponse, User, Offer, Trip, EarningsSummary, OrderRequest } from '../types';
+import { Restaurant, MenuItem, Order, AuthResponse, User, Offer, Trip, EarningsSummary, OrderRequest, GenieBooking } from '../types';
 import { MOCK_OFFERS } from '../mockData';
 
 /* =====================================================
@@ -14,11 +14,47 @@ const MENU_ITEMS_DB_KEY = 'foodwagon_menu_items_db_v4';
 const OFFERS_DB_KEY = 'foodwagon_offers_db_v4';
 const TRIPS_DB_KEY = 'foodwagon_trips_db_v4';
 const ORDER_REQUESTS_DB_KEY = 'foodwagon_order_requests_db_v4';
+const GENIE_BOOKINGS_DB_KEY = 'foodwagon_genie_bookings_db_v4';
 
 export const storeUser = (user: User) => {
   if (!user) return;
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 };
+
+const getGenieBookingsDB = (): GenieBooking[] => {
+  const data = localStorage.getItem(GENIE_BOOKINGS_DB_KEY);
+  return data ? JSON.parse(data) : [];
+};
+
+const saveGenieBookingsDB = (bookings: GenieBooking[]) => {
+  localStorage.setItem(GENIE_BOOKINGS_DB_KEY, JSON.stringify(bookings));
+};
+
+export const placeGenieBooking = async (bookingData: Omit<GenieBooking, 'id' | 'userId' | 'date' | 'status'>): Promise<GenieBooking> => {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  const user = getStoredUser();
+  const bookings = getGenieBookingsDB();
+
+  const newBooking: GenieBooking = {
+    id: Date.now(),
+    userId: user?.id || 0,
+    ...bookingData,
+    date: new Date().toISOString(),
+    status: 'PENDING'
+  };
+
+  bookings.push(newBooking);
+  saveGenieBookingsDB(bookings);
+  return newBooking;
+};
+
+export const fetchGenieBookings = async (): Promise<GenieBooking[]> => {
+  const user = getStoredUser();
+  if (!user) return [];
+  const bookings = getGenieBookingsDB();
+  return bookings.filter(b => b.userId === user.id).sort((a, b) => b.id - a.id);
+};
+
 
 export const getStoredUser = (): User | null => {
   const data = localStorage.getItem(USER_KEY);
@@ -34,7 +70,7 @@ export const clearStoredUser = () => {
   localStorage.removeItem(USER_KEY);
 };
 
-const getUsersDB = (): User[] => {
+export const getUsersDB = (): User[] => {
   const data = localStorage.getItem(USERS_DB_KEY);
   if (!data) {
     const initial: User[] = [
@@ -46,7 +82,7 @@ const getUsersDB = (): User[] => {
   return JSON.parse(data);
 };
 
-const saveUsersDB = (users: User[]) => {
+export const saveUsersDB = (users: User[]) => {
   localStorage.setItem(USERS_DB_KEY, JSON.stringify(users));
 };
 
@@ -59,12 +95,12 @@ const saveOrdersDB = (orders: Order[]) => {
   localStorage.setItem(ORDERS_DB_KEY, JSON.stringify(orders));
 };
 
-const getRestaurantsDB = (): Restaurant[] => {
+export const getRestaurantsDB = (): Restaurant[] => {
   const data = localStorage.getItem(RESTAURANTS_DB_KEY);
   return data ? JSON.parse(data) : [];
 };
 
-const saveRestaurantsDB = (restaurants: Restaurant[]) => {
+export const saveRestaurantsDB = (restaurants: Restaurant[]) => {
   localStorage.setItem(RESTAURANTS_DB_KEY, JSON.stringify(restaurants));
 };
 
@@ -524,74 +560,6 @@ export const rejectOrderRequest = async (requestId: number, deliveryBoyId: numbe
 /* =====================================================
    PARTNER & DELIVERY (Mock)
  ===================================================== */
-
-export const registerPartner = async (payload: any): Promise<AuthResponse> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  const users = getUsersDB();
-  const restaurants = getRestaurantsDB();
-  
-  const newRestaurant: Restaurant = {
-    id: Date.now(),
-    name: payload.restaurantName,
-    imageUrl: payload.imageUrl || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop',
-    rating: 0,
-    ratingCount: 0,
-    deliveryTime: '30-40 mins',
-    costForTwo: '₹500 for two',
-    cuisines: payload.cuisines || ['Indian'],
-    location: payload.location,
-    city: payload.city,
-    latitude: payload.latitude,
-    longitude: payload.longitude,
-    fssaiLicense: payload.fssaiLicense,
-    isNew: true,
-    isVerified: false
-  };
-  
-  restaurants.push(newRestaurant);
-  saveRestaurantsDB(restaurants);
-
-  const newUser: User = {
-    id: Date.now() + 1,
-    name: payload.name,
-    email: payload.email,
-    phone: payload.phone,
-    role: 'PARTNER',
-    restaurantId: newRestaurant.id,
-    isVerified: false,
-    isNew: true
-  };
-
-  users.push(newUser);
-  saveUsersDB(users);
-
-  return { user: newUser };
-};
-
-export const registerDelivery = async (payload: any): Promise<AuthResponse> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  const users = getUsersDB();
-  
-  const newUser: User = {
-    id: Date.now(),
-    name: payload.name,
-    email: payload.email,
-    phone: payload.phone,
-    role: 'DELIVERY',
-    isVerified: false,
-    isNew: true,
-    rating: 0,
-    ratingCount: 0,
-    vehicleType: payload.vehicleType,
-    vehicleNumber: payload.vehicleNumber,
-    drivingLicense: payload.drivingLicense
-  };
-
-  users.push(newUser);
-  saveUsersDB(users);
-
-  return { user: newUser };
-};
 
 export const fetchAllUsers = async (): Promise<User[]> => {
   return getUsersDB();

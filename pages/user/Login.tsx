@@ -1,9 +1,9 @@
 
 import React, { useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
-import { loginUser, registerUser } from '../services/api';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { loginUser, registerUser } from '../../services/api';
 import { X, Utensils, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const PRIMARY = 'bg-[#fc8019]';
