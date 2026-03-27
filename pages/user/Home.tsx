@@ -87,7 +87,7 @@ const Home: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -8, scale: 1.02 }}
-                className={`relative overflow-hidden p-6 md:p-8 h-44 md:h-60 flex flex-col justify-between shadow-xl rounded-2xl bg-gradient-to-br ${category.gradient} text-white transition-all`}
+                className={`relative overflow-hidden p-6 md:p-8 h-44 md:h-60 flex flex-col justify-between shadow-xl bg-gradient-to-br ${category.gradient} text-white transition-all`}
               >
                 <div className="z-10">
                   <div className="flex flex-col">
@@ -108,41 +108,16 @@ const Home: React.FC = () => {
         </div>
 
         {/* Promotional Banner */}
-  
-        <div className="mt-16 md:mt-24 bg-gray-50 rounded-2xl p-8 md:p-12 border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="max-w-xl text-center md:text-left">
-            <h2 className="text-3xl md:text-4xl font-bold text-dark tracking-tight uppercase mb-4">Get the best experience</h2>
-            <p className="text-gray-500 font-medium text-lg">Download the FoodWagon app for exclusive offers, real-time tracking, and personalized recommendations.</p>
-          </div>
-          <div className="flex flex-wrap justify-center md:justify-start gap-4">
-            <motion.a 
-              href="#"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="transition-transform"
-            >
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" 
-                alt="Download on the App Store" 
-                className="h-12 md:h-14"
-                referrerPolicy="no-referrer"
-              />
-            </motion.a>
-            <motion.a 
-              href="#"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="transition-transform"
-            >
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
-                alt="Get it on Google Play" 
-                className="h-12 md:h-14"
-                referrerPolicy="no-referrer"
-              />
-            </motion.a>
-          </div>
-        </div>
+      </div>
+
+      {/* New Image at Bottom */}
+      <div className="w-full">
+        <img 
+          src="https://res.cloudinary.com/dlbyx3pta/image/upload/v1774625971/1774625440295_lpnkje.png" 
+          alt="Attractive Banner" 
+          className="w-full shadow-2xl"
+          referrerPolicy="no-referrer"
+        />
       </div>
     </div>
   );

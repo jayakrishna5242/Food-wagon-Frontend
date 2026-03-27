@@ -614,6 +614,34 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Tracking Status */}
+                <div>
+                  <h5 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <div className="w-1 h-4 bg-primary rounded-full"></div>
+                    Order Tracking
+                  </h5>
+                  <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                    <div className="flex justify-between mb-3">
+                      {['Placed', 'Preparing', 'Dispatched', 'Delivered'].map((step, index) => {
+                        const currentStep = selectedOrder.status === 'DELIVERED' ? 3 : selectedOrder.status === 'PENDING' ? 1 : 0;
+                        return (
+                          <span key={step} className={`text-[10px] font-black uppercase tracking-widest ${index <= currentStep ? 'text-primary' : 'text-gray-300'}`}>
+                            {step}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full flex">
+                      {['Placed', 'Preparing', 'Dispatched', 'Delivered'].map((_, index) => {
+                        const currentStep = selectedOrder.status === 'DELIVERED' ? 3 : selectedOrder.status === 'PENDING' ? 1 : 0;
+                        return (
+                          <div key={index} className={`flex-1 ${index <= currentStep ? 'bg-primary' : ''} ${index === 0 ? 'rounded-l-full' : ''} ${index === 3 ? 'rounded-r-full' : ''}`} />
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Rating Section */}
                 {selectedOrder.status === 'DELIVERED' && (
                   <div className="bg-gray-50/50 p-8 rounded-3xl border border-gray-100 shadow-sm">

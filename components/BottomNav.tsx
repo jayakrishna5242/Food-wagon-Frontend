@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
@@ -10,13 +10,13 @@ import {
   LayoutDashboard, 
   ClipboardList, 
   Store, 
-  Tag, 
   Settings,
   BarChart3,
   Users,
   CheckCircle2,
-  Navigation,
-  Clock
+  Bike,
+  Clock,
+  History
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -26,6 +26,11 @@ const BottomNav: React.FC = () => {
   const location = useLocation();
   const { cartCount } = useCart();
   const { user } = useAuth();
+  const [pickupMode, setPickupMode] = useState(() => localStorage.getItem('pickupMode') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('pickupMode', String(pickupMode));
+  }, [pickupMode]);
 
   const isPartner = location.pathname.startsWith('/partner');
   const isAdmin = location.pathname.startsWith('/admin');
@@ -33,8 +38,10 @@ const BottomNav: React.FC = () => {
 
   let navItems = [
     { label: 'Home', icon: Home, path: '/' },
-    { label: 'Food', icon: Utensils, path: '/restaurants' },
-    { label: 'Pickups', icon: Truck, path: '/delivery-service' },
+    pickupMode 
+      ? { label: 'History', icon: History, path: '/pickup-history' } 
+      : { label: 'Food', icon: Utensils, path: '/restaurants' },
+    { label: 'Pickup', icon: Bike, path: '#', onClick: () => setPickupMode(!pickupMode) },
     { label: 'Cart', icon: ShoppingBag, path: '/cart', badge: cartCount },
     { label: 'Account', icon: User, path: user ? (user.role === 'partner' ? '/partner/dashboard' : user.role === 'admin' ? '/admin/dashboard' : user.role === 'delivery' ? '/delivery/dashboard' : '/profile') : '/login' },
   ];
@@ -68,12 +75,9 @@ const BottomNav: React.FC = () => {
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-3 z-[100] flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path || (item.path.includes('?') && location.pathname + location.search === item.path);
-        return (
-          <Link 
-            key={item.path} 
-            to={item.path} 
-            className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-gray-400'}`}
-          >
+        
+        const content = (
+          <div className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-gray-400'}`}>
             <motion.div 
               whileTap={{ scale: 0.8 }}
               className="relative"
@@ -88,6 +92,23 @@ const BottomNav: React.FC = () => {
             <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-primary' : 'text-gray-400'}`}>
               {item.label}
             </span>
+          </div>
+        );
+
+        if (item.onClick) {
+          return (
+            <button key={item.label} onClick={item.onClick} className="focus:outline-none">
+              {content}
+            </button>
+          );
+        }
+
+        return (
+          <Link 
+            key={item.path} 
+            to={item.path} 
+          >
+            {content}
           </Link>
         );
       })}

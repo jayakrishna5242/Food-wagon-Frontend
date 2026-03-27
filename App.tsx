@@ -4,7 +4,6 @@ import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
-import Footer from './components/Footer';
 import Home from './pages/user/Home';
 import RestaurantDetail from './pages/user/RestaurantDetail';
 import Cart from './pages/user/Cart';
@@ -15,6 +14,7 @@ import Search from './pages/user/Search';
 import Restaurants from './pages/user/Restaurants';
 import PartnerDashboard from './pages/partner/PartnerDashboard';
 import AboutUs from './pages/user/AboutUs';
+import PickupHistory from './pages/user/PickupHistory';
 import OrderRating from './pages/user/OrderRating';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -64,7 +64,6 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
       <main className="flex-grow pb-20 md:pb-0">
         {children}
       </main>
-      {!shouldHide && <Footer />}
       {!shouldHide && <BottomNav />}
     </div>
   );
@@ -98,6 +97,7 @@ const App: React.FC = () => {
                       <Route path="/supermarket" element={<Supermarket />} />
                       <Route path="/delivery-service" element={<DeliveryService />} />
                       <Route path="/about" element={<AboutUs />} />
+                      <Route path="/pickup-history" element={<PickupHistory />} />
                       <Route path="/order-rating/:orderId" element={<OrderRating />} />
                     </Routes>
                   </Layout>

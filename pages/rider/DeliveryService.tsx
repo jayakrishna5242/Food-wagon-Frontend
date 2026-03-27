@@ -178,12 +178,17 @@ const DeliveryService: React.FC = () => {
               {/* Recent Pickups */}
               {bookings.length > 0 && (
                 <div className="mt-12">
-                  <h3 className="text-xl font-bold text-dark mb-6 flex items-center gap-2">
-                    <History className="text-primary" />
-                    Recent Pickups
-                  </h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-dark flex items-center gap-2">
+                      <History className="text-primary" />
+                      Recent Pickups
+                    </h3>
+                    <Link to="/pickup-history" className="text-primary font-bold text-sm hover:underline">
+                      View All
+                    </Link>
+                  </div>
                   <div className="space-y-4">
-                    {bookings.map((booking) => (
+                    {bookings.slice(0, 3).map((booking) => (
                       <div key={booking.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className={`p-3 rounded-2xl ${booking.type === 'pickup' ? 'bg-pink-100 text-pink-600' : 'bg-orange-100 text-orange-600'}`}>
