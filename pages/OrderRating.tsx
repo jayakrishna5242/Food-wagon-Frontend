@@ -128,7 +128,7 @@ const OrderRating: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-50">
+      <div className="bg-white border-b border-gray-100 sticky top-20 z-50">
         <div className="container mx-auto px-4 max-w-2xl h-16 flex items-center justify-between">
           <button 
             onClick={() => navigate(-1)}

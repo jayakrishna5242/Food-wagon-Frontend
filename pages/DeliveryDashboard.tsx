@@ -214,7 +214,7 @@ const DeliveryDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-24 md:pb-0">
       {/* Header - Recipe 8 (Clean Utility) */}
-      <header className="bg-white border-b border-gray-100 p-4 md:p-6 sticky top-0 z-50">
+      <header className="bg-white border-b border-gray-100 p-4 md:p-6 sticky top-20 z-50">
         <div className="container mx-auto max-w-4xl flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-dark rounded-2xl flex items-center justify-center text-white font-black shadow-xl shadow-dark/10">

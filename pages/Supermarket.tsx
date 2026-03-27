@@ -22,7 +22,7 @@ const Supermarket: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-white sticky top-0 z-30 shadow-sm">
+      <div className="bg-white sticky top-20 z-30 shadow-sm">
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center gap-4">
           <Link to="/" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <ArrowLeft className="w-6 h-6 text-dark" />
@@ -47,7 +47,7 @@ const Supermarket: React.FC = () => {
         {/* Categories */}
         <div className="mb-10">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-black text-dark uppercase tracking-tight">Shop by Category</h2>
+            <h2 className="text-2xl font-bold text-dark uppercase">Shop by Category</h2>
             <button className="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
               View All <ChevronRight className="w-4 h-4" />
             </button>
@@ -70,14 +70,14 @@ const Supermarket: React.FC = () => {
 
         {/* Mart Stores */}
         <div>
-          <h2 className="text-2xl font-black text-dark mb-6 uppercase tracking-tight">Mart Stores Near You</h2>
+          <h2 className="text-2xl font-bold text-dark mb-6 uppercase">Mart Stores Near You</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {stores.map((store) => (
               <motion.div 
                 key={store.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow group"
+                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow group"
               >
                 <div className="relative h-48 overflow-hidden">
                   <img src={store.image} alt={store.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />

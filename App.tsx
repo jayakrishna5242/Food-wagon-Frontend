@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
 import Search from './pages/Search';
+import Restaurants from './pages/Restaurants';
 import PartnerDashboard from './pages/PartnerDashboard';
 import AboutUs from './pages/AboutUs';
 import OrderRating from './pages/OrderRating';
@@ -80,6 +81,7 @@ const App: React.FC = () => {
                   <Layout>
                     <Routes>
                       <Route path="/" element={<Home />} />
+                      <Route path="/restaurants" element={<Restaurants />} />
                       <Route path="/search" element={<Search />} />
                       <Route path="/restaurant/:id" element={<RestaurantDetail />} />
                       <Route path="/cart" element={<Cart />} />

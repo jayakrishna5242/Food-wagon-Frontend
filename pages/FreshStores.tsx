@@ -20,7 +20,7 @@ const FreshStores: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-white sticky top-0 z-30 shadow-sm">
+      <div className="bg-white sticky top-20 z-30 shadow-sm">
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center gap-4">
           <Link to="/" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <ArrowLeft className="w-6 h-6 text-dark" />
@@ -32,7 +32,7 @@ const FreshStores: React.FC = () => {
       <div className="container mx-auto max-w-7xl px-4 py-8">
         {/* Category Selection */}
         <div className="mb-10">
-          <h2 className="text-2xl font-black text-dark mb-6 uppercase tracking-tight">What are you looking for?</h2>
+          <h2 className="text-2xl font-bold text-dark mb-6 uppercase">What are you looking for?</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((cat) => (
               <motion.div 
@@ -52,14 +52,14 @@ const FreshStores: React.FC = () => {
 
         {/* Stores List */}
         <div>
-          <h2 className="text-2xl font-black text-dark mb-6 uppercase tracking-tight">Stores Near You</h2>
+          <h2 className="text-2xl font-bold text-dark mb-6 uppercase">Stores Near You</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {stores.map((store) => (
               <motion.div 
                 key={store.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow group"
+                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow group"
               >
                 <div className="relative h-48 overflow-hidden">
                   <img src={store.image} alt={store.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />

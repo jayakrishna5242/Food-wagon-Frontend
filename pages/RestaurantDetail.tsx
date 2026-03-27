@@ -204,7 +204,7 @@ const RestaurantDetail: React.FC = () => {
 
         {/* Category Navigation */}
         {!searchQuery && categories.length > 1 && (
-          <div className="sticky top-0 z-30 bg-gray-50/80 backdrop-blur-md py-4 -mx-4 px-4 mb-6 overflow-x-auto no-scrollbar flex gap-2 border-b border-gray-100">
+          <div className="sticky top-20 z-30 bg-gray-50/80 backdrop-blur-md py-4 -mx-4 px-4 mb-6 overflow-x-auto no-scrollbar flex gap-2 border-b border-gray-100">
             {categories.map((category) => (
               <motion.button
                 key={category}

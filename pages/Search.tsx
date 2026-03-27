@@ -84,15 +84,8 @@ const Search: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pb-28 md:pb-10">
       {/* Search Header */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4 safe-top">
+      <div className="sticky top-20 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4 safe-top">
         <div className="container mx-auto max-w-2xl flex items-center gap-4">
-          <button 
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-all"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          
           <div className="relative flex-1">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input

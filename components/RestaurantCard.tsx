@@ -40,7 +40,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
     <motion.div
       whileHover={{ y: -5, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100 flex flex-col h-full"
+      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100 flex flex-col h-full"
     >
       <Link to={`/restaurant/${restaurant.id}`} className="block group h-full">
         <div className="relative h-48 w-full overflow-hidden">
