@@ -193,7 +193,7 @@ const Restaurants: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={city === 'Select Location' ? "Select a location to search..." : `Search for restaurants in ${city}...`}
                 disabled={city === 'Select Location'}
-                className="w-full bg-gray-50 border-2 border-transparent focus:border-primary focus:bg-white rounded-2xl py-3.5 pl-12 pr-4 text-dark font-semibold transition-all outline-none shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gray-50 border-2 border-transparent focus:border-primary focus:bg-white rounded-2xl py-3.5 pl-12 pr-4 text-dark font-bold transition-all outline-none shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               />
               {searchQuery && (
                 <button 
@@ -251,7 +251,7 @@ const Restaurants: React.FC = () => {
                 <div className="relative" ref={sortRef}>
                   <button 
                     onClick={() => setIsSortOpen(!isSortOpen)}
-                    className={`flex items-center gap-2 border rounded-xl px-4 py-2.5 text-[11px] md:text-xs font-bold uppercase tracking-wider shadow-sm whitespace-nowrap transition-all ${sortBy !== 'Relevance' ? 'bg-dark text-white border-dark' : 'bg-white text-dark border-gray-200 hover:bg-gray-50'}`}
+                    className={`flex items-center gap-2 border rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm whitespace-nowrap transition-all ${sortBy !== 'Relevance' ? 'bg-dark text-white border-dark' : 'bg-white text-dark border-gray-200 hover:bg-gray-50'}`}
                   >
                     <span>{sortBy === 'Relevance' ? 'Sort By' : sortBy}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform ${isSortOpen ? 'rotate-180' : ''}`} />
@@ -269,7 +269,7 @@ const Restaurants: React.FC = () => {
                           <button
                             key={option}
                             onClick={() => handleSortChange(option)}
-                            className={`w-full text-left px-5 py-3.5 text-[11px] md:text-xs hover:bg-gray-50 border-b last:border-0 border-gray-50 font-bold uppercase tracking-wider ${sortBy === option ? 'text-primary' : 'text-dark'}`}
+                            className={`w-full text-left px-5 py-3.5 text-sm hover:bg-gray-50 border-b last:border-0 border-gray-50 font-bold ${sortBy === option ? 'text-primary' : 'text-dark'}`}
                           >
                             {option}
                           </button>
@@ -287,7 +287,7 @@ const Restaurants: React.FC = () => {
                     <button 
                       key={index}
                       onClick={() => toggleFilter(filter)}
-                      className={`border rounded-xl px-4 py-2.5 text-[11px] md:text-xs font-bold uppercase tracking-wider shadow-sm whitespace-nowrap transition-all ${
+                      className={`border rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm whitespace-nowrap transition-all ${
                         isActive 
                           ? 'bg-primary text-white border-primary' 
                           : 'bg-white text-dark border-gray-200 hover:bg-gray-50'

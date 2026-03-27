@@ -65,28 +65,27 @@ const BottomNav: React.FC = () => {
   }
 
   return (
-    <div className="hidden md:flex fixed left-0 top-20 bottom-0 w-20 bg-white border-r border-gray-100 flex-col items-center py-8 z-[100] gap-8 shadow-[4px_0_12px_rgba(0,0,0,0.02)]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-3 z-[100] flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path || (item.path.includes('?') && location.pathname + location.search === item.path);
         return (
           <Link 
             key={item.path} 
             to={item.path} 
-            className={`flex flex-col items-center gap-1.5 transition-all group ${isActive ? 'text-primary' : 'text-gray-400 hover:text-dark'}`}
+            className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-gray-400'}`}
           >
             <motion.div 
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className={`p-3 rounded-2xl transition-colors ${isActive ? 'bg-primary/10' : 'group-hover:bg-gray-50'}`}
+              whileTap={{ scale: 0.8 }}
+              className="relative"
             >
               <item.icon className={`w-6 h-6 ${isActive ? 'fill-primary/10' : ''}`} />
               {item.badge !== undefined && item.badge > 0 && (
-                <span className="absolute top-2 right-2 bg-secondary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                <span className="absolute -top-1.5 -right-2 bg-secondary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
                   {item.badge}
                 </span>
               )}
             </motion.div>
-            <span className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-primary' : 'text-gray-400'}`}>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-primary' : 'text-gray-400'}`}>
               {item.label}
             </span>
           </Link>

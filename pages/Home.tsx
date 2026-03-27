@@ -108,6 +108,7 @@ const Home: React.FC = () => {
         </div>
 
         {/* Promotional Banner */}
+  
         <div className="mt-16 md:mt-24 bg-gray-50 rounded-2xl p-8 md:p-12 border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="max-w-xl text-center md:text-left">
             <h2 className="text-3xl md:text-4xl font-bold text-dark tracking-tight uppercase mb-4">Get the best experience</h2>

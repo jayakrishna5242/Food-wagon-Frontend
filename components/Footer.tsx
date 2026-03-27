@@ -2,7 +2,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Utensils, Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
-import { motion } from 'motion/react';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -88,33 +87,17 @@ const Footer: React.FC = () => {
           <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">
             &copy; {currentYear} FOODWAGON. ALL RIGHTS RESERVED.
           </p>
-          <div className="flex items-center gap-4">
-            <motion.a 
-              href="#"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="transition-transform"
-            >
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
-                alt="Google Play" 
-                className="h-8 opacity-80 hover:opacity-100 transition-opacity"
-                referrerPolicy="no-referrer"
-              />
-            </motion.a>
-            <motion.a 
-              href="#"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="transition-transform"
-            >
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" 
-                alt="App Store" 
-                className="h-8 opacity-80 hover:opacity-100 transition-opacity"
-                referrerPolicy="no-referrer"
-              />
-            </motion.a>
+          <div className="flex items-center gap-6">
+            <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/2560px-Google_Play_Store_badge_EN.svg.png" 
+              alt="Google Play" 
+              className="h-8 opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
+            />
+            <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/2560px-Download_on_the_App_Store_Badge.svg.png" 
+              alt="App Store" 
+              className="h-8 opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
+            />
           </div>
         </div>
       </div>

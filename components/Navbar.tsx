@@ -114,8 +114,8 @@ const Navbar: React.FC = () => {
 
         {/* Location Selector (Dropdown) - Visible on Home and Restaurants pages */}
         {(location.pathname === '/' || location.pathname === '/restaurants') && (
-          <div className="hidden md:flex flex-1 items-center ml-8" ref={dropdownRef}>
-             <div className="relative w-full">
+          <div className="flex flex-1 items-center ml-2 md:ml-8" ref={dropdownRef}>
+             <div className="relative w-full max-w-[200px] md:max-w-none">
                <div 
                   onClick={() => setShowCityDropdown(!showCityDropdown)}
                   className="flex items-center gap-2 cursor-pointer group p-1 md:p-2 rounded-md hover:bg-gray-50 transition-colors overflow-hidden"
@@ -248,7 +248,7 @@ const Navbar: React.FC = () => {
 
           
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link to="/join-us" className="hidden md:flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
+            <Link to="/join-us" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors">
               <Store className="w-5 h-5" />
               <span className="hidden sm:inline">Join Us</span>
             </Link>

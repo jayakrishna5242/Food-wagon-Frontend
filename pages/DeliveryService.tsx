@@ -1,30 +1,15 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Bike, Package, MapPin, Clock, ShieldCheck, ArrowRight, X, Loader2, CheckCircle2, Info, AlertTriangle, Navigation, ChevronLeft } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useLocationContext } from '../context/LocationContext';
 
 type BookingType = 'pickup' | 'buy';
 
 const DeliveryService: React.FC = () => {
   const { address } = useLocationContext();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState<'new' | 'history'>((searchParams.get('tab') as 'new' | 'history') || 'new');
   const [showForm, setShowForm] = useState(false);
-
-  useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'history' || tab === 'new') {
-      setActiveTab(tab as 'new' | 'history');
-    }
-  }, [searchParams]);
-
-  const handleTabChange = (tab: 'new' | 'history') => {
-    setActiveTab(tab);
-    setSearchParams({ tab });
-    setShowForm(false);
-  };
   const [bookingType, setBookingType] = useState<BookingType>('pickup');
   const [pickupLocation, setPickupLocation] = useState('');
   const [dropLocation, setDropLocation] = useState('');
@@ -33,29 +18,6 @@ const DeliveryService: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const formRef = useRef<HTMLDivElement>(null);
-
-  const mockHistory = [
-    {
-      id: 'G12345',
-      type: 'pickup',
-      status: 'Delivered',
-      date: '24 Mar, 2026',
-      pickup: '123, Gourmet Street',
-      drop: '456, Foodie Lane',
-      item: 'House Keys',
-      price: '₹45'
-    },
-    {
-      id: 'G12346',
-      type: 'buy',
-      status: 'Cancelled',
-      date: '22 Mar, 2026',
-      pickup: 'Apollo Pharmacy',
-      drop: '456, Foodie Lane',
-      item: 'Medicines',
-      price: '₹0'
-    }
-  ];
 
   const services = [
     { 
@@ -130,105 +92,17 @@ const DeliveryService: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="bg-white sticky top-20 z-30 shadow-sm">
-        <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <ArrowLeft className="w-6 h-6 text-dark" />
-            </Link>
-            <h1 className="text-xl font-bold text-dark">Feasti Genie</h1>
-          </div>
-          <div className="flex bg-gray-100 p-1 rounded-xl">
-            <button 
-              onClick={() => handleTabChange('new')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'new' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-dark'}`}
-            >
-              NEW TASK
-            </button>
-            <button 
-              onClick={() => handleTabChange('history')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'history' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-dark'}`}
-            >
-              HISTORY
-            </button>
-          </div>
+        <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center gap-4">
+          <Link to="/" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <ArrowLeft className="w-6 h-6 text-dark" />
+          </Link>
+          <h1 className="text-xl font-bold text-dark">Feasti Genie</h1>
         </div>
       </div>
 
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <AnimatePresence mode="wait">
-          {activeTab === 'history' ? (
-            <motion.div
-              key="history"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-6 max-w-3xl mx-auto"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-2xl font-bold text-dark uppercase tracking-tight">Your Genie History</h2>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{mockHistory.length} TASKS</span>
-              </div>
-
-              {mockHistory.map((task) => (
-                <div key={task.id} className="bg-white rounded-3xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-xl ${task.type === 'pickup' ? 'bg-pink-100 text-pink-600' : 'bg-orange-100 text-orange-600'}`}>
-                        {task.type === 'pickup' ? <Package size={20} /> : <Bike size={20} />}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-dark">{task.type === 'pickup' ? 'Pick up & Drop' : 'Buy from Store'}</h4>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{task.id} • {task.date}</p>
-                      </div>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                      task.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                      {task.status}
-                    </span>
-                  </div>
-
-                  <div className="space-y-4 mb-6">
-                    <div className="flex gap-3">
-                      <div className="flex flex-col items-center gap-1 mt-1">
-                        <div className="w-2 h-2 rounded-full bg-gray-300" />
-                        <div className="w-0.5 h-6 bg-gray-100" />
-                        <MapPin size={12} className="text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">FROM</p>
-                        <p className="text-sm font-medium text-dark">{task.pickup}</p>
-                        <div className="h-4" />
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">TO</p>
-                        <p className="text-sm font-medium text-dark">{task.drop}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-gray-50 flex justify-between items-center">
-                    <div>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">ITEM</p>
-                      <p className="text-sm font-bold text-dark">{task.item}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">AMOUNT</p>
-                      <p className="text-lg font-black text-dark">{task.price}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {mockHistory.length === 0 && (
-                <div className="text-center py-20">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Clock className="w-10 h-10 text-gray-300" />
-                  </div>
-                  <h3 className="text-xl font-bold text-dark mb-2">No History Yet</h3>
-                  <p className="text-gray-500 max-w-xs mx-auto">Your completed Genie tasks will appear here. Book your first Genie now!</p>
-                </div>
-              )}
-            </motion.div>
-          ) : !showForm ? (
+          {!showForm ? (
             <motion.div
               key="selection"
               initial={{ opacity: 0, x: -20 }}
@@ -241,20 +115,12 @@ const DeliveryService: React.FC = () => {
                 <div className="relative z-10 max-w-lg">
                   <h2 className="text-3xl md:text-4xl font-bold mb-4 uppercase tracking-tight">Anything Delivered Instantly</h2>
                   <p className="text-indigo-100 mb-8">Forgot your keys? Need a document delivered? Want something from a specific store? Genie is here to help.</p>
-                  <div className="flex flex-wrap gap-4">
-                    <button 
-                      onClick={() => handleOpenForm('pickup')}
-                      className="bg-white text-indigo-900 font-bold py-3 px-8 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
-                    >
-                      Set Pickup Location
-                    </button>
-                    <button 
-                      onClick={() => handleTabChange('history')}
-                      className="bg-indigo-800/50 text-white font-bold py-3 px-8 rounded-xl hover:bg-indigo-800 transition-colors border border-indigo-700/50"
-                    >
-                      View History
-                    </button>
-                  </div>
+                  <button 
+                    onClick={() => handleOpenForm('pickup')}
+                    className="bg-white text-indigo-900 font-bold py-3 px-8 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
+                  >
+                    Set Pickup Location
+                  </button>
                 </div>
                 <div className="absolute right-0 bottom-0 opacity-20 transform translate-x-1/4 translate-y-1/4">
                   <Bike size={300} strokeWidth={1} />
@@ -314,18 +180,17 @@ const DeliveryService: React.FC = () => {
               exit={{ opacity: 0, x: -20 }}
               className="max-w-2xl mx-auto"
             >
-              
+              <button 
+                onClick={() => setShowForm(false)}
+                className="flex items-center gap-2 text-gray-500 font-bold text-sm mb-8 hover:text-dark transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                BACK TO SERVICES
+              </button>
 
               <div className="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
                 <div className="p-8 md:p-10">
                   <div className="mb-10">
-                    <button 
-                      onClick={() => setShowForm(false)}
-                      className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest mb-6 hover:gap-3 transition-all"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                      Back to Services
-                    </button>
                     <h2 className="text-3xl font-bold text-dark uppercase tracking-tight mb-2">
                       {bookingType === 'pickup' ? 'Pick up & Drop' : 'Buy from Store'}
                     </h2>
@@ -338,22 +203,13 @@ const DeliveryService: React.FC = () => {
                         <CheckCircle2 className="w-12 h-12 text-green-600" />
                       </div>
                       <h3 className="text-3xl font-bold text-dark mb-4">Booking Successful!</h3>
-                      <p className="text-gray-500 mb-10 max-w-sm mx-auto">Your Genie will be assigned shortly. You can track the progress in your history.</p>
-                      <div className="space-y-4">
-                        <button 
-                          onClick={() => handleTabChange('history')}
-                          className="w-full bg-primary text-white font-bold py-5 rounded-2xl hover:bg-primary/90 transition-colors shadow-xl shadow-primary/10 flex items-center justify-center gap-2"
-                        >
-                          <Clock className="w-5 h-5" />
-                          VIEW IN HISTORY
-                        </button>
-                        <button 
-                          onClick={() => setShowForm(false)}
-                          className="w-full bg-gray-100 text-dark font-bold py-5 rounded-2xl hover:bg-gray-200 transition-colors"
-                        >
-                          BACK TO GENIE HOME
-                        </button>
-                      </div>
+                      <p className="text-gray-500 mb-10 max-w-sm mx-auto">Your Genie will be assigned shortly. You can track the progress in your orders.</p>
+                      <button 
+                        onClick={() => setShowForm(false)}
+                        className="w-full bg-dark text-white font-bold py-5 rounded-2xl hover:bg-black transition-colors shadow-xl shadow-black/10"
+                      >
+                        Back to Genie Home
+                      </button>
                     </div>
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-8">
