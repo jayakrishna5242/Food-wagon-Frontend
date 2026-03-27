@@ -180,14 +180,7 @@ const DeliveryService: React.FC = () => {
               exit={{ opacity: 0, x: -20 }}
               className="max-w-2xl mx-auto"
             >
-              <button 
-                onClick={() => setShowForm(false)}
-                className="flex items-center gap-2 text-gray-500 font-bold text-sm mb-8 hover:text-dark transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5" />
-                BACK TO SERVICES
-              </button>
-
+             
               <div className="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
                 <div className="p-8 md:p-10">
                   <div className="mb-10">

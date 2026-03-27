@@ -192,7 +192,6 @@ const Profile: React.FC = () => {
               {user.name}
             </h1>
             <div className="flex items-center gap-2 mt-2">
-              <span className="px-2 py-0.5 bg-orange-100 text-primary text-[10px] font-black rounded-md uppercase tracking-wider">Pro Member</span>
               <p className="text-xs text-graytext font-medium">
                 {user.email}
               </p>
