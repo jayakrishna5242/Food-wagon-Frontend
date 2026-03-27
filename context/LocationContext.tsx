@@ -16,9 +16,8 @@ interface LocationContextType {
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
 export const LocationProvider = ({ children }: { children?: ReactNode }) => {
-  // Default to Bangalore for initial experience if nothing detected
-  const [city, setCity] = useState<string>('Bangalore');
-  const [address, setAddress] = useState<string>('Bangalore, India');
+  const [city, setCity] = useState<string>('Select Location');
+  const [address, setAddress] = useState<string>('Detecting your location...');
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

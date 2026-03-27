@@ -4,7 +4,7 @@ import { useAddresses } from '../context/AddressContext';
 import { useToast } from '../context/ToastContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchOrders, rateOrder } from '../services/api';
+import { fetchOrders, rateOrder, updateUser } from '../services/api';
 import { Order } from '../types';
 import AddressForm from '../components/AddressForm';
 import RestaurantCard from '../components/RestaurantCard';
@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-type Tab = 'orders' | 'profile' | 'addresses' | 'payments' | 'favorites';
+type Tab = 'menu' | 'orders' | 'profile' | 'addresses' | 'payments' | 'favorites';
 
 const tabs: { id: Tab; label: string; icon: any }[] = [
   { id: 'orders', label: 'Orders', icon: ShoppingBag },
@@ -43,18 +43,20 @@ const tabs: { id: Tab; label: string; icon: any }[] = [
 ];
 
 const Profile: React.FC = () => {
-  const { user, logout, isLoading: authLoading } = useAuth();
+  const { user, logout, login, isLoading: authLoading } = useAuth();
   const { addresses, addAddress, removeAddress } = useAddresses();
   const { favorites } = useFavorites();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'orders');
+  const [activeTab, setActiveTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'menu');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [showAllOrders, setShowAllOrders] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -125,7 +127,9 @@ const Profile: React.FC = () => {
     }
   }, [user]);
 
-  const handleUpdateProfile = () => {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleUpdateProfile = async () => {
     if (profileForm.name.trim().length < 3) {
       showToast('Name must be at least 3 characters', 'error');
       return;
@@ -134,255 +138,359 @@ const Profile: React.FC = () => {
       showToast('Phone number must be 10 digits', 'error');
       return;
     }
-    showToast('Profile updated successfully!', 'success');
+    
+    if (!user) return;
+
+    setIsUpdating(true);
+    try {
+      const updated = await updateUser(user.id, {
+        name: profileForm.name,
+        phone: profileForm.phone
+      });
+      login(updated);
+      showToast('Profile updated successfully!', 'success');
+    } catch (error) {
+      showToast('Failed to update profile', 'error');
+    } finally {
+      setIsUpdating(false);
+    }
   };
+
+  const [isAccountOpen, setIsAccountOpen] = useState(true);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  const faqs = [
+    { q: "How do I track my order?", a: "You can track your order in real-time from the 'Orders' section in your profile." },
+    { q: "What are the payment options?", a: "We accept all major credit/debit cards, UPI, and net banking." },
+    { q: "Can I cancel my order?", a: "Orders can be cancelled within 60 seconds of placement. After that, cancellation depends on the restaurant's acceptance." },
+    { q: "How do I add a new address?", a: "Go to 'Addresses' in your profile and click on 'Add New' to save a new delivery location." },
+    { q: "Is there a delivery fee?", a: "Delivery fees vary based on distance and order value. You can see the exact fee at checkout." }
+  ];
+
+  const menuItems = [
+    { id: 'addresses', label: 'Manage Address', icon: MapPin },
+    { id: 'favorites', label: 'My Favourites', icon: Heart },
+    { id: 'orders', label: 'My Orders', icon: ShoppingBag },
+    { id: 'payments', label: 'My Wallet', icon: CreditCard },
+    { id: 'profile', label: 'Change Phone Number', icon: Settings },
+    { id: 'delete', label: 'Delete My Account', icon: Trash2, color: 'text-red-500' },
+  ];
 
   if (!user) return null;
 
-  useEffect(() => {
-    const tab = searchParams.get('tab') as Tab;
-    if (tab && tabs.some(t => t.id === tab)) {
-      setActiveTab(tab);
-    }
-  }, [searchParams]);
-
   return (
-    <div className="min-h-screen bg-white py-12 px-4">
-      <div className="container mx-auto max-w-5xl">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-          <div className="flex items-center gap-6">
-            <div className="w-20 h-20 bg-orange-100 rounded-[2.5rem] flex items-center justify-center text-orange-500 shadow-sm">
-              <UserIcon className="w-10 h-10" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-1">Account</h1>
-              <div className="flex items-center gap-3 text-sm text-gray-500">
-                <span className="font-medium">{user.name}</span>
-                <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                <span className="font-medium">{user.email}</span>
-              </div>
+    <div className="min-h-screen bg-white pb-24">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-orange-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50 pointer-events-none"></div>
+      <div className="absolute top-40 left-0 w-48 h-48 bg-orange-100 rounded-full -ml-24 blur-3xl opacity-30 pointer-events-none"></div>
+
+      {/* Header */}
+      <div className="relative px-6 pt-12 pb-8">
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex-1">
+            <h1 className="text-3xl font-black text-dark uppercase tracking-tighter leading-none">
+              {user.name}
+            </h1>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="px-2 py-0.5 bg-orange-100 text-primary text-[10px] font-black rounded-md uppercase tracking-wider">Pro Member</span>
+              <p className="text-xs text-graytext font-medium">
+                {user.email}
+              </p>
             </div>
           </div>
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-50 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all font-bold text-sm uppercase tracking-widest group"
-          >
-            <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Logout
-          </button>
+          <div className="relative">
+            <div className="w-20 h-20 rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl rotate-3 hover:rotate-0 transition-all duration-500">
+              <img 
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
+                alt="Profile" 
+                className="w-full h-full object-cover bg-orange-50"
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-12">
-          {/* Sidebar Navigation */}
-          <div className="w-full md:w-64 space-y-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`w-full flex items-center gap-4 px-6 py-4 rounded-3xl transition-all font-bold text-sm ${
-                  activeTab === tab.id 
-                    ? 'bg-gray-900 text-white shadow-xl shadow-gray-900/10' 
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`} />
-                {tab.label}
-              </button>
-            ))}
+        {/* Stats Row */}
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-center">
+            <p className="text-xl font-black text-dark">{orders.length}</p>
+            <p className="text-[10px] text-graytext font-bold uppercase tracking-widest">Orders</p>
           </div>
-
-          {/* Content Area */}
-          <div className="flex-1">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                {activeTab === 'orders' && (
-                  <div className="space-y-8">
-                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Order History</h2>
-                    
-                    {loadingOrders ? (
-                      <div className="space-y-6">
-                         {[1,2,3].map(i => (
-                           <div key={i} className="h-32 bg-gray-50 rounded-3xl animate-pulse" />
-                         ))}
-                      </div>
-                    ) : orders.length === 0 ? (
-                      <div className="text-center py-20 bg-gray-50 rounded-[40px] border border-dashed border-gray-200">
-                         <ShoppingBag className="w-16 h-16 text-gray-200 mx-auto mb-6" />
-                         <h3 className="text-lg font-bold text-gray-900 mb-2">No orders yet</h3>
-                         <p className="text-sm text-gray-500 mb-8">Ready to taste something delicious?</p>
-                         <button 
-                           onClick={() => navigate('/')} 
-                           className="bg-orange-500 text-white font-bold py-4 px-10 rounded-2xl shadow-lg shadow-orange-500/20 hover:bg-orange-600 transition-all uppercase text-xs tracking-widest"
-                         >
-                            Browse Menu
-                         </button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {orders.map((order) => (
-                          <motion.div 
-                            key={order.id} 
-                            whileHover={{ y: -4 }}
-                            onClick={() => {
-                              setSelectedOrder(order);
-                              setIsOrderModalOpen(true);
-                            }}
-                            className="bg-white rounded-[32px] p-6 border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-orange-200 hover:shadow-xl hover:shadow-orange-500/5 transition-all cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-6">
-                              <div className="w-16 h-16 rounded-2xl bg-gray-50 overflow-hidden border border-gray-100 group-hover:scale-105 transition-transform">
-                                <img src={order.restaurantImageUrl || "https://picsum.photos/seed/food/200"} alt="" className="w-full h-full object-cover" />
-                              </div>
-                              <div>
-                                <h3 className="font-bold text-gray-900 text-lg group-hover:text-orange-500 transition-colors">{order.restaurantName}</h3>
-                                <div className="flex items-center gap-3 mt-1">
-                                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                                    {new Date(order.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
-                                  </span>
-                                  <span className="w-1 h-1 bg-gray-200 rounded-full" />
-                                  <span className="text-xs font-bold text-gray-900">₹{order.totalAmount}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-between md:justify-end gap-6">
-                              <div className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest ${
-                                order.status === 'DELIVERED' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'
-                              }`}>
-                                {order.status}
-                              </div>
-                              <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === 'favorites' && (
-                  <div className="space-y-8">
-                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Favorites</h2>
-                    {favorites.length === 0 ? (
-                      <div className="text-center py-20 bg-gray-50 rounded-[40px] border border-dashed border-gray-200">
-                        <Heart className="w-16 h-16 text-gray-200 mx-auto mb-6" />
-                        <h3 className="font-bold text-lg text-gray-900">No favorites yet</h3>
-                        <p className="text-sm text-gray-500 mt-2">Save your favorite spots for quick access.</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {favorites.map((restaurant) => <RestaurantCard key={restaurant.id} restaurant={restaurant} />)}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === 'addresses' && (
-                  <div className="space-y-8">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Addresses</h2>
-                      <button 
-                        onClick={() => setIsAddressModalOpen(true)} 
-                        className="bg-orange-500 text-white font-bold text-xs px-6 py-3 rounded-2xl hover:bg-orange-600 transition-all uppercase tracking-widest flex items-center gap-2"
-                      >
-                        <Plus className="w-4 h-4" /> Add New
-                      </button>
-                    </div>
-                    {addresses.length === 0 ? (
-                      <div className="text-center py-20 bg-gray-50 rounded-[40px] border border-dashed border-gray-200">
-                        <MapPin className="w-16 h-16 text-gray-200 mx-auto mb-6" />
-                        <h3 className="font-bold text-lg text-gray-900">No addresses</h3>
-                        <p className="text-sm text-gray-500 mt-2">Add an address to speed up your checkout.</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {addresses.map((addr) => (
-                          <div key={addr.id} className="bg-white p-8 rounded-[32px] border border-gray-100 hover:border-orange-500 hover:shadow-xl hover:shadow-orange-500/5 transition-all group relative">
-                            <div className="flex items-start gap-4">
-                              <div className="p-3 bg-gray-50 rounded-2xl text-gray-400 group-hover:bg-orange-100 group-hover:text-orange-500 transition-colors">
-                                {addr.type === 'Home' && <Home className="w-5 h-5" />}
-                                {addr.type === 'Work' && <Briefcase className="w-5 h-5" />}
-                                {addr.type === 'Other' && <MapPin className="w-5 h-5" />}
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-bold text-gray-900 mb-1">{addr.type}</h4>
-                                <p className="text-xs text-gray-500 leading-relaxed font-medium">{addr.flatNo}, {addr.area}, {addr.city}</p>
-                                <div className="mt-6 flex gap-4">
-                                   <button 
-                                     onClick={() => handleRemoveAddress(addr.id)} 
-                                     className="text-[10px] font-bold text-red-500 hover:text-red-700 uppercase tracking-widest transition-colors flex items-center gap-1.5"
-                                   >
-                                     <Trash2 className="w-3.5 h-3.5" /> Delete
-                                   </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === 'profile' && (
-                  <div className="space-y-8">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Settings</h2>
-                      <p className="text-gray-500 text-sm mt-1">Manage your personal information.</p>
-                    </div>
-                    
-                    <div className="max-w-md space-y-6">
-                       <div className="space-y-2">
-                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-4">Full Name</label>
-                          <input 
-                            type="text" 
-                            value={profileForm.name} 
-                            onChange={e => setProfileForm({...profileForm, name: e.target.value})}
-                            className="w-full bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none px-6 py-4 rounded-2xl font-bold text-sm transition-all" 
-                          />
-                       </div>
-                       <div className="space-y-2">
-                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-4">Email Address</label>
-                          <input type="email" defaultValue={user.email} className="w-full bg-gray-50 border border-transparent px-6 py-4 rounded-2xl font-bold text-sm text-gray-400 cursor-not-allowed" disabled />
-                       </div>
-                       <div className="space-y-2">
-                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-4">Phone Number</label>
-                          <input 
-                            type="tel" 
-                            value={profileForm.phone} 
-                            onChange={e => setProfileForm({...profileForm, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})}
-                            className="w-full bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none px-6 py-4 rounded-2xl font-bold text-sm transition-all" 
-                          />
-                       </div>
-                       <button 
-                        onClick={handleUpdateProfile}
-                        className="w-full bg-gray-900 text-white font-bold py-5 rounded-2xl shadow-xl shadow-gray-900/10 hover:bg-black transition-all uppercase text-xs tracking-widest mt-4"
-                       >
-                        Save Changes
-                       </button>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'payments' && (
-                   <div className="text-center py-20 bg-gray-50 rounded-[40px] border border-dashed border-gray-200">
-                      <CreditCard className="w-16 h-16 text-gray-200 mx-auto mb-6" />
-                      <h3 className="font-bold text-lg text-gray-900">No payments</h3>
-                      <p className="text-sm text-gray-500 mt-2">Your saved payment methods will appear here.</p>
-                   </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
+          <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-center">
+            <p className="text-xl font-black text-dark">{favorites.length}</p>
+            <p className="text-[10px] text-graytext font-bold uppercase tracking-widest">Favorites</p>
+          </div>
+          <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-center">
+            <p className="text-xl font-black text-dark">{addresses.length}</p>
+            <p className="text-[10px] text-graytext font-bold uppercase tracking-widest">Places</p>
           </div>
         </div>
       </div>
+
+      <div className="px-6">
+        <div className="h-[1px] bg-gray-100 w-full mb-8"></div>
+      </div>
+
+      {/* My Account Section */}
+      <div className="px-6 mb-4">
+        <button 
+          onClick={() => setIsAccountOpen(!isAccountOpen)}
+          className="w-full flex justify-between items-center py-4 group"
+        >
+          <h2 className="text-xl font-black text-dark tracking-tight group-hover:text-primary transition-colors">My Account</h2>
+          <motion.div
+            animate={{ rotate: isAccountOpen ? 0 : 180 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ChevronRight className="w-6 h-6 text-dark rotate-90" />
+          </motion.div>
+        </button>
+
+        <AnimatePresence>
+          {isAccountOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-1 py-2">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      if (item.id === 'delete') {
+                        setIsDeleteModalOpen(true);
+                      } else {
+                        handleTabChange(item.id as Tab);
+                      }
+                    }}
+                    className="w-full flex items-center justify-between py-4 group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <item.icon className={`w-5 h-5 ${item.color || 'text-gray-500'} group-hover:text-primary transition-colors`} />
+                      <span className="text-base font-medium text-dark group-hover:text-primary transition-colors">{item.label}</span>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Help & FAQs Section */}
+      <div className="px-6 mb-8">
+        <button 
+          onClick={() => setIsHelpOpen(!isHelpOpen)}
+          className="w-full flex justify-between items-center py-4 group border-t border-gray-100"
+        >
+          <h2 className="text-xl font-black text-dark tracking-tight group-hover:text-primary transition-colors">Help & FAQs</h2>
+          <motion.div
+            animate={{ rotate: isHelpOpen ? 90 : 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ChevronRight className="w-6 h-6 text-dark" />
+          </motion.div>
+        </button>
+
+        <AnimatePresence>
+          {isHelpOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-4 py-2">
+                {faqs.map((faq, index) => (
+                  <div key={index} className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <p className="font-bold text-dark text-sm mb-1">{faq.q}</p>
+                    <p className="text-xs text-graytext leading-relaxed">{faq.a}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Logout Button */}
+      <div className="px-6 mt-4">
+        <button 
+          onClick={handleLogout}
+          className="w-full py-4 bg-gray-50 rounded-xl flex items-center justify-center gap-2 text-red-500 font-bold border border-gray-100 hover:bg-red-50 transition-all"
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
+      </div>
+
+      {/* Active Tab Content Modal/Overlay */}
+      <AnimatePresence>
+        {activeTab !== 'menu' && (
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[110] bg-white overflow-y-auto"
+          >
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-8">
+                <button 
+                  onClick={() => handleTabChange('menu')}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-all"
+                >
+                  <ChevronRight className="w-6 h-6 rotate-180" />
+                </button>
+                <h2 className="text-2xl font-black text-dark tracking-tight">
+                  {tabs.find(t => t.id === activeTab)?.label}
+                </h2>
+              </div>
+
+              {activeTab === 'orders' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <p className="text-graytext font-medium">
+                      {showAllOrders ? 'All Orders' : 'Recent Orders'}
+                    </p>
+                    {orders.length > 3 && (
+                      <button 
+                        onClick={() => setShowAllOrders(!showAllOrders)}
+                        className="text-primary font-bold text-sm hover:underline"
+                      >
+                        {showAllOrders ? 'Show Less' : 'View All'}
+                      </button>
+                    )}
+                  </div>
+                  
+                  {loadingOrders ? (
+                    <div className="space-y-4">
+                      {[1,2,3].map(i => <div key={i} className="h-32 bg-gray-50 rounded-2xl animate-pulse"></div>)}
+                    </div>
+                  ) : orders.length === 0 ? (
+                    <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                      <ShoppingBag className="w-12 h-12 text-gray-200 mx-auto mb-2" />
+                      <p className="text-graytext font-medium">No orders yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {(showAllOrders ? orders : orders.slice(0, 3)).map((order) => (
+                        <div 
+                          key={order.id}
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setIsOrderModalOpen(true);
+                          }}
+                          className="p-4 border border-gray-100 rounded-2xl flex items-center gap-4 bg-white shadow-sm hover:border-primary transition-all cursor-pointer"
+                        >
+                          <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
+                            <img src={order.restaurantImageUrl || "https://picsum.photos/seed/food/200"} alt="" className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-dark line-clamp-1">{order.restaurantName}</p>
+                            <p className="text-xs text-graytext mt-0.5">₹{order.totalAmount} • {new Date(order.date).toLocaleDateString()}</p>
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className={`w-1.5 h-1.5 rounded-full ${order.status === 'DELIVERED' ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{order.status}</span>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-gray-300" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'favorites' && (
+                <div className="space-y-6">
+                  {favorites.length === 0 ? (
+                    <div className="text-center py-20">
+                      <Heart className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+                      <p className="text-graytext font-medium">No favorites yet</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-6">
+                      {favorites.map((restaurant) => <RestaurantCard key={restaurant.id} restaurant={restaurant} />)}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'addresses' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <p className="text-graytext font-medium">Saved Addresses</p>
+                    <button 
+                      onClick={() => setIsAddressModalOpen(true)}
+                      className="text-primary font-bold text-sm flex items-center gap-1"
+                    >
+                      <Plus className="w-4 h-4" /> Add New
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {addresses.map((addr) => (
+                      <div key={addr.id} className="p-4 border border-gray-100 rounded-2xl flex items-start gap-4">
+                        <div className="p-2 bg-orange-50 text-primary rounded-lg">
+                          {addr.type === 'Home' ? <Home className="w-5 h-5" /> : <MapPin className="w-5 h-5" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-dark">{addr.type}</p>
+                          <p className="text-sm text-graytext">{addr.flatNo}, {addr.area}, {addr.city}</p>
+                        </div>
+                        <button onClick={() => handleRemoveAddress(addr.id)} className="text-red-500 p-2">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'profile' && (
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Full Name</label>
+                      <input 
+                        type="text" 
+                        value={profileForm.name}
+                        onChange={e => setProfileForm({...profileForm, name: e.target.value})}
+                        className="w-full p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Phone Number</label>
+                      <input 
+                        type="tel" 
+                        value={profileForm.phone}
+                        onChange={e => setProfileForm({...profileForm, phone: e.target.value})}
+                        className="w-full p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                      />
+                    </div>
+                    <button 
+                      onClick={handleUpdateProfile}
+                      disabled={isUpdating}
+                      className="w-full bg-primary text-white font-black py-4 rounded-xl shadow-lg shadow-orange-500/20 mt-4 disabled:opacity-70 flex items-center justify-center gap-2"
+                    >
+                      {isUpdating ? 'Updating...' : 'Update Profile'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'payments' && (
+                <div className="text-center py-20">
+                  <CreditCard className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+                  <p className="text-graytext font-medium">No payment methods added</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AddressForm isOpen={isAddressModalOpen} onClose={() => setIsAddressModalOpen(false)} onSave={(newAddr) => {
           addAddress(newAddr);
@@ -528,6 +636,44 @@ const Profile: React.FC = () => {
                   className="w-full bg-primary text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#e26e10] transition-all uppercase tracking-widest text-sm"
                 >
                   Reorder from this restaurant
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* Delete Account Modal */}
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 text-center shadow-2xl"
+            >
+              <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Trash2 className="w-10 h-10" />
+              </div>
+              <h3 className="text-2xl font-black text-dark tracking-tight mb-2">Delete Account?</h3>
+              <p className="text-graytext text-sm font-medium mb-8 leading-relaxed">
+                This action is permanent and cannot be undone. All your orders, favorites, and addresses will be lost.
+              </p>
+              <div className="space-y-3">
+                <button 
+                  onClick={() => {
+                    showToast('Account deletion request submitted', 'info');
+                    setIsDeleteModalOpen(false);
+                  }}
+                  className="w-full py-4 bg-red-500 text-white font-black rounded-2xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
+                >
+                  Yes, Delete My Account
+                </button>
+                <button 
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="w-full py-4 bg-gray-50 text-dark font-black rounded-2xl hover:bg-gray-100 transition-all"
+                >
+                  No, Keep It
                 </button>
               </div>
             </motion.div>

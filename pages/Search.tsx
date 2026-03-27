@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search as SearchIcon, X, ChevronRight, ArrowLeft, History } from 'lucide-react';
+import { Search as SearchIcon, X, ChevronRight, ArrowLeft, History, Star } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { searchGlobal } from '../services/api';
 import { Restaurant, MenuItem } from '../types';

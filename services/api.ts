@@ -156,6 +156,32 @@ export const registerUser = async (fullName: string, email: string, phone: strin
   return { user: newUser };
 };
 
+export const updateUser = async (userId: number, updates: Partial<User>): Promise<User> => {
+  await new Promise(resolve => setTimeout(resolve, 800));
+  const users = getUsersDB();
+  let updatedUser: User | null = null;
+  
+  const updated = users.map(u => {
+    if (u.id === userId) {
+      updatedUser = { ...u, ...updates };
+      return updatedUser;
+    }
+    return u;
+  });
+  
+  if (!updatedUser) throw new Error('User not found');
+  
+  saveUsersDB(updated);
+  
+  // Also update stored user if it's the current one
+  const current = getStoredUser();
+  if (current && current.id === userId) {
+    storeUser(updatedUser);
+  }
+  
+  return updatedUser;
+};
+
 export const generateOtp = async (email: string): Promise<{ message: string }> => {
   return { message: 'OTP sent to your email (Mock)' };
 };

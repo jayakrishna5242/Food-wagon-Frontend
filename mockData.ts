@@ -163,6 +163,172 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     location: "Colaba",
     city: "Mumbai",
     isPureVeg: false
+  },
+  {
+    id: 13,
+    name: "Shah Ghouse",
+    imageUrl: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=1974&auto=format&fit=crop",
+    rating: 4.5,
+    deliveryTime: "35-45 mins",
+    costForTwo: "₹500 for two",
+    cuisines: ["Biryani", "North Indian", "Mughlai"],
+    location: "Gachibowli",
+    city: "Hyderabad",
+    isPureVeg: false,
+    aggregatedDiscountInfo: {
+      header: "20% OFF",
+      subHeader: "UPTO ₹120"
+    }
+  },
+  {
+    id: 14,
+    name: "Meghana Foods",
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    rating: 4.4,
+    deliveryTime: "25-35 mins",
+    costForTwo: "₹550 for two",
+    cuisines: ["Biryani", "Andhra", "South Indian"],
+    location: "Koramangala",
+    city: "Bangalore",
+    isPureVeg: false
+  },
+  {
+    id: 15,
+    name: "Truffles",
+    imageUrl: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=2072&auto=format&fit=crop",
+    rating: 4.6,
+    deliveryTime: "30-40 mins",
+    costForTwo: "₹800 for two",
+    cuisines: ["Burgers", "American", "Continental"],
+    location: "Indiranagar",
+    city: "Bangalore",
+    isPureVeg: false,
+    isNew: true
+  },
+  {
+    id: 16,
+    name: "Licious - Meat & Seafood",
+    imageUrl: "https://images.unsplash.com/photo-1607623273573-748d80bc11d3?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.8,
+    deliveryTime: "45-60 mins",
+    costForTwo: "₹1000 for two",
+    cuisines: ["Meat", "Seafood", "Fresh Meat"],
+    location: "Whitefield",
+    city: "Bangalore",
+    isPureVeg: false,
+    aggregatedDiscountInfo: {
+      header: "FREE DELIVERY",
+      subHeader: "ON FIRST ORDER"
+    }
+  },
+  {
+    id: 17,
+    name: "TenderCuts",
+    imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=2069&auto=format&fit=crop",
+    rating: 4.7,
+    deliveryTime: "40-55 mins",
+    costForTwo: "₹900 for two",
+    cuisines: ["Meat", "Poultry", "Eggs"],
+    location: "Banjara Hills",
+    city: "Hyderabad",
+    isPureVeg: false
+  },
+  {
+    id: 18,
+    name: "Pista House",
+    imageUrl: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.3,
+    deliveryTime: "30-40 mins",
+    costForTwo: "₹450 for two",
+    cuisines: ["Biryani", "Haleem", "Bakery"],
+    location: "Charminar",
+    city: "Hyderabad",
+    isPureVeg: false
+  },
+  {
+    id: 19,
+    name: "Corner House Ice Creams",
+    imageUrl: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=1974&auto=format&fit=crop",
+    rating: 4.9,
+    deliveryTime: "15-25 mins",
+    costForTwo: "₹400 for two",
+    cuisines: ["Desserts", "Ice Cream"],
+    location: "Jayanagar",
+    city: "Bangalore",
+    isPureVeg: true
+  },
+  {
+    id: 20,
+    name: "Mandi @ 36",
+    imageUrl: "https://images.unsplash.com/photo-1544124499-58912cbddaad?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.2,
+    deliveryTime: "40-50 mins",
+    costForTwo: "₹1200 for two",
+    cuisines: ["Arabian", "Mandi", "Middle Eastern"],
+    location: "Jubilee Hills",
+    city: "Hyderabad",
+    isPureVeg: false,
+    isNew: true
+  },
+  {
+    id: 21,
+    name: "FreshToHome",
+    imageUrl: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.5,
+    deliveryTime: "50-70 mins",
+    costForTwo: "₹800 for two",
+    cuisines: ["Meat", "Seafood", "Groceries"],
+    location: "HSR Layout",
+    city: "Bangalore",
+    isPureVeg: false
+  },
+  {
+    id: 22,
+    name: "Bawarchi",
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    rating: 4.6,
+    deliveryTime: "30-40 mins",
+    costForTwo: "₹500 for two",
+    cuisines: ["Biryani", "Hyderabadi", "Tandoori"],
+    location: "RTC X Roads",
+    city: "Hyderabad",
+    isPureVeg: false
+  },
+  {
+    id: 23,
+    name: "MTR - Mavalli Tiffin Rooms",
+    imageUrl: "https://images.unsplash.com/photo-1630383249896-424e482df921?q=80&w=1974&auto=format&fit=crop",
+    rating: 4.7,
+    deliveryTime: "20-30 mins",
+    costForTwo: "₹300 for two",
+    cuisines: ["South Indian", "Karnataka"],
+    location: "Lalbagh Road",
+    city: "Bangalore",
+    isPureVeg: true
+  },
+  {
+    id: 24,
+    name: "Meatigo",
+    imageUrl: "https://images.unsplash.com/photo-1607623273573-748d80bc11d3?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.8,
+    deliveryTime: "45-60 mins",
+    costForTwo: "₹1200 for two",
+    cuisines: ["Gourmet Meat", "Cold Cuts", "Seafood"],
+    location: "Indiranagar",
+    city: "Bangalore",
+    isPureVeg: false
+  },
+  {
+    id: 25,
+    name: "The Meat & Eat Store",
+    imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=2069&auto=format&fit=crop",
+    rating: 4.4,
+    deliveryTime: "40-50 mins",
+    costForTwo: "₹900 for two",
+    cuisines: ["Fresh Meat", "Poultry", "Marinades"],
+    location: "Kukatpally",
+    city: "Hyderabad",
+    isPureVeg: false
   }
 ];
 
@@ -374,6 +540,160 @@ export const MOCK_MENU_ITEMS: MenuItem[] = [
     isVeg: false,
     category: "Kebabs",
     restaurantId: 12,
+    inStock: true
+  },
+  {
+    id: 1301,
+    name: "Special Chicken Biryani",
+    description: "Shah Ghouse's world-famous Hyderabadi chicken biryani.",
+    price: 350,
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    isVeg: false,
+    category: "Biryani",
+    restaurantId: 13,
+    inStock: true
+  },
+  {
+    id: 1401,
+    name: "Meghana Special Chicken Biryani",
+    description: "Boneless chicken biryani with spicy Andhra flavors.",
+    price: 380,
+    imageUrl: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=1974&auto=format&fit=crop",
+    isVeg: false,
+    category: "Biryani",
+    restaurantId: 14,
+    inStock: true
+  },
+  {
+    id: 1501,
+    name: "All American Cheese Burger",
+    description: "Classic beef patty with double cheese and pickles.",
+    price: 320,
+    imageUrl: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1899&auto=format&fit=crop",
+    isVeg: false,
+    category: "Burgers",
+    restaurantId: 15,
+    inStock: true
+  },
+  {
+    id: 1601,
+    name: "Chicken Breast - Boneless",
+    description: "Fresh, tender chicken breast, perfect for grilling.",
+    price: 250,
+    imageUrl: "https://images.unsplash.com/photo-1607623273573-748d80bc11d3?q=80&w=2070&auto=format&fit=crop",
+    isVeg: false,
+    category: "Poultry",
+    restaurantId: 16,
+    inStock: true
+  },
+  {
+    id: 1602,
+    name: "Atlantic Salmon Fillet",
+    description: "Premium quality salmon imported from Norway.",
+    price: 1200,
+    imageUrl: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=2070&auto=format&fit=crop",
+    isVeg: false,
+    category: "Seafood",
+    restaurantId: 16,
+    inStock: true
+  },
+  {
+    id: 1701,
+    name: "Farm Fresh Eggs - Pack of 12",
+    description: "Antibiotic-free, farm-fresh white eggs.",
+    price: 120,
+    imageUrl: "https://images.unsplash.com/photo-1506976785307-8732e854ad03?q=80&w=1974&auto=format&fit=crop",
+    isVeg: false,
+    category: "Eggs",
+    restaurantId: 17,
+    inStock: true
+  },
+  {
+    id: 1801,
+    name: "Mutton Haleem",
+    description: "Traditional Hyderabadi Haleem made with pure ghee and tender mutton.",
+    price: 280,
+    imageUrl: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?q=80&w=2070&auto=format&fit=crop",
+    isVeg: false,
+    category: "Specialties",
+    restaurantId: 18,
+    inStock: true
+  },
+  {
+    id: 1901,
+    name: "Death by Chocolate",
+    description: "Layers of chocolate cake, ice cream, fudge, and nuts.",
+    price: 290,
+    imageUrl: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=1974&auto=format&fit=crop",
+    isVeg: true,
+    category: "Ice Cream Sundaes",
+    restaurantId: 19,
+    inStock: true
+  },
+  {
+    id: 2001,
+    name: "Chicken Mandi",
+    description: "Traditional Arabian rice dish served with roasted chicken and spicy sauce.",
+    price: 650,
+    imageUrl: "https://images.unsplash.com/photo-1544124499-58912cbddaad?q=80&w=2070&auto=format&fit=crop",
+    isVeg: false,
+    category: "Mandi",
+    restaurantId: 20,
+    inStock: true
+  },
+  {
+    id: 2101,
+    name: "Fresh Prawns - Medium",
+    description: "Cleaned and deveined medium-sized prawns.",
+    price: 450,
+    imageUrl: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?q=80&w=1974&auto=format&fit=crop",
+    isVeg: false,
+    category: "Seafood",
+    restaurantId: 21,
+    inStock: true
+  },
+  {
+    id: 2201,
+    name: "Bawarchi Special Chicken Biryani",
+    description: "The legendary Hyderabadi chicken biryani from RTC X Roads.",
+    price: 350,
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    isVeg: false,
+    category: "Biryani",
+    restaurantId: 22,
+    inStock: true
+  },
+  {
+    id: 2301,
+    name: "MTR Rava Idli",
+    description: "The original Rava Idli invented by MTR during WWII.",
+    price: 120,
+    imageUrl: "https://images.unsplash.com/photo-1630383249896-424e482df921?q=80&w=1974&auto=format&fit=crop",
+    isVeg: true,
+    category: "Breakfast",
+    restaurantId: 23,
+    inStock: true
+  },
+  {
+    id: 2401,
+    name: "Gourmet Chicken Breast",
+    description: "Premium quality boneless chicken breast.",
+    price: 450,
+    imageUrl: "https://images.unsplash.com/photo-1607623273573-748d80bc11d3?q=80&w=2070&auto=format&fit=crop",
+    isVeg: false,
+    category: "Meat",
+    restaurantId: 24,
+    inStock: true
+  },
+  {
+    id: 2501,
+    name: "Fresh Farm Chicken",
+    description: "Freshly cut chicken delivered straight to your home.",
+    price: 300,
+    imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=2069&auto=format&fit=crop",
+    isVeg: false,
+    category: "Poultry",
+    restaurantId: 25,
     inStock: true
   }
 ];

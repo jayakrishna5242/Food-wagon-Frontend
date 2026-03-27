@@ -3,7 +3,8 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
-  Search, 
+  Utensils,
+  Truck,
   ShoppingBag, 
   User, 
   LayoutDashboard, 
@@ -32,7 +33,8 @@ const BottomNav: React.FC = () => {
 
   let navItems = [
     { label: 'Home', icon: Home, path: '/' },
-    { label: 'Search', icon: Search, path: '/search' },
+    { label: 'Food', icon: Utensils, path: '/search' },
+    { label: 'Pickups', icon: Truck, path: '/delivery-service' },
     { label: 'Cart', icon: ShoppingBag, path: '/cart', badge: cartCount },
     { label: 'Account', icon: User, path: user ? (user.role === 'partner' ? '/partner/dashboard' : user.role === 'admin' ? '/admin/dashboard' : user.role === 'delivery' ? '/delivery/dashboard' : '/profile') : '/login' },
   ];
@@ -56,7 +58,7 @@ const BottomNav: React.FC = () => {
   } else if (isDelivery) {
     navItems = [
       { label: 'Home', icon: Home, path: '/' },
-      { label: 'Trips', icon: Navigation, path: '/delivery/dashboard' },
+      { label: 'Pickups', icon: Truck, path: '/delivery/dashboard' },
       { label: 'History', icon: Clock, path: '/delivery/dashboard?tab=history' },
       { label: 'Profile', icon: User, path: '/profile' },
     ];

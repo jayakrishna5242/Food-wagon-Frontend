@@ -11,7 +11,6 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
 import Search from './pages/Search';
-import Partner from './pages/Partner';
 import PartnerDashboard from './pages/PartnerDashboard';
 import AboutUs from './pages/AboutUs';
 import OrderRating from './pages/OrderRating';
@@ -22,10 +21,12 @@ import { AddressProvider } from './context/AddressContext';
 import { ToastProvider } from './context/ToastContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 
-import CartBottomSheet from './components/CartBottomSheet';
 import AdminDashboard from './pages/AdminDashboard';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import JoinWithUs from './pages/JoinWithUs';
+import FreshStores from './pages/FreshStores';
+import Supermarket from './pages/Supermarket';
+import DeliveryService from './pages/DeliveryService';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
@@ -63,7 +64,6 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
       </main>
       {!shouldHide && <Footer />}
       {!shouldHide && <BottomNav />}
-      <CartBottomSheet />
     </div>
   );
 };
@@ -86,11 +86,13 @@ const App: React.FC = () => {
                       <Route path="/login" element={<Login />} />
                       <Route path="/forgot-password" element={<ForgotPassword />} />
                       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                      <Route path="/partner" element={<Partner />} />
                       <Route path="/partner/dashboard" element={<ProtectedRoute allowedRoles={['PARTNER']}><PartnerDashboard /></ProtectedRoute>} />
                       <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
                       <Route path="/delivery/dashboard" element={<ProtectedRoute allowedRoles={['DELIVERY']}><DeliveryDashboard /></ProtectedRoute>} />
                       <Route path="/join-us" element={<JoinWithUs />} />
+                      <Route path="/fresh-stores" element={<FreshStores />} />
+                      <Route path="/supermarket" element={<Supermarket />} />
+                      <Route path="/delivery-service" element={<DeliveryService />} />
                       <Route path="/about" element={<AboutUs />} />
                       <Route path="/order-rating/:orderId" element={<OrderRating />} />
                     </Routes>

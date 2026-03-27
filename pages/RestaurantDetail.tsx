@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, Clock, MapPin, Search, Heart, ArrowLeft } from 'lucide-react';
 import MenuItem from '../components/MenuItem';
@@ -16,6 +16,7 @@ const RestaurantDetail: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
   
   const { toggleFavorite, isFavorite } = useFavorites();
 
@@ -40,6 +41,32 @@ const RestaurantDetail: React.FC = () => {
     };
     loadData();
   }, [id]);
+
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '-100px 0px -70% 0px',
+      threshold: 0
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const categoryId = entry.target.id.replace('category-', '');
+          setActiveCategory(categoryId);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Observe all category sections
+    Object.values(categoryRefs.current).forEach(ref => {
+      if (ref) observer.observe(ref as Element);
+    });
+
+    return () => observer.disconnect();
+  }, [menuItems, searchQuery]);
 
   if (loading) return <div className="h-screen flex items-center justify-center font-bold text-primary animate-pulse">Loading menu...</div>;
   if (!restaurant) return (
@@ -83,120 +110,140 @@ const RestaurantDetail: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white pb-24 md:pb-8">
-      {/* Hero Section with Image */}
-      <div className="relative h-48 md:h-64 overflow-hidden">
-        <img 
-          src={restaurant.image} 
-          alt={restaurant.name} 
-          className="w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+    <div className="min-h-screen bg-gray-50 pb-24 md:pb-8">
+      <div className="container mx-auto px-4 max-w-3xl pt-4 md:pt-8">
         
-        <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
+        {/* Top Navigation Row */}
+        <div className="flex items-center justify-between mb-4">
           <motion.button 
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ x: -4 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => navigate(-1)}
-            className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30"
+            className="flex items-center gap-2 text-dark hover:text-primary transition-colors font-bold text-xs md:text-sm bg-white px-3 md:px-4 py-2 rounded-full shadow-sm"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
           </motion.button>
           
-          <motion.button 
-            whileTap={{ scale: 0.9 }}
-            onClick={() => toggleFavorite(restaurant)}
-            className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30"
-          >
-            <Heart className={`w-5 h-5 ${favorited ? 'fill-orange-500 text-orange-500' : ''}`} />
-          </motion.button>
+          {/* Breadcrumb - Simplified */}
+          <div className="text-[9px] md:text-[10px] uppercase tracking-widest font-black text-gray-400 truncate max-w-[150px] md:max-w-none">
+            {restaurant.location} / {restaurant.name}
+          </div>
         </div>
 
-        <div className="absolute bottom-6 left-6 right-6">
-          <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight mb-1">{restaurant.name}</h1>
-          <p className="text-white/80 text-sm md:text-base font-medium">{restaurant.cuisines.join(', ')}</p>
-        </div>
-      </div>
+        {/* Restaurant Header Info */}
+        <div className="bg-white rounded-2xl md:rounded-[24px] p-4 md:p-8 shadow-sm mb-6 md:mb-8 border border-gray-100">
+            <div className="flex justify-between items-start gap-3 md:gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+                  <h1 className="text-lg md:text-3xl font-black text-dark tracking-tight truncate">{restaurant.name}</h1>
+                  <motion.button 
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => toggleFavorite(restaurant)}
+                    className="p-1 md:p-2 hover:bg-orange-50 rounded-full transition-all flex-shrink-0"
+                    title={favorited ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <Heart className={`w-4 h-4 md:w-6 md:h-6 transition-colors ${favorited ? 'fill-primary text-primary' : 'text-gray-300'}`} />
+                  </motion.button>
+                </div>
+                <p className="text-[10px] md:text-sm font-semibold text-graytext mb-2 md:mb-3 truncate">{restaurant.cuisines.join(', ')}</p>
+                <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-sm text-graytext">
+                   <div className="bg-gray-100 p-0.5 md:p-1 rounded">
+                    <MapPin className="w-2.5 h-2.5 md:w-4 md:h-4" />
+                   </div>
+                   <span className="font-medium truncate">{restaurant.location}, 2.5 km</span>
+                </div>
+              </div>
+              
+              <div className="border border-gray-100 rounded-lg md:rounded-xl p-1.5 md:p-3 flex flex-col items-center justify-center shadow-sm min-w-[50px] md:min-w-[80px] bg-white flex-shrink-0">
+                 <div className="flex items-center gap-0.5 md:gap-1 font-black text-green-700 border-b border-gray-100 pb-1 md:pb-2 mb-1 md:mb-2 w-full justify-center text-xs md:text-base">
+                   <Star className="w-2.5 h-2.5 md:w-4 md:h-4 fill-green-700" />
+                   <span>{restaurant.rating > 0 ? restaurant.rating : '--'}</span>
+                 </div>
+                 <span className="text-[7px] md:text-[10px] text-graytext font-black tracking-tight uppercase text-center">{restaurant.ratingCount > 0 ? `${restaurant.ratingCount}+` : 'No'} ratings</span>
+              </div>
+            </div>
 
-      <div className="container mx-auto px-4 max-w-3xl -mt-4 relative z-10">
-        {/* Quick Info Card */}
-        <div className="bg-white rounded-3xl p-6 shadow-xl shadow-gray-200/50 border border-gray-100 flex items-center justify-between mb-8">
-          <div className="flex flex-col items-center gap-1 border-r border-gray-100 flex-1">
-            <div className="flex items-center gap-1 text-orange-500 font-bold">
-              <Star className="w-4 h-4 fill-orange-500" />
-              <span>{restaurant.rating || '--'}</span>
-            </div>
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{restaurant.ratingCount}+ Ratings</span>
-          </div>
-          
-          <div className="flex flex-col items-center gap-1 border-r border-gray-100 flex-1">
-            <div className="flex items-center gap-1 text-gray-900 font-bold">
-              <Clock className="w-4 h-4" />
-              <span>{restaurant.deliveryTime}</span>
-            </div>
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Delivery</span>
-          </div>
+            <div className="border-t border-dashed border-gray-200 my-4 md:my-6"></div>
 
-          <div className="flex flex-col items-center gap-1 flex-1">
-            <div className="flex items-center gap-1 text-gray-900 font-bold">
-              <span className="text-lg">₹</span>
-              <span>{restaurant.costForTwo}</span>
+            <div className="flex items-center gap-6 md:gap-8">
+               <div className="flex items-center gap-2 md:gap-3 text-dark font-black text-xs md:text-sm">
+                 <div className="bg-gray-100 p-1 md:p-1.5 rounded-lg">
+                    <Clock className="w-4 h-4 md:w-5 md:h-5" />
+                 </div>
+                 <span>{restaurant.deliveryTime}</span>
+               </div>
+               <div className="flex items-center gap-2 md:gap-3 text-dark font-black text-xs md:text-sm">
+                 <div className="bg-gray-100 p-1 md:p-1.5 rounded-lg flex items-center justify-center w-6 h-6 md:w-8 md:h-8">
+                    <span className="text-base md:text-lg">₹</span>
+                 </div>
+                 <span>{restaurant.costForTwo}</span>
+               </div>
             </div>
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">For Two</span>
-          </div>
         </div>
 
         {/* Menu Search */}
-        <div className="relative mb-8">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input 
-            type="text" 
-            placeholder="Search in menu..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-orange-500/20 transition-all"
-          />
+        <div className="text-center mb-10">
+           <p className="text-[10px] font-black tracking-[0.2em] text-gray-400 mb-6 uppercase">Explorable Menu</p>
+           <motion.div 
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="relative group max-w-md mx-auto"
+           >
+             <input 
+               type="text" 
+               placeholder="Search for your favorites..." 
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+               className="w-full bg-white border border-gray-200 rounded-2xl py-3 md:py-4 px-10 md:px-12 text-xs md:text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm group-hover:shadow-md"
+             />
+             <Search className="absolute left-3.5 md:left-4 top-3 md:top-4 text-gray-400 w-4 h-4 md:w-5 md:h-5 group-hover:text-primary transition-colors" />
+           </motion.div>
         </div>
 
         {/* Category Navigation */}
         {!searchQuery && categories.length > 1 && (
-          <div className="sticky top-16 z-30 bg-white/80 backdrop-blur-md py-4 -mx-4 px-4 mb-8 overflow-x-auto scrollbar-hide flex gap-3 border-b border-gray-50">
+          <div className="sticky top-0 z-30 bg-gray-50/80 backdrop-blur-md py-4 -mx-4 px-4 mb-6 overflow-x-auto no-scrollbar flex gap-2 border-b border-gray-100">
             {categories.map((category) => (
-              <button
+              <motion.button
                 key={category}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => scrollToCategory(category)}
-                className={`flex-shrink-0 px-5 py-2 rounded-full text-xs font-bold transition-all ${
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${
                   activeCategory === category 
-                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                    : 'bg-white text-gray-400 hover:text-dark border border-gray-100'
                 }`}
               >
                 {category}
-              </button>
+              </motion.button>
             ))}
           </div>
         )}
 
-        {/* Menu Items */}
-        <div className="space-y-12">
+        {/* Menu Categories */}
+        <div className="space-y-6">
           {categories.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-8 h-8 text-gray-300" />
-              </div>
-              <p className="text-gray-400 font-bold">No items found</p>
+            <div className="text-center py-20 bg-white rounded-3xl border border-gray-100">
+              <Search className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+              <p className="text-gray-400 font-bold">No items found matching "{searchQuery}"</p>
             </div>
           ) : (
             categories.map((category) => {
               const itemsInCategory = filteredItems.filter(item => item.category === category);
               return (
-                <div key={category} id={`category-${category}`} className="scroll-mt-32">
-                  <div className="flex items-center gap-4 mb-6">
-                    <h3 className="font-bold text-xl text-gray-900">{category}</h3>
-                    <div className="h-px bg-gray-100 flex-1" />
-                    <span className="text-xs font-bold text-gray-400">{itemsInCategory.length} items</span>
+                <div 
+                  key={category} 
+                  id={`category-${category}`}
+                  ref={el => categoryRefs.current[category] = el}
+                  className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm border border-gray-100 overflow-hidden"
+                >
+                  <div className="flex justify-between items-center mb-4 border-b border-gray-50 pb-4">
+                    <h3 className="font-black text-lg md:text-xl text-dark tracking-tight">{category} <span className="text-gray-300 ml-1">{itemsInCategory.length}</span></h3>
                   </div>
-                  <div className="space-y-8">
+                  <div className="divide-y divide-gray-50">
                      {itemsInCategory.map(item => (
                        <MenuItem key={item.id} item={item} />
                      ))}
