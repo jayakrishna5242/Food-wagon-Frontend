@@ -64,7 +64,7 @@ const BottomNav: React.FC = () => {
   }
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-3 z-[100] flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-4 z-[100] flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,0.02)]">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path || (item.path.includes('?') && location.pathname + location.search === item.path);
         
@@ -72,20 +72,17 @@ const BottomNav: React.FC = () => {
           <Link 
             key={item.path} 
             to={item.path} 
-            className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-gray-400'}`}
+            className={`flex flex-col items-center gap-1.5 transition-colors ${isActive ? 'text-primary' : 'text-gray-300'}`}
           >
-            <motion.div 
-              whileTap={{ scale: 0.8 }}
-              className="relative"
-            >
-              <item.icon className={`w-6 h-6 ${isActive ? 'fill-primary/10' : ''}`} />
+            <div className="relative">
+              <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
               {item.badge !== undefined && item.badge > 0 && (
-                <span className="absolute -top-1.5 -right-2 bg-secondary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                <span className="absolute -top-1 -right-1 bg-primary text-white text-[7px] font-black w-3.5 h-3.5 flex items-center justify-center rounded-full">
                   {item.badge}
                 </span>
               )}
-            </motion.div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-primary' : 'text-gray-400'}`}>
+            </div>
+            <span className={`text-[8px] font-black uppercase tracking-[0.15em] ${isActive ? 'text-primary' : 'text-gray-300'}`}>
               {item.label}
             </span>
           </Link>
