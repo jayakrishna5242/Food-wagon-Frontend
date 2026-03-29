@@ -1,10 +1,12 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Store, MapPin, Star, Clock } from 'lucide-react';
+import { ArrowLeft, Store, MapPin, Star, Clock, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 
 const FreshStores: React.FC = () => {
+  const { cartCount } = useCart();
   const categories = [
     { name: 'Chicken', image: 'https://picsum.photos/seed/chicken/400/300' },
     { name: 'Fish', image: 'https://picsum.photos/seed/fish/400/300' },
@@ -27,7 +29,15 @@ const FreshStores: React.FC = () => {
           <Link to="/" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <ArrowLeft className="w-6 h-6 text-dark" />
           </Link>
-          <h1 className="text-xl font-bold text-dark">Fresh Stores</h1>
+          <h1 className="text-xl font-bold text-dark flex-grow">Fresh Stores</h1>
+          <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <ShoppingBag className="w-6 h-6 text-dark" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
         </div>
       </div>
 

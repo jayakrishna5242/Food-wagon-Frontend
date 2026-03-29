@@ -14,8 +14,9 @@ const Home: React.FC = () => {
       title: 'Food',
       subtitle: 'UP TO 20% OFF',
       icon: Utensils,
+      image: 'https://picsum.photos/seed/food-delivery/800/800',
       link: '/restaurants',
-      gradient: 'from-orange-500 to-red-600',
+      gradient: 'from-orange-600/90 to-red-700/90',
       actionText: 'ORDER NOW'
     },
     {
@@ -23,8 +24,9 @@ const Home: React.FC = () => {
       title: 'Stores',
       subtitle: 'CLEAN & FRESH',
       icon: Store,
+      image: 'https://picsum.photos/seed/fresh-grocery/800/800',
       link: '/fresh-stores',
-      gradient: 'from-emerald-500 to-teal-600',
+      gradient: 'from-emerald-600/90 to-teal-700/90',
       actionText: 'SHOP NOW'
     },
     {
@@ -32,8 +34,9 @@ const Home: React.FC = () => {
       title: 'Mart',
       subtitle: 'GROCERY DELIVERY',
       icon: ShoppingBag,
+      image: 'https://picsum.photos/seed/mart-shopping/800/800',
       link: '/supermarket',
-      gradient: 'from-blue-500 to-indigo-600',
+      gradient: 'from-blue-600/90 to-indigo-700/90',
       actionText: 'ORDER NOW'
     },
     {
@@ -41,8 +44,9 @@ const Home: React.FC = () => {
       title: 'Genie',
       subtitle: 'SEND & RECEIVE',
       icon: Bike,
+      image: 'https://picsum.photos/seed/delivery-bike/800/800',
       link: '/delivery-service',
-      gradient: 'from-pink-500 to-rose-600',
+      gradient: 'from-pink-600/90 to-rose-700/90',
       actionText: 'BOOK NOW'
     }
   ];
@@ -70,20 +74,36 @@ const Home: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -8, scale: 1.02 }}
-                className={`relative overflow-hidden p-8 h-60 flex flex-col justify-between shadow-xl bg-gradient-to-br ${category.gradient} text-white transition-all`}
+                className="relative overflow-hidden p-8 h-64 flex flex-col justify-between shadow-2xl rounded-3xl transition-all"
               >
-                <div className="z-10">
+                {/* Background Image */}
+                <div className="absolute inset-0 z-0">
+                  <img 
+                    src={category.image} 
+                    alt={category.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    referrerPolicy="no-referrer"
+                  />
+                  {/* Gradient Overlay */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} mix-blend-multiply`} />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                </div>
+
+                <div className="z-10 relative">
                   <div className="flex flex-col">
-                    <h3 className="text-4xl font-bold tracking-tight uppercase leading-none">{category.title}</h3>
-                    <span className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">{category.subtitle}</span>
+                    <h3 className="text-4xl font-black tracking-tighter uppercase leading-none drop-shadow-md">{category.title}</h3>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-90 mt-2 bg-white/20 backdrop-blur-sm px-2 py-1 rounded self-start">{category.subtitle}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 z-10">
-                  <span className="text-sm font-bold border-b-2 border-white/40 group-hover:border-white transition-all tracking-widest uppercase">{category.actionText}</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-                <div className="absolute -right-4 -bottom-4 opacity-20 group-hover:opacity-30 transition-opacity">
-                   <category.icon className="w-[160px] h-[160px]" strokeWidth={1.5} />
+
+                <div className="flex items-center justify-between z-10 relative">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black border-b-2 border-white/40 group-hover:border-white transition-all tracking-widest uppercase">{category.actionText}</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-md p-2 rounded-xl">
+                    <category.icon className="w-6 h-6" strokeWidth={2.5} />
+                  </div>
                 </div>
               </motion.div>
             </Link>

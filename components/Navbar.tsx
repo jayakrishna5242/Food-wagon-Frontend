@@ -104,10 +104,10 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 max-w-7xl flex items-center justify-between">
         {/* Logo Section */}
         <Link to="/" className="flex items-center gap-2 group mr-2 flex-shrink-0">
-          <div className="bg-primary p-2 rounded-lg transform group-hover:rotate-12 transition-transform">
+          <div className="bg-primary p-2 rounded-md transform group-hover:rotate-12 transition-transform">
             <Utensils className="text-white w-5 h-5 md:w-6 md:h-6" />
           </div>
-          <span className="text-xl md:text-2xl font-bold text-dark tracking-tight hidden md:block">
+          <span className="text-xl md:text-2xl font-bold text-dark tracking-tight hidden md:block font-display">
             FoodWagon
           </span>
         </Link>
@@ -142,14 +142,14 @@ const Navbar: React.FC = () => {
 
                 {/* Dropdown Menu */}
                {showCityDropdown && (
-                 <div className="absolute top-full left-0 mt-2 w-64 md:w-72 bg-white shadow-xl rounded-lg border border-gray-100 py-2 z-[1010] animate-in fade-in zoom-in-95 duration-200">
+                 <div className="absolute top-full left-0 mt-2 w-64 md:w-72 bg-white shadow-xl rounded-md border border-gray-100 py-2 z-[1010] animate-in fade-in zoom-in-95 duration-200">
                     <button 
                        onClick={detectLocation}
                        className="w-full text-left px-5 py-4 hover:bg-gray-50 flex items-start gap-3 group/btn border-b border-gray-100"
                     >
                        <Crosshair className="w-5 h-5 text-primary mt-0.5" />
                        <div>
-                          <p className="text-sm font-bold text-primary group-hover/btn:text-[#e66f0f]">Detect Current Location</p>
+                          <p className="text-sm font-bold text-primary group-hover/btn:text-[#e66f0f] font-display">Detect Current Location</p>
                           <p className="text-xs text-gray-400 font-normal mt-0.5">Using GPS</p>
                        </div>
                     </button>

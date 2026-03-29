@@ -184,7 +184,7 @@ const Cart: React.FC = () => {
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Link 
             to="/" 
-            className="bg-gray-900 text-white font-black py-4 px-10 rounded-2xl hover:shadow-2xl hover:shadow-black/20 transition-all duration-300 uppercase text-xs tracking-widest block"
+            className="bg-primary text-white font-black py-4 px-10 rounded-2xl hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 uppercase text-xs tracking-widest block"
           >
             Start Ordering
           </Link>
@@ -194,89 +194,69 @@ const Cart: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-24 md:pb-12">
+    <div className="min-h-screen bg-white pb-24 md:pb-12">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-30 md:relative md:border-none md:bg-transparent">
-        <div className="container mx-auto px-4 max-w-5xl py-4 md:py-8 flex items-center gap-4">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30 md:relative md:border-none">
+        <div className="container mx-auto px-4 max-w-5xl py-6 md:py-12 flex items-center gap-4">
           <button 
             onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors md:hidden"
+            className="p-2 hover:bg-gray-100 transition-colors md:hidden"
           >
             <ChevronLeft className="w-6 h-6 text-gray-900" />
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20 hidden md:flex">
-              <ShoppingBag className="w-5 h-5" />
-            </div>
-            <h1 className="text-xl md:text-3xl font-black text-gray-900 tracking-tight uppercase">Checkout</h1>
+            <h1 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tighter uppercase">Checkout</h1>
           </div>
         </div>
       </div>
       
       <div className="container mx-auto px-4 max-w-5xl">
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-12 items-start">
           {/* Left Column: Details */}
-          <div className="flex-1 w-full space-y-6">
+          <div className="flex-1 w-full space-y-12">
             {/* User Info */}
-            <section className="bg-white rounded-[32px] p-6 md:p-8 shadow-sm border border-gray-100 hidden md:block">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <h2 className="font-bold text-lg text-gray-900 uppercase tracking-tight">Account</h2>
-                </div>
-                {!isAuthenticated && (
-                  <Link to="/login" className="text-xs font-bold text-orange-500 uppercase tracking-widest hover:underline">Sign In</Link>
-                )}
+            <section className="bg-white p-0 hidden md:block">
+              <div className="flex items-center gap-3 mb-6 border-b border-primary pb-2">
+                <h2 className="font-black text-sm text-primary uppercase tracking-widest">01. Account</h2>
               </div>
               
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
+              <div className="flex items-center justify-between py-4 border-b border-gray-100">
                 {isAuthenticated && user ? (
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shadow-md">
-                      <span className="font-black text-lg">{user.name.charAt(0)}</span>
+                    <div className="w-10 h-10 bg-primary flex items-center justify-center text-white">
+                      <span className="font-black text-sm">{user.name.charAt(0)}</span>
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900">{user.name}</p>
-                      <p className="text-xs text-gray-500 font-medium">{user.email}</p>
+                      <p className="font-black text-xs text-gray-900 uppercase tracking-tight">{user.name}</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{user.email}</p>
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">
-                      <User className="w-5 h-5" />
-                    </div>
-                    <p className="text-sm text-gray-500 font-medium">Ordering as guest</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ordering as guest</p>
+                    <Link to="/login" className="text-[10px] font-black text-primary uppercase tracking-widest underline">Sign In</Link>
                   </div>
                 )}
                 {isAuthenticated && (
-                  <div className="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-black uppercase tracking-widest rounded-full">
-                    Verified
+                  <div className="text-[10px] font-black text-primary uppercase tracking-widest">
+                    [ Verified ]
                   </div>
                 )}
               </div>
             </section>
 
             {/* Address Selection */}
-            <section className="bg-white rounded-[32px] p-6 md:p-8 shadow-sm border border-gray-100 w-full overflow-hidden">
-              <div className="flex items-center justify-between mb-6">
+            <section className="bg-white p-0 w-full overflow-hidden">
+              <div className="flex items-center justify-between mb-6 border-b border-primary pb-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-sm">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="font-black text-lg text-gray-900 uppercase tracking-tight">Delivery Address</h2>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Where should we drop it?</p>
-                  </div>
+                  <h2 className="font-black text-sm text-primary uppercase tracking-widest">02. Delivery Address</h2>
                 </div>
                 {!isAddressModalOpen && (
                   <button 
                     onClick={() => setIsAddressModalOpen(true)}
-                    className="text-orange-500 text-[10px] font-black uppercase tracking-widest hover:text-orange-600 transition-all flex items-center gap-1.5 bg-orange-50 px-3 py-2 rounded-lg"
+                    className="text-primary text-[10px] font-black uppercase tracking-widest hover:underline transition-all"
                   >
-                    <PlusIcon className="w-3 h-3" />
-                    Add New
+                    + Add New
                   </button>
                 )}
               </div>
@@ -285,15 +265,15 @@ const Cart: React.FC = () => {
                 {isAddressModalOpen ? (
                   <motion.div
                     key="address-form"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    className="bg-gray-50 rounded-3xl p-5 md:p-8 border border-gray-100 shadow-inner"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="bg-gray-50 p-6 border border-gray-200"
                   >
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="font-black text-sm uppercase tracking-widest text-gray-900">New Address</h3>
-                      <button onClick={() => setIsAddressModalOpen(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
-                        <X className="w-4 h-4 text-gray-400" />
+                    <div className="flex items-center justify-between mb-8">
+                      <h3 className="font-black text-[10px] uppercase tracking-widest text-gray-900">New Address</h3>
+                      <button onClick={() => setIsAddressModalOpen(false)} className="text-[10px] font-black uppercase tracking-widest hover:underline">
+                        Cancel
                       </button>
                     </div>
                     <AddressForm 
@@ -313,90 +293,37 @@ const Cart: React.FC = () => {
                     exit={{ opacity: 0 }}
                     className="space-y-4"
                   >
-                    {/* Mobile: Show selected address or "Select Address" if none */}
-                    <div className="md:hidden">
-                      {selectedAddressId ? (
-                        <div className="flex items-center justify-between p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center shadow-md">
-                              <MapPin className="w-5 h-5" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-black text-gray-900 text-[10px] uppercase tracking-widest">Delivering to</p>
-                              <p className="text-xs text-gray-500 font-bold truncate w-48">
-                                {addresses.find(a => a.id === selectedAddressId)?.flatNo}, {addresses.find(a => a.id === selectedAddressId)?.area}
-                              </p>
-                            </div>
-                          </div>
-                          <button 
-                            onClick={() => {
-                              // Scroll to address list or just show all
-                              const el = document.getElementById('address-grid');
-                              el?.scrollIntoView({ behavior: 'smooth' });
-                            }}
-                            className="text-[10px] font-black text-orange-500 uppercase tracking-widest"
-                          >
-                            Change
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="p-4 bg-red-50 rounded-2xl border border-red-100 text-center">
-                          <p className="text-xs font-bold text-red-500 uppercase tracking-widest">Please select a delivery address</p>
-                        </div>
-                      )}
-                    </div>
-
-                    <div id="address-grid" className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div id="address-grid" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {addresses.map((addr) => (
-                        <motion.button 
+                        <button 
                           key={addr.id}
-                          whileHover={{ y: -4, shadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
-                          whileTap={{ scale: 0.98 }}
                           onClick={() => setSelectedAddressId(addr.id)}
-                          className={`text-left p-5 rounded-2xl border-2 transition-all relative group w-full overflow-hidden ${
+                          className={`text-left p-6 border transition-all relative w-full ${
                             selectedAddressId === addr.id 
-                              ? 'border-orange-500 bg-white shadow-lg shadow-orange-500/10' 
-                              : 'border-gray-100 hover:border-gray-200 bg-white'
+                              ? 'border-primary bg-orange-50/30' 
+                              : 'border-gray-200 hover:border-primary/50 bg-white'
                           }`}
                         >
-                          {selectedAddressId === addr.id && (
-                            <div className="absolute top-0 left-0 w-1 h-full bg-orange-500" />
-                          )}
-                          <div className="flex items-start gap-4">
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                              selectedAddressId === addr.id ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-gray-50 text-gray-400'
-                            }`}>
-                              {addr.type.toLowerCase() === 'home' ? <Home className="w-6 h-6" /> : 
-                               addr.type.toLowerCase() === 'work' ? <Briefcase className="w-6 h-6" /> : 
-                               <MapPin className="w-6 h-6" />}
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                              <p className="font-black text-gray-900 text-[10px] uppercase tracking-widest">{addr.type}</p>
+                              {selectedAddressId === addr.id && (
+                                <span className="text-primary text-[8px] font-black uppercase tracking-widest underline">Selected</span>
+                              )}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <p className="font-black text-gray-900 text-[10px] uppercase tracking-widest">{addr.type}</p>
-                                {selectedAddressId === addr.id && (
-                                  <span className="bg-orange-100 text-orange-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter">Selected</span>
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-500 font-bold leading-relaxed line-clamp-2">
-                                {addr.flatNo}, {addr.area}, {addr.city}
-                              </p>
-                            </div>
+                            <p className="text-[11px] text-gray-500 font-bold uppercase tracking-tight leading-relaxed">
+                              {addr.flatNo}, {addr.area}, {addr.city}
+                            </p>
                           </div>
-                        </motion.button>
+                        </button>
                       ))}
 
                       {addresses.length === 0 && (
                         <button 
                           onClick={() => setIsAddressModalOpen(true)}
-                          className="p-10 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-4 text-gray-400 hover:text-orange-500 hover:border-orange-500 transition-all group bg-gray-50/30"
+                          className="p-12 border border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-gray-900 hover:border-gray-900 transition-all bg-gray-50/50"
                         >
-                          <div className="w-14 h-14 rounded-2xl bg-white border-2 border-dashed border-gray-200 flex items-center justify-center group-hover:border-orange-500 group-hover:scale-110 transition-all shadow-sm">
-                            <PlusIcon className="w-7 h-7" />
-                          </div>
-                          <div className="text-center">
-                            <span className="text-xs font-black uppercase tracking-widest block mb-1">Add First Address</span>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Save your location for faster delivery</span>
-                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest block">Add Delivery Address</span>
                         </button>
                       )}
                     </div>
@@ -406,212 +333,155 @@ const Cart: React.FC = () => {
             </section>
 
             {/* Payment Method */}
-            <section className={`bg-white rounded-[32px] p-6 md:p-8 shadow-sm border border-gray-100 hidden md:block transition-opacity duration-300 ${!selectedAddressId ? 'opacity-50 pointer-events-none' : ''}`}>
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-500">
-                  <CreditCard className="w-4 h-4" />
-                </div>
-                <h2 className="font-bold text-lg text-gray-900 uppercase tracking-tight">Payment Method</h2>
+            <section className={`bg-white p-0 hidden md:block transition-opacity duration-300 ${!selectedAddressId ? 'opacity-50 pointer-events-none' : ''}`}>
+              <div className="flex items-center gap-3 mb-6 border-b border-primary pb-2">
+                <h2 className="font-black text-sm text-primary uppercase tracking-widest">03. Payment</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button 
                   onClick={() => setPaymentMethod('COD')}
-                  className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all ${
-                    paymentMethod === 'COD' ? 'border-orange-500 bg-orange-50/30' : 'border-gray-100 hover:border-gray-200 bg-white'
+                  className={`flex flex-col gap-2 p-6 border transition-all ${
+                    paymentMethod === 'COD' ? 'border-primary bg-orange-50/30' : 'border-gray-200 hover:border-primary/50 bg-white'
                   }`}
                 >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${paymentMethod === 'COD' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                    <Banknote className="w-6 h-6" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-black text-gray-900 text-xs uppercase tracking-widest mb-0.5">Cash on Delivery</p>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Pay when food arrives</p>
-                  </div>
+                  <p className="font-black text-gray-900 text-[10px] uppercase tracking-widest">Cash on Delivery</p>
+                  <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Pay at your door</p>
                 </button>
 
                 <button 
                   onClick={() => setPaymentMethod('ONLINE')}
-                  className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all ${
-                    paymentMethod === 'ONLINE' ? 'border-orange-500 bg-orange-50/30' : 'border-gray-100 hover:border-gray-200 bg-white'
+                  className={`flex flex-col gap-2 p-6 border transition-all ${
+                    paymentMethod === 'ONLINE' ? 'border-primary bg-orange-50/30' : 'border-gray-200 hover:border-primary/50 bg-white'
                   }`}
                 >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${paymentMethod === 'ONLINE' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                    <CreditCard className="w-6 h-6" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-black text-gray-900 text-xs uppercase tracking-widest mb-0.5">Online Payment</p>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">UPI, Cards, Netbanking</p>
-                  </div>
+                  <p className="font-black text-gray-900 text-[10px] uppercase tracking-widest">Online Payment</p>
+                  <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">UPI, Cards, Netbanking</p>
                 </button>
               </div>
             </section>
           </div>
 
           {/* Right Column: Summary */}
-          <div id="bill-details" className="w-full lg:w-[400px] lg:sticky lg:top-8">
-            <div className="bg-white rounded-[40px] p-6 md:p-8 shadow-xl shadow-gray-200/50 border border-gray-100 relative overflow-hidden">
-              {/* Decorative background element */}
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/5 rounded-full blur-3xl" />
-              
+          <div id="bill-details" className="w-full lg:w-[380px] lg:sticky lg:top-12">
+            <div className="bg-white p-0 relative">
               <div className="relative">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Bill Details</h2>
-                  <div className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                <div className="flex items-center justify-between mb-8 border-b border-primary pb-2">
+                  <h2 className="text-sm font-black text-primary uppercase tracking-widest">Order Summary</h2>
+                  <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                     {items.length} {items.length === 1 ? 'Item' : 'Items'}
                   </div>
                 </div>
                 
-                <div className="space-y-6 mb-8">
-                  <div className="flex items-center gap-3 text-xs text-orange-600 bg-orange-50/50 p-4 rounded-2xl border border-orange-100/50">
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                      <Clock className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="font-black uppercase tracking-widest text-[10px] mb-0.5">Estimated Arrival</p>
-                      <p className="font-bold text-sm">{deliveryTime}</p>
-                    </div>
+                <div className="space-y-8 mb-12">
+                  <div className="flex items-center justify-between text-[10px] text-gray-400 font-black uppercase tracking-widest">
+                    <span>Estimated Delivery</span>
+                    <span className="text-gray-900">{deliveryTime}</span>
                   </div>
 
-                  <div className="space-y-4 max-h-[300px] overflow-y-auto scrollbar-hide pr-1">
+                  <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2">
                     <AnimatePresence mode="popLayout">
                       {items.map((item) => (
                         <motion.div 
                           key={item.id}
                           layout
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          className="flex items-center justify-between group"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="flex items-start justify-between gap-4"
                         >
-                          <div className="flex items-start gap-3 flex-1">
-                            <div className={`mt-1 w-3 h-3 border-2 flex-shrink-0 flex items-center justify-center p-[1px] rounded-sm ${item.isVeg ? 'border-green-600' : 'border-red-600'}`}>
-                              <div className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className={`w-2 h-2 flex-shrink-0 rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`} />
+                              <p className="text-[11px] font-black text-gray-900 uppercase tracking-tight truncate">{item.name}</p>
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold text-gray-900 leading-tight truncate">{item.name}</p>
-                              <p className="text-[10px] text-gray-400 font-bold mt-0.5">₹{item.price} per unit</p>
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => removeFromCart(item.id)} className="text-gray-400 hover:text-gray-900 transition-colors"><Minus className="w-3 h-3" /></button>
+                                <span className="text-[10px] font-black text-gray-900 w-4 text-center">{item.quantity}</span>
+                                <button onClick={() => addToCart(item)} className="text-gray-400 hover:text-gray-900 transition-colors"><Plus className="w-3 h-3" /></button>
+                              </div>
+                              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">₹{item.price}</span>
                             </div>
                           </div>
-                          
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center bg-gray-50 rounded-xl border border-gray-100 p-1 shadow-inner">
-                              <button 
-                                onClick={() => removeFromCart(item.id)} 
-                                className="w-6 h-6 flex items-center justify-center hover:bg-white hover:text-orange-500 rounded-lg transition-all text-gray-400"
-                              >
-                                <Minus className="w-3 h-3" />
-                              </button>
-                              <span className="text-[10px] font-black w-6 text-center text-gray-900">{item.quantity}</span>
-                              <button 
-                                onClick={() => addToCart(item)} 
-                                className="w-6 h-6 flex items-center justify-center hover:bg-white hover:text-orange-500 rounded-lg transition-all text-gray-400"
-                              >
-                                <Plus className="w-3 h-3" />
-                              </button>
-                            </div>
-                            <span className="text-xs font-black text-gray-900 w-12 text-right">₹{item.price * item.quantity}</span>
-                          </div>
+                          <span className="text-[11px] font-black text-gray-900">₹{item.price * item.quantity}</span>
                         </motion.div>
                       ))}
                     </AnimatePresence>
                   </div>
                 </div>
 
-                {/* Coupons Section */}
-                <div className="mb-8 p-5 bg-gray-50 rounded-[32px] border border-gray-100 hidden md:block">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm">
-                      <Ticket className="w-4 h-4 text-orange-500" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest block">Coupons</span>
-                      <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Save more on your order</span>
-                    </div>
+                {/* Coupons Section - Desktop Only */}
+                <div className="mb-12 hidden md:block">
+                  <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
+                    <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest">Promo Code</span>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-0">
                     <input 
                       type="text" 
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value)}
-                      placeholder="Enter Code"
-                      className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest focus:ring-4 focus:ring-orange-500/10 transition-all outline-none placeholder:text-gray-300 shadow-sm"
+                      placeholder="CODE"
+                      className="flex-1 bg-white border border-primary border-r-0 px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none placeholder:text-gray-300"
                     />
                     <button 
                       onClick={handleApplyCoupon}
                       disabled={!couponInput.trim()}
-                      className="bg-gray-900 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all disabled:opacity-50 shadow-lg shadow-black/10 active:scale-95"
+                      className="bg-primary text-white px-6 py-3 font-black text-[10px] uppercase tracking-widest hover:bg-[#e66f0f] transition-all disabled:opacity-50"
                     >
                       Apply
                     </button>
                   </div>
-                  {couponError && <p className="text-red-500 text-[9px] font-bold mt-2 uppercase tracking-widest ml-1">{couponError}</p>}
+                  {couponError && <p className="text-red-500 text-[9px] font-bold mt-2 uppercase tracking-widest">{couponError}</p>}
                   
                   {selectedOffer && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-green-500/20"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                          <Tag className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest">'{selectedOffer.code}' Applied!</p>
-                          <p className="text-[8px] font-bold opacity-80 uppercase tracking-widest">You saved ₹{discountAmount}</p>
-                        </div>
+                    <div className="mt-4 flex items-center justify-between border border-primary p-4">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-primary">'{selectedOffer.code}' Applied</p>
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Saved ₹{discountAmount}</p>
                       </div>
-                      <button onClick={() => setSelectedOffer(null)} className="p-2 hover:bg-white/10 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
-                    </motion.div>
+                      <button onClick={() => setSelectedOffer(null)} className="text-gray-400 hover:text-primary"><X className="w-4 h-4" /></button>
+                    </div>
                   )}
                 </div>
 
                 {/* Price Breakdown */}
-                <div className="space-y-3 pt-6 border-t border-dashed border-gray-200 mb-8">
-                  <div className="flex justify-between text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                    <span>Item Total</span>
+                <div className="space-y-4 pt-8 border-t border-primary mb-12">
+                  <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <span>Subtotal</span>
                     <span className="text-gray-900 font-black">₹{cartTotal}</span>
                   </div>
-                  <div className="flex justify-between text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                    <span>Delivery Fee</span>
+                  <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <span>Delivery</span>
                     <span className="text-gray-900 font-black">₹{deliveryFee}</span>
                   </div>
-                  <div className="flex justify-between text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                    <span>Taxes & Charges</span>
+                  <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <span>Taxes</span>
                     <span className="text-gray-900 font-black">₹{gst + platformFee}</span>
                   </div>
                   {selectedOffer && (
-                    <div className="flex justify-between text-[11px] font-black text-green-600 uppercase tracking-widest">
+                    <div className="flex justify-between text-[10px] font-black text-primary uppercase tracking-widest">
                       <span>Discount</span>
                       <span>-₹{discountAmount}</span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center pt-4 border-t-2 border-gray-900">
-                    <span className="font-black text-gray-900 text-sm uppercase tracking-tighter">To Pay</span>
-                    <span className="font-black text-gray-900 text-2xl tracking-tighter">₹{finalTotal}</span>
+                  <div className="flex justify-between items-center pt-6 border-t border-gray-100">
+                    <span className="font-black text-gray-900 text-xs uppercase tracking-widest">Total</span>
+                    <span className="font-black text-primary text-3xl tracking-tighter">₹{finalTotal}</span>
                   </div>
                 </div>
 
-                <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <button 
                   onClick={handleCheckout}
                   disabled={isPlacingOrder || !selectedAddressId}
-                  className="hidden md:flex w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black py-5 rounded-[24px] items-center justify-center gap-3 hover:shadow-2xl hover:shadow-orange-500/40 transition-all disabled:opacity-50 disabled:grayscale shadow-xl shadow-orange-500/20"
+                  className="hidden md:flex w-full bg-primary text-white font-black py-6 items-center justify-center gap-3 hover:bg-[#e66f0f] transition-all disabled:opacity-50 shadow-lg shadow-primary/20"
                 >
                   {isPlacingOrder ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span className="uppercase tracking-widest text-xs">Confirming...</span>
-                    </>
+                    <span className="uppercase tracking-widest text-[10px]">Processing...</span>
                   ) : (
-                    <>
-                      <span className="uppercase tracking-widest text-xs">Place Order</span>
-                      <ArrowRight className="w-5 h-5" />
-                    </>
+                    <span className="uppercase tracking-widest text-[10px]">Place Order</span>
                   )}
-                </motion.button>
+                </button>
               </div>
             </div>
           </div>
@@ -619,39 +489,26 @@ const Cart: React.FC = () => {
       </div>
     
       {/* Mobile Sticky Checkout Bar */}
-      <div className="md:hidden sticky bottom-16 left-0 right-0 bg-white border-t border-gray-100 p-6 z-40 shadow-[0_-12px_32px_rgba(0,0,0,0.1)] rounded-t-[40px]">
-        <div className="flex items-center justify-between mb-4 px-1">
+      <div className="md:hidden sticky bottom-0 left-0 right-0 bg-white border-t border-primary p-6 z-40">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex flex-col">
-            <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-0.5">Total Payable</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-black text-gray-900 tracking-tighter">₹{finalTotal}</span>
-              <button 
-                onClick={() => {
-                  const el = document.getElementById('bill-details');
-                  el?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="text-[10px] font-bold text-orange-500 uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded ml-1"
-              >
-                View Details
-              </button>
-            </div>
+            <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest">Total</span>
+            <span className="text-2xl font-black text-primary tracking-tighter">₹{finalTotal}</span>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-0.5">Delivery In</span>
-            <span className="text-sm font-black text-gray-900 tracking-tight">{deliveryTime}</span>
+          <div className="text-right">
+            <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest">Arrival</span>
+            <p className="text-xs font-black text-gray-900 uppercase tracking-tight">{deliveryTime}</p>
           </div>
         </div>
-        <motion.button 
-          whileTap={{ scale: 0.96 }}
+        <button 
           onClick={handleCheckout}
           disabled={isPlacingOrder || !selectedAddressId}
-          className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black py-5 rounded-[24px] shadow-xl shadow-orange-500/30 flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:grayscale"
+          className="w-full bg-primary text-white font-black py-5 flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-lg shadow-primary/20"
         >
-          <span className="uppercase text-xs tracking-widest font-black">
-            {isPlacingOrder ? 'Processing Order' : 'Place Order'}
+          <span className="uppercase text-[10px] tracking-widest font-black">
+            {isPlacingOrder ? 'Processing' : 'Checkout'}
           </span>
-          {isPlacingOrder ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
-        </motion.button>
+        </button>
       </div>
     </div>
   );

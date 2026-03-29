@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Search, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Search, ChevronRight, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SUPERMARKET_ITEMS } from '../../supermarketData';
 import MenuItem from '../../components/MenuItem';
+import { useCart } from '../../context/CartContext';
 
 const Supermarket: React.FC = () => {
+  const { cartCount } = useCart();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -26,7 +28,15 @@ const Supermarket: React.FC = () => {
           <Link to="/" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <ArrowLeft className="w-6 h-6 text-dark" />
           </Link>
-          <h1 className="text-xl font-bold text-dark">Feasti Mart</h1>
+          <h1 className="text-xl font-bold text-dark flex-grow">Feasti Mart</h1>
+          <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <ShoppingBag className="w-6 h-6 text-dark" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
         </div>
       </div>
 
@@ -72,7 +82,16 @@ const Supermarket: React.FC = () => {
           <h2 className="text-xl font-semibold text-dark mb-6 uppercase">{selectedCategory || 'All Items'}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredItems.map((item) => (
-              <MenuItem key={item.id} item={item} />
+              <MenuItem 
+                key={item.id} 
+                item={{
+                  ...item,
+                  id: item.id.toString(),
+                  image: item.imageUrl,
+                  restaurantName: 'Feasti Mart',
+                  restaurantId: item.restaurantId.toString()
+                }} 
+              />
             ))}
           </div>
         </div>

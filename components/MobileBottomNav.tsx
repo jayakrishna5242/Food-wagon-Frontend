@@ -33,7 +33,7 @@ const MobileBottomNav: React.FC = () => {
             <div className="relative">
               <Icon className={`w-6 h-6 ${isActive ? 'fill-primary/10' : ''}`} />
               {item.badge !== undefined && item.badge > 0 && (
-                <span className="absolute -top-1 -right-1 bg-secondary text-white text-[8px] font-bold px-1 py-0.5 rounded-full min-w-[14px] text-center">
+                <span className="absolute -top-1 -right-1 bg-secondary text-white text-[8px] font-bold px-1 py-0.5 rounded-md min-w-[14px] text-center">
                   {item.badge}
                 </span>
               )}

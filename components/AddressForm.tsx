@@ -124,20 +124,9 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = 
   };
 
   return (
-    <div className={`bg-white rounded-[32px] shadow-2xl shadow-gray-200/50 border border-gray-100 p-6 md:p-10 relative overflow-hidden ${className}`}>
-      {/* Decorative background */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/5 rounded-full blur-3xl" />
-      
-      {onClose && (
-        <button 
-          onClick={onClose}
-          className="absolute top-6 right-6 p-2.5 rounded-full hover:bg-gray-100 transition-all text-gray-400 hover:text-gray-900 z-10"
-        >
-          <X size={20} />
-        </button>
-      )}
+    <div className={`bg-white p-0 relative ${className}`}>
       <div className="mb-10 relative z-10">
-        <h2 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Save Address</h2>
+        <h2 className="text-xl font-black text-gray-900 tracking-tighter uppercase">Save Address</h2>
         <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-2">Where should we deliver your food?</p>
       </div>
 
@@ -145,21 +134,18 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = 
         {/* Address Type Selector */}
         <div className="space-y-4">
           <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Address Label</label>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             {(['Home', 'Work', 'Other'] as const).map(t => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setType(t)}
-                className={`flex-1 py-4 rounded-2xl border-2 font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all duration-300 ${
+                className={`flex-1 py-4 border font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all ${
                   type === t 
-                    ? 'border-orange-500 bg-orange-500 text-white shadow-xl shadow-orange-500/30 scale-[1.02]' 
-                    : 'border-gray-100 text-gray-400 bg-gray-50/50 hover:border-gray-200 hover:bg-white'
+                    ? 'border-primary bg-primary text-white' 
+                    : 'border-gray-200 text-gray-400 bg-white hover:border-primary/50'
                 }`}
               >
-                {t === 'Home' && <Home size={20} />}
-                {t === 'Work' && <Briefcase size={20} />}
-                {t === 'Other' && <MapPin size={20} />}
                 {t}
               </button>
             ))}
@@ -171,7 +157,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = 
           type="button"
           onClick={handleDetectLocation}
           disabled={isDetecting}
-          className="w-full flex items-center justify-center gap-3 py-4 bg-gray-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all active:scale-[0.98] disabled:opacity-70 shadow-lg shadow-black/10"
+          className="w-full flex items-center justify-center gap-3 py-4 border border-primary text-primary text-[10px] font-black uppercase tracking-widest hover:bg-orange-50/30 transition-all disabled:opacity-50"
         >
           {isDetecting ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -183,38 +169,38 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = 
 
         <div className="grid grid-cols-1 gap-6">
           <div className="relative group">
-            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1 group-focus-within:text-orange-500 transition-colors">Flat / House No.</label>
+            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Flat / House No.</label>
             <input 
               required 
               placeholder="e.g. 402, Building 7"
               value={flatNo} 
               onChange={e => setFlatNo(e.target.value)} 
               type="text" 
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 focus:bg-white transition-all font-bold text-gray-900 placeholder:text-gray-300 shadow-sm" 
+              className="w-full px-4 py-3 bg-white border border-gray-200 outline-none focus:border-primary transition-all font-bold text-gray-900 placeholder:text-gray-300 text-xs" 
             />
           </div>
           
           <div className="relative group">
-            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1 group-focus-within:text-orange-500 transition-colors">Area / Locality</label>
+            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Area / Locality</label>
             <input 
               required 
               placeholder="e.g. Indiranagar 100ft Rd"
               value={area} 
               onChange={e => setArea(e.target.value)} 
               type="text" 
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 focus:bg-white transition-all font-bold text-gray-900 placeholder:text-gray-300 shadow-sm" 
+              className="w-full px-4 py-3 bg-white border border-gray-200 outline-none focus:border-primary transition-all font-bold text-gray-900 placeholder:text-gray-300 text-xs" 
             />
           </div>
 
           <div className="relative group">
-            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1 group-focus-within:text-orange-500 transition-colors">City</label>
+            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">City</label>
             <input 
               required 
               placeholder="e.g. Bangalore"
               value={city} 
               onChange={e => setCity(e.target.value)} 
               type="text" 
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 focus:bg-white transition-all font-bold text-gray-900 placeholder:text-gray-300 shadow-sm" 
+              className="w-full px-4 py-3 bg-white border border-gray-200 outline-none focus:border-primary transition-all font-bold text-gray-900 placeholder:text-gray-300 text-xs" 
             />
           </div>
         </div>
@@ -222,12 +208,12 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = 
         <button 
           type="submit" 
           disabled={isSaving}
-          className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black py-5 rounded-2xl shadow-2xl shadow-orange-500/30 hover:scale-[1.02] transition-all active:scale-[0.98] flex items-center justify-center gap-3 mt-6 disabled:opacity-70 disabled:scale-100 uppercase text-xs tracking-widest"
+          className="w-full bg-primary text-white font-black py-5 flex items-center justify-center gap-3 mt-6 disabled:opacity-70 uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20"
         >
           {isSaving ? (
-            <>Saving... <Loader2 size={20} className="animate-spin" /></>
+            <>Saving... <Loader2 size={16} className="animate-spin" /></>
           ) : (
-            <>Save Address <CheckCircle2 size={20} /></>
+            <>Save Address</>
           )}
         </button>
       </form>

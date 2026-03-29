@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { loginUser, registerUser } from '../../services/api';
@@ -40,6 +40,9 @@ const Login: React.FC = () => {
   const { login } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = (location.state as any)?.from || '/';
 
   // Field Validations
   const emailValid = useMemo(() => EMAIL_REGEX.test(email.trim()), [email]);
@@ -127,7 +130,7 @@ const Login: React.FC = () => {
       } else if (authResponse.user.role === 'DELIVERY') {
         navigate('/delivery/dashboard');
       } else {
-        navigate('/');
+        navigate(from);
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred. Please try again.');

@@ -49,14 +49,11 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
     <motion.div
       whileHover={!restaurant.isOffline ? { y: -5, scale: 1.02 } : {}}
       whileTap={!restaurant.isOffline ? { scale: 0.98 } : {}}
-      className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100 flex flex-col h-full ${restaurant.isOffline ? 'grayscale opacity-70' : ''}`}
+      className={`bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100 flex flex-col h-full ${restaurant.isOffline ? 'grayscale opacity-70' : ''}`}
     >
       <Link to={!restaurant.isOffline ? `/restaurant/${restaurant.id}` : '#'} className={`block group h-full ${restaurant.isOffline ? 'pointer-events-none' : ''}`}>
         <div className="relative h-48 w-full overflow-hidden">
-          <span className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-[10px] font-bold text-gray-800 shadow-sm flex items-center gap-1">
-            <div className={`w-1.5 h-1.5 rounded-full ${restaurant.isOffline ? 'bg-red-500' : 'bg-green-500'}`} />
-            {restaurant.isOffline ? 'CLOSED' : 'OPEN'}
-            <span className="text-gray-300">|</span>
+          <span className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-bold text-gray-800 shadow-sm flex items-center gap-1">
             <MapPin className="w-3 h-3 text-primary" />
             {distance !== null ? `${distance.toFixed(1)} km` : restaurant.location}
             <span className="text-gray-300">|</span>
@@ -76,7 +73,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleFavoriteClick}
-              className="absolute top-4 right-4 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all"
+              className="absolute top-4 right-4 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm hover:bg-white transition-all"
               aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
             >
               <Heart className={`w-4 h-4 transition-colors ${favorited ? 'fill-primary text-primary' : 'text-gray-400'}`} />
@@ -84,7 +81,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
           )}
 
           {restaurant.aggregatedDiscountInfo && !restaurant.isOffline && (
-            <div className="absolute bottom-4 left-4 bg-primary text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm">
+            <div className="absolute bottom-4 left-4 bg-primary text-white px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-sm font-display">
               {restaurant.aggregatedDiscountInfo.header}
             </div>
           )}
@@ -93,16 +90,16 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
         <div className="p-5 flex flex-col flex-grow">
           <div className="flex justify-between items-start mb-2">
             <div className="flex items-center gap-1">
-              <h3 className="font-bold text-gray-900 text-base line-clamp-1 group-hover:text-primary transition-colors">{restaurant.name}</h3>
+              <h3 className="font-bold text-gray-900 text-base line-clamp-1 group-hover:text-primary transition-colors font-display">{restaurant.name}</h3>
               {restaurant.isPureVeg && <Leaf className="w-3 h-3 text-green-600" />}
             </div>
-            <div className="flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-lg">
+            <div className="flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-md">
               <Star className="w-4 h-4 text-green-600 fill-green-600" />
               <span className="text-xs font-bold text-green-700">{restaurant.rating > 0 ? restaurant.rating : '--'}</span>
             </div>
           </div>
           
-          <p className="text-gray-500 text-xs mb-2 line-clamp-1">
+          <p className="text-gray-500 text-xs mb-2 line-clamp-1 font-medium">
             {restaurant.cuisines.join(', ')}
           </p>
           <p className="text-gray-900 text-xs font-bold mb-2">
@@ -111,11 +108,11 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
 
           <div className="mt-auto pt-3 border-t border-gray-50 flex flex-col gap-3">
             {distance !== null && (
-              <div className="text-primary font-bold text-[10px]">
+              <div className="text-primary font-bold text-[10px] uppercase tracking-widest">
                 Delivery Fee: ₹{(distance * 15).toFixed(0)}
               </div>
             )}
-            <div className="w-full text-center bg-primary text-white py-2 rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors">
+            <div className="w-full text-center bg-primary text-white py-2.5 rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors uppercase tracking-widest font-display">
               View Menu
             </div>
           </div>

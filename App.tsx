@@ -54,8 +54,10 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode,
 
 const Layout = ({ children }: { children?: React.ReactNode }) => {
   const location = useLocation();
-  const hideNavFooterPaths: string[] = [];
-  const shouldHide = hideNavFooterPaths.includes(location.pathname);
+  const hideNavFooterPaths = ['/login', '/signup', '/supermarket', '/fresh-stores'];
+  const shouldHide = hideNavFooterPaths.includes(location.pathname) || 
+                    location.pathname.startsWith('/admin') || 
+                    location.pathname.startsWith('/partner');
 
   return (
     <div className="flex flex-col min-h-screen">
