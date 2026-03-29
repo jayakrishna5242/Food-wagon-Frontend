@@ -4,9 +4,10 @@ import { useAddresses } from '../../context/AddressContext';
 import { useToast } from '../../context/ToastContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchOrders, rateOrder, updateUser } from '../../services/api';
-import { Order } from '../../types';
+import { fetchOrders, rateOrder, updateUser, fetchGenieBookings, fetchEarningsSummary, fetchTrips } from '../../services/api';
+import { Order, EarningsSummary, Trip } from '../../types';
 import AddressForm from '../../components/AddressForm';
+import OrderDetailView from '../../components/OrderDetailView';
 import RestaurantCard from '../../components/RestaurantCard';
 import { 
   LogOut, 
@@ -28,11 +29,12 @@ import {
   Clock,
   ArrowRight,
   Star,
-  X
+  X,
+  History
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-type Tab = 'menu' | 'orders' | 'profile' | 'addresses' | 'payments' | 'favorites';
+type Tab = 'menu' | 'orders' | 'profile' | 'addresses' | 'payments' | 'favorites' | 'pickup';
 
 const tabs: { id: Tab; label: string; icon: any }[] = [
   { id: 'orders', label: 'Orders', icon: ShoppingBag },
@@ -40,6 +42,7 @@ const tabs: { id: Tab; label: string; icon: any }[] = [
   { id: 'addresses', label: 'Addresses', icon: MapPin },
   { id: 'payments', label: 'Payments', icon: CreditCard },
   { id: 'profile', label: 'Settings', icon: Settings },
+  { id: 'pickup', label: 'Pickup History', icon: History },
 ];
 
 const Profile: React.FC = () => {
@@ -52,9 +55,8 @@ const Profile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'menu');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
-  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'DELIVERED' | 'PENDING' | 'CANCELLED'>('ALL');
   const [dateRangeFilter, setDateRangeFilter] = useState<'ALL' | '7' | '30'>('ALL');
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -190,10 +192,57 @@ const Profile: React.FC = () => {
     { q: "Is there a delivery fee?", a: "Delivery fees vary based on distance and order value. You can see the exact fee at checkout." }
   ];
 
+  const [earnings, setEarnings] = useState<EarningsSummary | null>(null);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [loadingWallet, setLoadingWallet] = useState(false);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [priceFilter, setPriceFilter] = useState('all');
+
+  useEffect(() => {
+    if (activeTab === 'payments' && user) {
+      const loadWalletData = async () => {
+        setLoadingWallet(true);
+        try {
+          const [earningsData, tripsData] = await Promise.all([
+            fetchEarningsSummary(user.id),
+            fetchTrips(user.id)
+          ]);
+          setEarnings(earningsData);
+          setTrips(tripsData);
+        } catch (error) {
+          console.error('Failed to fetch wallet data');
+        } finally {
+          setLoadingWallet(false);
+        }
+      };
+      loadWalletData();
+    }
+  }, [activeTab, user]);
+
+  useEffect(() => {
+    if (activeTab === 'pickup') {
+      const loadBookings = async () => {
+        setLoadingBookings(true);
+        try {
+          const data = await fetchGenieBookings();
+          setBookings(data);
+        } catch (error) {
+          console.error('Failed to fetch bookings');
+        } finally {
+          setLoadingBookings(false);
+        }
+      };
+      loadBookings();
+    }
+  }, [activeTab]);
+
   const menuItems = [
     { id: 'addresses', label: 'Manage Address', icon: MapPin },
     { id: 'favorites', label: 'My Favourites', icon: Heart },
     { id: 'orders', label: 'My Orders', icon: ShoppingBag },
+    { id: 'pickup', label: 'Pickup History', icon: History },
     { id: 'payments', label: 'My Wallet', icon: CreditCard },
     { id: 'profile', label: 'Change Phone Number', icon: Settings },
     { id: 'delete', label: 'Delete My Account', icon: Trash2, color: 'text-red-500' },
@@ -414,7 +463,6 @@ const Profile: React.FC = () => {
                           <div 
                             onClick={() => {
                               setSelectedOrder(order);
-                              setIsOrderModalOpen(true);
                             }}
                             className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer"
                           >
@@ -423,7 +471,6 @@ const Profile: React.FC = () => {
                           <div 
                             onClick={() => {
                               setSelectedOrder(order);
-                              setIsOrderModalOpen(true);
                             }}
                             className="flex-1 cursor-pointer"
                           >
@@ -472,25 +519,42 @@ const Profile: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <p className="text-graytext font-medium">Saved Addresses</p>
                     <button 
-                      onClick={() => setIsAddressModalOpen(true)}
+                      onClick={() => setIsAddingAddress(true)}
                       className="text-primary font-bold text-sm flex items-center gap-1"
                     >
                       <Plus className="w-4 h-4" /> Add New
                     </button>
                   </div>
+                  {isAddingAddress && (
+                    <AddressForm onSave={(newAddr) => {
+                        addAddress(newAddr);
+                        showToast(`Address "${newAddr.type}" added successfully.`, "success");
+                        setIsAddingAddress(false);
+                    }} className="mb-6" />
+                  )}
                   <div className="space-y-4">
                     {addresses.map((addr) => (
-                      <div key={addr.id} className="p-4 border border-gray-100 rounded-2xl flex items-start gap-4">
-                        <div className="p-2 bg-orange-50 text-primary rounded-lg">
-                          {addr.type === 'Home' ? <Home className="w-5 h-5" /> : <MapPin className="w-5 h-5" />}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-bold text-dark">{addr.type}</p>
-                          <p className="text-sm text-graytext">{addr.flatNo}, {addr.area}, {addr.city}</p>
-                        </div>
-                        <button onClick={() => handleRemoveAddress(addr.id)} className="text-red-500 p-2">
-                          <Trash2 className="w-4 h-4" />
+                      <div key={addr.id} className="relative overflow-hidden rounded-2xl border border-gray-100 bg-red-500">
+                        <button 
+                          onClick={() => handleRemoveAddress(addr.id)}
+                          className="absolute right-0 top-0 bottom-0 text-white px-6 flex items-center justify-center"
+                        >
+                          <Trash2 className="w-5 h-5" />
                         </button>
+                        <motion.div
+                          drag="x"
+                          dragConstraints={{ left: -80, right: 0 }}
+                          dragElastic={0.1}
+                          className="flex items-start gap-4 p-4 bg-white relative z-10"
+                        >
+                          <div className="p-2 bg-orange-50 text-primary rounded-lg">
+                            {addr.type === 'Home' ? <Home className="w-5 h-5" /> : <MapPin className="w-5 h-5" />}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-dark">{addr.type}</p>
+                            <p className="text-sm text-graytext">{addr.flatNo}, {addr.area}, {addr.city}</p>
+                          </div>
+                        </motion.div>
                       </div>
                     ))}
                   </div>
@@ -530,9 +594,124 @@ const Profile: React.FC = () => {
               )}
 
               {activeTab === 'payments' && (
-                <div className="text-center py-20">
-                  <CreditCard className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-                  <p className="text-graytext font-medium">No payment methods added</p>
+                <div className="space-y-6">
+                  {loadingWallet ? (
+                    <div className="space-y-4">
+                      {[1,2,3].map(i => <div key={i} className="h-20 bg-gray-50 rounded-2xl animate-pulse"></div>)}
+                    </div>
+                  ) : earnings ? (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-orange-600 mb-1">Daily Earnings</p>
+                          <p className="text-2xl font-black text-dark">₹{earnings.daily}</p>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Weekly Earnings</p>
+                          <p className="text-2xl font-black text-dark">₹{earnings.weekly}</p>
+                        </div>
+                      </div>
+                      
+                      <button 
+                        onClick={() => showToast('Withdrawal request submitted successfully!', 'success')}
+                        className="w-full bg-primary text-white font-black py-4 rounded-xl shadow-lg shadow-orange-500/20"
+                      >
+                        Withdraw Funds
+                      </button>
+
+                      <div className="flex justify-between items-center mt-8">
+                        <h3 className="font-black text-dark tracking-tight">Trip History</h3>
+                        <div className="flex gap-2">
+                          <select onChange={(e) => setTimeFilter(e.target.value)} className="text-xs p-2 rounded-lg border bg-white">
+                            <option value="all">All Time</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                          </select>
+                          <select onChange={(e) => setPriceFilter(e.target.value)} className="text-xs p-2 rounded-lg border bg-white">
+                            <option value="all">All Prices</option>
+                            <option value="low">Low to High</option>
+                            <option value="high">High to Low</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        {trips
+                          .filter(trip => {
+                            if (timeFilter === 'week') {
+                              const tripDate = new Date(trip.date);
+                              const now = new Date();
+                              const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
+                              return tripDate >= oneWeekAgo;
+                            }
+                            if (timeFilter === 'month') {
+                              const tripDate = new Date(trip.date);
+                              const now = new Date();
+                              const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1));
+                              return tripDate >= oneMonthAgo;
+                            }
+                            return true;
+                          })
+                          .sort((a, b) => {
+                            if (priceFilter === 'low') return a.payout - b.payout;
+                            if (priceFilter === 'high') return b.payout - a.payout;
+                            return 0;
+                          })
+                          .map((trip) => (
+                          <div key={trip.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center">
+                            <div>
+                              <p className="font-bold text-dark">{trip.restaurantName}</p>
+                              <p className="text-xs text-graytext">{new Date(trip.date).toLocaleDateString()}</p>
+                            </div>
+                            <p className="font-black text-primary">₹{trip.payout}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100">
+                      <CreditCard className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+                      <p className="text-graytext font-medium">No wallet data found</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'pickup' && (
+                <div className="space-y-6">
+                  {loadingBookings ? (
+                    <div className="space-y-4">
+                      {[1,2,3].map(i => <div key={i} className="h-32 bg-gray-50 rounded-2xl animate-pulse"></div>)}
+                    </div>
+                  ) : bookings.length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100">
+                      <History className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+                      <p className="text-graytext font-medium">No pickup history found</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {bookings.map((booking) => (
+                        <div key={booking.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className={`p-3 rounded-2xl ${booking.type === 'pickup' ? 'bg-pink-100 text-pink-600' : 'bg-orange-100 text-orange-600'}`}>
+                              {booking.type === 'pickup' ? <ShoppingBag className="w-6 h-6" /> : <Home className="w-6 h-6" />}
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-dark">{booking.type === 'pickup' ? 'Pick up & Drop' : 'Buy from Store'}</h4>
+                              <p className="text-xs text-gray-500">{booking.pickupLocation} → {booking.dropLocation}</p>
+                              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{new Date(booking.date).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                            booking.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
+                            booking.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
+                            'bg-blue-100 text-blue-700'
+                          }`}>
+                            {booking.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -540,15 +719,11 @@ const Profile: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <AddressForm isOpen={isAddressModalOpen} onClose={() => setIsAddressModalOpen(false)} onSave={(newAddr) => {
-          addAddress(newAddr);
-          showToast(`Address "${newAddr.type}" added successfully.`, "success");
-          setIsAddressModalOpen(false);
-      }} />
+      {/* Address Form removed from here */}
 
       {/* Order Details Modal */}
       <AnimatePresence>
-        {isOrderModalOpen && selectedOrder && (
+        {selectedOrder && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
             <motion.div 
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -562,7 +737,7 @@ const Profile: React.FC = () => {
                   <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Order #{selectedOrder.id}</p>
                 </div>
                 <button 
-                  onClick={() => setIsOrderModalOpen(false)} 
+                  onClick={() => setSelectedOrder(null)} 
                   className="p-3 hover:bg-gray-50 rounded-2xl transition-all text-gray-400 hover:text-dark border border-transparent hover:border-gray-100 shadow-sm"
                 >
                   <X className="w-6 h-6" />
@@ -708,7 +883,7 @@ const Profile: React.FC = () => {
                     onClick={() => {
                       setOrderToCancel(selectedOrder);
                       setIsCancelModalOpen(true);
-                      setIsOrderModalOpen(false);
+                      setSelectedOrder(null);
                     }}
                     className="w-full bg-red-500 text-white font-black py-4 rounded-xl shadow-lg hover:bg-red-600 transition-all uppercase tracking-widest text-sm mb-4"
                   >
@@ -719,7 +894,7 @@ const Profile: React.FC = () => {
                   onClick={() => {
                     const rid = selectedOrder.restaurantId || (selectedOrder.items && selectedOrder.items[0]?.restaurantId);
                     if (rid) navigate(`/restaurant/${rid}`);
-                    setIsOrderModalOpen(false);
+                    setSelectedOrder(null);
                   }}
                   className="w-full bg-primary text-white font-black py-4 rounded-xl shadow-lg hover:bg-[#e26e10] transition-all uppercase tracking-widest text-sm"
                 >

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Store, 
@@ -18,6 +18,13 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { motion } from 'motion/react';
 
+const DEFAULT_RESTAURANT_IMAGES = [
+  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
+  'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800',
+  'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=800',
+  'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800'
+];
+
 const PartnerRegistration: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -34,9 +41,27 @@ const PartnerRegistration: React.FC = () => {
     cuisines: '',
     fssaiLicense: '',
     imageUrl: '',
-    latitude: 0,
-    longitude: 0
+    locationCoordinates: ''
   });
+
+  const fetchLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setPartnerForm(prev => ({
+            ...prev,
+            locationCoordinates: `${position.coords.latitude}, ${position.coords.longitude}`
+          }));
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          showToast('Could not fetch location. Please enable location services.', 'error');
+        }
+      );
+    } else {
+      showToast('Geolocation is not supported by this browser.', 'error');
+    }
+  };
 
   const handlePartnerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,11 +91,19 @@ const PartnerRegistration: React.FC = () => {
       showToast('Please select or provide a restaurant image', 'error');
       return;
     }
+    if (!partnerForm.locationCoordinates) {
+      showToast('Please fetch your location', 'error');
+      return;
+    }
+
+    const [lat, lng] = partnerForm.locationCoordinates.split(',').map(s => parseFloat(s.trim()));
 
     setLoading(true);
     try {
       await registerPartner({
         ...partnerForm,
+        latitude: lat,
+        longitude: lng,
         cuisines: partnerForm.cuisines.split(',').map(c => c.trim())
       });
       setSuccess(true);
@@ -218,6 +251,58 @@ const PartnerRegistration: React.FC = () => {
                       value={partnerForm.fssaiLicense}
                       onChange={e => setPartnerForm({...partnerForm, fssaiLicense: e.target.value})}
                     />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Restaurant Image</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {DEFAULT_RESTAURANT_IMAGES.map((img, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setPartnerForm({...partnerForm, imageUrl: img})}
+                      className={`relative rounded-2xl overflow-hidden aspect-square border-2 transition-all ${partnerForm.imageUrl === img ? 'border-primary' : 'border-transparent'}`}
+                    >
+                      <img src={img} alt={`Default ${index + 1}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    </button>
+                  ))}
+                </div>
+                <input 
+                  type="url" 
+                  placeholder="Or paste image URL here" 
+                  className="w-full bg-gray-50 border-none rounded-2xl py-3.5 px-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                  value={partnerForm.imageUrl}
+                  onChange={e => setPartnerForm({...partnerForm, imageUrl: e.target.value})}
+                />
+                {partnerForm.imageUrl && (
+                  <div className="rounded-2xl overflow-hidden aspect-video">
+                    <img src={partnerForm.imageUrl} alt="Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Location (Lat, Long)</label>
+                  <div className="relative flex gap-2">
+                    <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-gray-300" />
+                    <input 
+                      required
+                      readOnly
+                      type="text"
+                      placeholder="latitude, longitude" 
+                      className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all opacity-50 cursor-not-allowed"
+                      value={partnerForm.locationCoordinates}
+                    />
+                    <button 
+                      type="button"
+                      onClick={fetchLocation}
+                      className="bg-primary text-white px-4 py-3.5 rounded-2xl text-xs font-bold hover:bg-orange-600 transition-all"
+                    >
+                      Fetch
+                    </button>
                   </div>
                 </div>
               </div>

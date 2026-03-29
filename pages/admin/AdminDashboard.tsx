@@ -134,6 +134,7 @@ const AdminDashboard: React.FC = () => {
             { id: 'restaurants', icon: Store, label: 'Restaurants' },
             { id: 'orders', icon: ShoppingBag, label: 'Orders' },
             { id: 'users', icon: Users, label: 'Users' },
+            { id: 'activities', icon: TrendingUp, label: 'Recent Activities' },
             { id: 'verification', icon: CheckCircle2, label: 'Verification', badge: users.filter(u => !u.isVerified && (u.role === 'PARTNER' || u.role === 'DELIVERY')).length }
           ].map((item) => (
             <button 
@@ -508,6 +509,34 @@ const AdminDashboard: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'activities' && (
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+          >
+            <div className="p-6 border-b border-gray-50">
+              <h2 className="text-xl font-black text-dark tracking-tight">Recent Activities</h2>
+              <p className="text-sm text-gray-400 font-medium">Latest actions across the platform.</p>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                {orders.slice(0, 15).map((order) => (
+                  <div key={order.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
+                    <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center">
+                      <ShoppingBag className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-dark">Order #{order.id.toString().slice(-6)} placed by {order.customerName}</p>
+                      <p className="text-xs text-gray-400 font-medium">{new Date(order.date).toLocaleString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}

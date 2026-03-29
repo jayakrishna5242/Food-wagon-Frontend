@@ -22,7 +22,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
   const showToast = useCallback((message: string, type: ToastType = 'success') => {
     const id = Math.random().toString(36).substr(2, 9);
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts([{ id, message, type }]);
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
@@ -39,7 +39,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     <ToastContext.Provider value={contextValue}>
       {children}
       <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-3 pointer-events-none w-full items-center px-4">
-        <AnimatePresence mode="multiple">
+        <AnimatePresence mode="popLayout">
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}

@@ -1,11 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
-import { Search as SearchIcon, X, ChevronRight, ArrowLeft, History, Star } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search as SearchIcon, X, ChevronRight, ArrowLeft, History, Star, Clock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { searchGlobal } from '../../services/api';
+import { searchGlobal, calculateDistance, calculateDeliveryTime } from '../../services/api';
 import { Restaurant, MenuItem } from '../../types';
 import RestaurantCard from '../../components/RestaurantCard';
 import MenuItemComponent from '../../components/MenuItem';
+import { useLocationContext } from '../../context/LocationContext';
 
 const RECENT_SEARCHES_KEY = 'foodwagon_recent_searches';
 
@@ -17,6 +18,15 @@ const Search: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const { coordinates } = useLocationContext();
+
+  const getDeliveryTime = (restaurant: Restaurant) => {
+    if (coordinates && restaurant.latitude && restaurant.longitude) {
+      const distance = calculateDistance(coordinates.latitude, coordinates.longitude, restaurant.latitude, restaurant.longitude);
+      return calculateDeliveryTime(distance);
+    }
+    return restaurant.deliveryTime;
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
@@ -93,7 +103,7 @@ const Search: React.FC = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search for restaurants or dishes"
-              className="w-full h-12 pl-12 pr-12 bg-gray-50 border-none rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-orange-500/20 transition-all"
+              className="w-full h-12 pl-12 pr-12 bg-gray-50 border-none rounded-none text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-orange-500/20 transition-all"
               autoFocus
             />
             {query && (
@@ -187,7 +197,9 @@ const Search: React.FC = () => {
                           <span className="flex items-center gap-1 text-orange-500">
                             <Star className="w-3 h-3 fill-orange-500" /> {restaurant.rating}
                           </span>
-                          <span>{restaurant.deliveryTime}</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> {getDeliveryTime(restaurant)}
+                          </span>
                         </div>
                       </div>
                       <ChevronRight className="text-gray-300 w-5 h-5 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />

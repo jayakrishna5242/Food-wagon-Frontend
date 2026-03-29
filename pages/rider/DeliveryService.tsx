@@ -12,6 +12,7 @@ type BookingType = 'pickup' | 'buy';
 const DeliveryService: React.FC = () => {
   const { address } = useLocationContext();
   const [showForm, setShowForm] = useState(false);
+  const [step, setStep] = useState(1);
   const [bookingType, setBookingType] = useState<BookingType>('pickup');
   const [pickupLocation, setPickupLocation] = useState('');
   const [dropLocation, setDropLocation] = useState('');
@@ -21,6 +22,10 @@ const DeliveryService: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [bookings, setBookings] = useState<GenieBooking[]>([]);
   const formRef = useRef<HTMLDivElement>(null);
+  
+  // Mock state for step 2
+  const [estimatedTime, setEstimatedTime] = useState('');
+  const [estimatedPrice, setEstimatedPrice] = useState('');
 
   useEffect(() => {
     const loadBookings = async () => {
@@ -81,24 +86,31 @@ const DeliveryService: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
-
-    setIsSubmitting(true);
-    try {
-      await placeGenieBooking({
-        type: bookingType,
-        pickupLocation,
-        dropLocation,
-        itemDescription
-      });
-      setIsSuccess(true);
-      setPickupLocation('');
-      setDropLocation('');
-      setItemDescription('');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSubmitting(false);
+    if (step === 1) {
+      if (!validate()) return;
+      // Mock calculation
+      setEstimatedTime('30-45 mins');
+      setEstimatedPrice('₹150');
+      setStep(2);
+    } else {
+      setIsSubmitting(true);
+      try {
+        await placeGenieBooking({
+          type: bookingType,
+          pickupLocation,
+          dropLocation,
+          itemDescription
+        });
+        setIsSuccess(true);
+        setPickupLocation('');
+        setDropLocation('');
+        setItemDescription('');
+        setStep(1);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -111,15 +123,6 @@ const DeliveryService: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-white sticky top-20 z-30 shadow-sm">
-        <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center gap-4">
-          <Link to="/" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <ArrowLeft className="w-6 h-6 text-dark" />
-          </Link>
-          <h1 className="text-xl font-bold text-dark">Feasti Genie</h1>
-        </div>
-      </div>
-
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <AnimatePresence mode="wait">
           {!showForm ? (
@@ -256,14 +259,15 @@ const DeliveryService: React.FC = () => {
                       <h3 className="text-3xl font-bold text-dark mb-4">Booking Successful!</h3>
                       <p className="text-gray-500 mb-10 max-w-sm mx-auto">Your Genie will be assigned shortly. You can track the progress in your orders.</p>
                       <button 
-                        onClick={() => setShowForm(false)}
+                        onClick={() => { setShowForm(false); setStep(1); }}
                         className="w-full bg-dark text-white font-bold py-5 rounded-2xl hover:bg-black transition-colors shadow-xl shadow-black/10"
                       >
                         Back to Genie Home
                       </button>
                     </div>
-                  ) : (
+                  ) : step === 1 ? (
                     <form onSubmit={handleSubmit} className="space-y-8">
+                      {/* ... existing form fields ... */}
                       <div className="space-y-6">
                         <div className="relative">
                           <div className="flex items-center justify-between ml-1 mb-3">
@@ -320,30 +324,47 @@ const DeliveryService: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="bg-orange-50 p-5 rounded-2xl flex items-start gap-4 border border-orange-100">
-                        <AlertTriangle className="w-6 h-6 text-orange-500 shrink-0 mt-0.5" />
-                        <p className="text-xs text-orange-800 font-bold leading-relaxed">
-                          Estimated delivery fee will be calculated based on distance. Minimum fee applies.
-                        </p>
-                      </div>
-
                       <button 
                         type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-primary text-white font-black py-6 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center gap-4 disabled:opacity-70 text-sm uppercase tracking-widest"
+                        className="w-full bg-primary text-white font-black py-6 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center gap-4 text-sm uppercase tracking-widest"
                       >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 className="w-6 h-6 animate-spin" />
-                            <span>BOOKING GENIE...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>BOOK GENIE NOW</span>
-                            <ArrowRight className="w-6 h-6" />
-                          </>
-                        )}
+                        <span>CONTINUE</span>
+                        <ArrowRight className="w-6 h-6" />
                       </button>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-8">
+                      <div className="bg-gray-50 p-6 rounded-2xl space-y-4">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Estimated Time:</span>
+                          <span className="font-bold text-dark">{estimatedTime}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Estimated Price:</span>
+                          <span className="font-bold text-dark">{estimatedPrice}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <button 
+                          type="button"
+                          onClick={() => setStep(1)}
+                          className="flex-1 bg-gray-200 text-dark font-bold py-6 rounded-2xl hover:bg-gray-300 transition-all text-sm uppercase tracking-widest"
+                        >
+                          Back
+                        </button>
+                        <button 
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="flex-1 bg-primary text-white font-black py-6 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center gap-4 disabled:opacity-70 text-sm uppercase tracking-widest"
+                        >
+                          {isSubmitting ? (
+                            <Loader2 className="w-6 h-6 animate-spin" />
+                          ) : (
+                            <span>CONFIRM BOOKING</span>
+                          )}
+                        </button>
+                      </div>
                     </form>
                   )}
                 </div>

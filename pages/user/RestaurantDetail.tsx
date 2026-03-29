@@ -1,11 +1,12 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, Clock, MapPin, Search, Heart, ArrowLeft } from 'lucide-react';
 import MenuItem from '../../components/MenuItem';
-import { fetchMenu, fetchRestaurants } from '../../services/api';
+import { fetchMenu, fetchRestaurants, calculateDistance, calculateDeliveryTime } from '../../services/api';
 import { Restaurant, MenuItem as MenuItemType } from '../../types';
 import { useFavorites } from '../../context/FavoritesContext';
+import { useLocationContext } from '../../context/LocationContext';
 import { motion, AnimatePresence } from 'motion/react';
 
 const RestaurantDetail: React.FC = () => {
@@ -14,11 +15,35 @@ const RestaurantDetail: React.FC = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItemType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<MenuItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
   
+  useEffect(() => {
+    if (searchQuery.length > 0) {
+      const filtered = menuItems.filter(item => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSuggestions(filtered.slice(0, 5));
+    } else {
+      setSuggestions([]);
+    }
+  }, [searchQuery, menuItems]);
+  
   const { toggleFavorite, isFavorite } = useFavorites();
+  const { coordinates } = useLocationContext();
+
+  const distance = useMemo(() => {
+    if (coordinates && restaurant) {
+      return calculateDistance(coordinates.latitude, coordinates.longitude, restaurant.latitude, restaurant.longitude);
+    }
+    return null;
+  }, [coordinates, restaurant]);
+
+  const deliveryTime = useMemo(() => {
+    return calculateDeliveryTime(distance);
+  }, [distance]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -152,7 +177,7 @@ const RestaurantDetail: React.FC = () => {
                    <div className="bg-gray-100 p-0.5 md:p-1 rounded">
                     <MapPin className="w-2.5 h-2.5 md:w-4 md:h-4" />
                    </div>
-                   <span className="font-medium truncate">{restaurant.location}, 2.5 km</span>
+                   <span className="font-medium truncate">{restaurant.location}, {distance !== null ? `${distance} km` : '...'}</span>
                 </div>
               </div>
               
@@ -172,7 +197,7 @@ const RestaurantDetail: React.FC = () => {
                  <div className="bg-gray-100 p-1 md:p-1.5 rounded-lg">
                     <Clock className="w-4 h-4 md:w-5 md:h-5" />
                  </div>
-                 <span>{restaurant.deliveryTime}</span>
+                 <span>{deliveryTime}</span>
                </div>
                <div className="flex items-center gap-2 md:gap-3 text-dark font-black text-xs md:text-sm">
                  <div className="bg-gray-100 p-1 md:p-1.5 rounded-lg flex items-center justify-center w-6 h-6 md:w-8 md:h-8">
@@ -196,9 +221,25 @@ const RestaurantDetail: React.FC = () => {
                placeholder="Search for your favorites..." 
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
-               className="w-full bg-white border border-gray-200 rounded-2xl py-3 md:py-4 px-10 md:px-12 text-xs md:text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm group-hover:shadow-md"
+               className="w-full bg-white border border-gray-200 rounded-none py-3 md:py-4 px-10 md:px-12 text-xs md:text-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm group-hover:shadow-md"
              />
              <Search className="absolute left-3.5 md:left-4 top-3 md:top-4 text-gray-400 w-4 h-4 md:w-5 md:h-5 group-hover:text-primary transition-colors" />
+             {suggestions.length > 0 && (
+               <div className="absolute top-full left-0 w-full bg-white border border-gray-200 shadow-lg z-50 mt-1 rounded-b-lg">
+                 {suggestions.map(item => (
+                   <div 
+                     key={item.id} 
+                     className="p-3 text-xs cursor-pointer hover:bg-gray-50 text-left"
+                     onClick={() => {
+                       setSearchQuery(item.name);
+                       setSuggestions([]);
+                     }}
+                   >
+                     {item.name}
+                   </div>
+                 ))}
+               </div>
+             )}
            </motion.div>
         </div>
 

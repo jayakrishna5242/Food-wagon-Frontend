@@ -14,7 +14,6 @@ import Search from './pages/user/Search';
 import Restaurants from './pages/user/Restaurants';
 import PartnerDashboard from './pages/partner/PartnerDashboard';
 import AboutUs from './pages/user/AboutUs';
-import PickupHistory from './pages/user/PickupHistory';
 import OrderRating from './pages/user/OrderRating';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -97,7 +96,6 @@ const App: React.FC = () => {
                       <Route path="/supermarket" element={<Supermarket />} />
                       <Route path="/delivery-service" element={<DeliveryService />} />
                       <Route path="/about" element={<AboutUs />} />
-                      <Route path="/pickup-history" element={<PickupHistory />} />
                       <Route path="/order-rating/:orderId" element={<OrderRating />} />
                     </Routes>
                   </Layout>

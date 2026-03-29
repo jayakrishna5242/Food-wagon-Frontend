@@ -16,11 +16,13 @@ const FreshStores: React.FC = () => {
     { id: 1, name: 'Fresh Meat Hub', rating: 4.5, time: '20-30 mins', distance: '2.5 km', items: ['Chicken', 'Mutton'], image: 'https://picsum.photos/seed/meatstore/800/600' },
     { id: 2, name: 'Ocean Catch', rating: 4.8, time: '30-45 mins', distance: '4.1 km', items: ['Fish', 'Prawns'], image: 'https://picsum.photos/seed/fishstore/800/600' },
     { id: 3, name: 'Daily Fresh Meats', rating: 4.2, time: '15-25 mins', distance: '1.2 km', items: ['Chicken', 'Eggs'], image: 'https://picsum.photos/seed/freshmeat/800/600' },
+    { id: 4, name: 'Green Valley Farms', rating: 4.6, time: '25-35 mins', distance: '3.0 km', items: ['Organic Veggies', 'Fruits'], image: 'https://picsum.photos/seed/greenvalley/800/600' },
+    { id: 5, name: 'The Dairy Barn', rating: 4.7, time: '10-20 mins', distance: '0.8 km', items: ['Milk', 'Cheese', 'Butter'], image: 'https://picsum.photos/seed/dairybarn/800/600' },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-white sticky top-20 z-30 shadow-sm">
+    <div className="min-h-screen bg-gray-50 pb-16">
+      <div className="bg-white relative z-30 shadow-sm">
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center gap-4">
           <Link to="/" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <ArrowLeft className="w-6 h-6 text-dark" />
@@ -29,11 +31,11 @@ const FreshStores: React.FC = () => {
         </div>
       </div>
 
-      <div className="container mx-auto max-w-7xl px-4 py-8">
+      <div className="container mx-auto max-w-7xl px-4 py-12">
         {/* Category Selection */}
-        <div className="mb-10">
-          <h2 className="text-2xl font-bold text-dark mb-6 uppercase">What are you looking for?</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-dark mb-8 uppercase">What are you looking for?</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {categories.map((cat) => (
               <motion.div 
                 key={cat.name}
@@ -52,7 +54,7 @@ const FreshStores: React.FC = () => {
 
         {/* Stores List */}
         <div>
-          <h2 className="text-2xl font-bold text-dark mb-6 uppercase">Stores Near You</h2>
+          <h2 className="text-2xl font-bold text-dark mb-8 uppercase">Stores Near You</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {stores.map((store) => (
               <motion.div 
@@ -89,9 +91,9 @@ const FreshStores: React.FC = () => {
                       </span>
                     ))}
                   </div>
-                  <button className="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-[#e66f0f] transition-colors shadow-md active:scale-95">
+                  <Link to={`/restaurant/${store.id}`} className="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-[#e66f0f] transition-colors shadow-md active:scale-95 text-center block">
                     View Store
-                  </button>
+                  </Link>
                 </div>
               </motion.div>
             ))}

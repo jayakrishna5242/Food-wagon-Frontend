@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Star } from 'lucide-react';
 import { MenuItem as MenuItemType } from '../types';
 import { useCart } from '../context/CartContext';
 import { motion } from 'motion/react';
@@ -26,12 +25,6 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
           <div className={`w-3 h-3 border ${item.isVeg ? 'border-green-600' : 'border-red-600'} flex items-center justify-center p-[1.5px]`}>
             <div className={`w-full h-full rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
           </div>
-          {item.rating !== undefined && (
-            <div className="flex items-center gap-1 text-yellow-600 text-xs font-bold">
-              <Star className="w-3 h-3 fill-yellow-600" />
-              <span>{item.rating > 0 ? item.rating : '4.5'}</span>
-            </div>
-          )}
         </div>
         <h3 className="text-base font-bold text-gray-900 mb-1 group-hover:text-primary transition-colors">{item.name}</h3>
         <p className="text-sm font-bold text-gray-900 mb-2">₹{item.price}</p>
@@ -46,13 +39,15 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
           referrerPolicy="no-referrer"
         />
         
-        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24">
+        <motion.div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24">
           {item.inStock === false ? (
             <div className="bg-gray-100 text-gray-400 py-2 rounded-xl text-[10px] font-bold uppercase text-center shadow-sm border border-gray-200">
               Sold Out
             </div>
           ) : quantity === 0 ? (
             <motion.button 
+              layoutId={`add-btn-${item.id}`}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => addToCart(item)}
@@ -61,13 +56,17 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
               Add
             </motion.button>
           ) : (
-            <div className="flex items-center justify-between px-2 py-2 bg-primary text-white rounded-xl text-xs font-bold shadow-md">
+            <motion.div 
+              layoutId={`add-btn-${item.id}`}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="flex items-center justify-between px-2 py-2 bg-primary text-white rounded-xl text-xs font-bold shadow-md"
+            >
               <motion.button whileTap={{ scale: 0.8 }} onClick={() => removeFromCart(item.id)} className="w-6 h-6 flex items-center justify-center">-</motion.button>
               <span>{quantity}</span>
               <motion.button whileTap={{ scale: 0.8 }} onClick={() => addToCart(item)} className="w-6 h-6 flex items-center justify-center">+</motion.button>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );

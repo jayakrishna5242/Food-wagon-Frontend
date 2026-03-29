@@ -9,7 +9,7 @@ import { MOCK_OFFERS } from '../mockData';
 const USER_KEY = 'foodwagon_user';
 const USERS_DB_KEY = 'foodwagon_users_db_v4';
 const ORDERS_DB_KEY = 'foodwagon_orders_db_v4';
-const RESTAURANTS_DB_KEY = 'foodwagon_restaurants_db_v4';
+const RESTAURANTS_DB_KEY = 'foodwagon_restaurants_db_v5';
 const MENU_ITEMS_DB_KEY = 'foodwagon_menu_items_db_v4';
 const OFFERS_DB_KEY = 'foodwagon_offers_db_v4';
 const TRIPS_DB_KEY = 'foodwagon_trips_db_v4';
@@ -97,7 +97,123 @@ const saveOrdersDB = (orders: Order[]) => {
 
 export const getRestaurantsDB = (): Restaurant[] => {
   const data = localStorage.getItem(RESTAURANTS_DB_KEY);
-  return data ? JSON.parse(data) : [];
+  if (!data) {
+    const initial: Restaurant[] = [
+      {
+        id: 1,
+        name: 'Fresh Meat Hub',
+        imageUrl: 'https://picsum.photos/seed/meatstore/800/600',
+        rating: 4.5,
+        ratingCount: 120,
+        deliveryTime: '20-30 mins',
+        costForTwo: '₹300',
+        cuisines: ['Chicken', 'Mutton'],
+        location: 'Indiranagar',
+        city: 'Bangalore',
+        isVerified: true
+      },
+      {
+        id: 2,
+        name: 'Ocean Catch',
+        imageUrl: 'https://picsum.photos/seed/fishstore/800/600',
+        rating: 4.8,
+        ratingCount: 85,
+        deliveryTime: '30-45 mins',
+        costForTwo: '₹500',
+        cuisines: ['Fish', 'Prawns'],
+        location: 'Koramangala',
+        city: 'Bangalore',
+        isVerified: true
+      },
+      {
+        id: 3,
+        name: 'Daily Fresh Meats',
+        imageUrl: 'https://picsum.photos/seed/freshmeat/800/600',
+        rating: 4.2,
+        ratingCount: 200,
+        deliveryTime: '15-25 mins',
+        costForTwo: '₹250',
+        cuisines: ['Chicken', 'Eggs'],
+        location: 'BTM Layout',
+        city: 'Bangalore',
+        isVerified: true
+      },
+      {
+        id: 4,
+        name: 'Hyderabad Biryani House',
+        imageUrl: 'https://picsum.photos/seed/biryani/800/600',
+        rating: 4.7,
+        ratingCount: 300,
+        deliveryTime: '30-40 mins',
+        costForTwo: '₹600',
+        cuisines: ['Biryani', 'Mughlai'],
+        location: 'Banjara Hills',
+        city: 'Hyderabad',
+        isVerified: true
+      },
+      {
+        id: 5,
+        name: 'Paradise Food Court',
+        imageUrl: 'https://picsum.photos/seed/paradise/800/600',
+        rating: 4.6,
+        ratingCount: 500,
+        deliveryTime: '25-35 mins',
+        costForTwo: '₹700',
+        cuisines: ['Biryani', 'Kebabs'],
+        location: 'Secunderabad',
+        city: 'Hyderabad',
+        isVerified: true
+      },
+      {
+        id: 6,
+        name: 'Shah Ghouse',
+        imageUrl: 'https://picsum.photos/seed/shahghouse/800/600',
+        rating: 4.5,
+        ratingCount: 400,
+        deliveryTime: '35-45 mins',
+        costForTwo: '₹500',
+        cuisines: ['Biryani', 'Hyderabadi'],
+        location: 'Gachibowli',
+        city: 'Hyderabad',
+        isVerified: true
+      },
+      {
+        id: 7,
+        name: 'Pista House',
+        imageUrl: 'https://picsum.photos/seed/pistahouse/800/600',
+        rating: 4.4,
+        ratingCount: 350,
+        deliveryTime: '30-40 mins',
+        costForTwo: '₹400',
+        cuisines: ['Biryani', 'Haleem'],
+        location: 'Tolichowki',
+        city: 'Hyderabad',
+        isVerified: true
+      },
+      {
+        id: 8,
+        name: 'Sarvi',
+        imageUrl: 'https://picsum.photos/seed/sarvi/800/600',
+        rating: 4.3,
+        ratingCount: 250,
+        deliveryTime: '25-35 mins',
+        costForTwo: '₹600',
+        cuisines: ['Mughlai', 'Hyderabadi'],
+        location: 'Banjara Hills',
+        city: 'Hyderabad',
+        isVerified: true
+      }
+    ];
+    localStorage.setItem(RESTAURANTS_DB_KEY, JSON.stringify(initial));
+    return initial;
+  }
+  return JSON.parse(data);
+};
+
+export const addMockRestaurants = (newRestaurants: Restaurant[]) => {
+  const restaurants = getRestaurantsDB();
+  const updated = [...restaurants, ...newRestaurants];
+  saveRestaurantsDB(updated);
 };
 
 export const saveRestaurantsDB = (restaurants: Restaurant[]) => {
@@ -241,6 +357,15 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const d = R * c; // Distance in km
   return Number(d.toFixed(1));
+};
+
+export const calculateDeliveryTime = (distance: number | null): string => {
+  if (distance !== null) {
+    // Assume 20km/h average speed + 10 mins prep time
+    const minutes = Math.round((distance / 20) * 60) + 10;
+    return `${minutes} mins`;
+  }
+  return '30-40 mins'; // Default fallback
 };
 
 function deg2rad(deg: number) {

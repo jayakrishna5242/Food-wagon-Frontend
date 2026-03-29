@@ -720,237 +720,201 @@ const PartnerDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Add/Edit Menu Item Modal */}
-        <AnimatePresence>
-          {showAddMenuItem && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowAddMenuItem(false)}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              />
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative overflow-hidden"
-              >
-                <div className="p-10">
-                  <h2 className="text-2xl font-black text-gray-900 tracking-tight mb-2">
-                    {editingMenuItem ? 'Edit Menu Item' : 'Add New Menu Item'}
-                  </h2>
-                  <p className="text-gray-500 font-medium mb-8">Provide the details for your dish.</p>
+        {/* Add/Edit Menu Item Form */}
+        {showAddMenuItem && (
+          <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100 mb-8">
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight mb-2">
+              {editingMenuItem ? 'Edit Menu Item' : 'Add New Menu Item'}
+            </h2>
+            <p className="text-gray-500 font-medium mb-8">Provide the details for your dish.</p>
 
-                  <form onSubmit={handleAddMenuItem} className="space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Item Name</label>
-                        <input 
-                          required
-                          type="text"
-                          value={newMenuItem.name}
-                          onChange={e => setNewMenuItem({...newMenuItem, name: e.target.value})}
-                          placeholder="E.g. Butter Chicken"
-                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Category</label>
-                        <input 
-                          required
-                          type="text"
-                          value={newMenuItem.category}
-                          onChange={e => setNewMenuItem({...newMenuItem, category: e.target.value})}
-                          placeholder="E.g. Main Course"
-                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Description</label>
-                      <textarea 
-                        required
-                        rows={3}
-                        value={newMenuItem.description}
-                        onChange={e => setNewMenuItem({...newMenuItem, description: e.target.value})}
-                        placeholder="Describe your dish..."
-                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all resize-none"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Price (₹)</label>
-                        <input 
-                          required
-                          type="number"
-                          value={newMenuItem.price}
-                          onChange={e => setNewMenuItem({...newMenuItem, price: Number(e.target.value)})}
-                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Type</label>
-                        <div className="flex bg-gray-50 p-1 rounded-2xl border border-gray-100">
-                          <button 
-                            type="button"
-                            onClick={() => setNewMenuItem({...newMenuItem, isVeg: true})}
-                            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${newMenuItem.isVeg ? 'bg-green-500 text-white shadow-md' : 'text-gray-400'}`}
-                          >
-                            Veg
-                          </button>
-                          <button 
-                            type="button"
-                            onClick={() => setNewMenuItem({...newMenuItem, isVeg: false})}
-                            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${!newMenuItem.isVeg ? 'bg-red-500 text-white shadow-md' : 'text-gray-400'}`}
-                          >
-                            Non-Veg
-                          </button>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Image URL</label>
-                        <input 
-                          required
-                          type="url"
-                          value={newMenuItem.imageUrl}
-                          onChange={e => setNewMenuItem({...newMenuItem, imageUrl: e.target.value})}
-                          placeholder="https://..."
-                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4 pt-4">
-                      <button 
-                        type="button"
-                        onClick={() => setShowAddMenuItem(false)}
-                        className="flex-1 bg-gray-100 text-gray-600 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all"
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        type="submit"
-                        className="flex-1 bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
-                      >
-                        {editingMenuItem ? 'Update Item' : 'Add Item'}
-                      </button>
-                    </div>
-                  </form>
+            <form onSubmit={handleAddMenuItem} className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Item Name</label>
+                  <input 
+                    required
+                    type="text"
+                    value={newMenuItem.name}
+                    onChange={e => setNewMenuItem({...newMenuItem, name: e.target.value})}
+                    placeholder="E.g. Butter Chicken"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
+                  />
                 </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-        {/* Add Offer Modal */}
-        <AnimatePresence>
-          {showAddOffer && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowAddOffer(false)}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              />
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl relative overflow-hidden"
-              >
-                <div className="p-10">
-                  <h2 className="text-2xl font-black text-gray-900 tracking-tight mb-2">Create New Offer</h2>
-                  <p className="text-gray-500 font-medium mb-8">Fill in the details to create a new promotional coupon.</p>
-
-                  <form onSubmit={handleAddOffer} className="space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Coupon Code</label>
-                        <input 
-                          required
-                          type="text"
-                          value={newOffer.code}
-                          onChange={e => setNewOffer({...newOffer, code: e.target.value.toUpperCase()})}
-                          placeholder="E.g. WELCOME50"
-                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Discount Type</label>
-                        <select 
-                          value={newOffer.discountType}
-                          onChange={e => setNewOffer({...newOffer, discountType: e.target.value as any})}
-                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all appearance-none"
-                        >
-                          <option value="PERCENTAGE">Percentage (%)</option>
-                          <option value="FIXED">Fixed Amount (₹)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Description</label>
-                      <input 
-                        required
-                        type="text"
-                        value={newOffer.description}
-                        onChange={e => setNewOffer({...newOffer, description: e.target.value})}
-                        placeholder="E.g. Get 50% off on your first order"
-                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Discount Value</label>
-                        <input 
-                          required
-                          type="number"
-                          value={newOffer.discountValue}
-                          onChange={e => setNewOffer({...newOffer, discountValue: Number(e.target.value)})}
-                          placeholder="Value"
-                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Min Order Value</label>
-                        <input 
-                          required
-                          type="number"
-                          value={newOffer.minOrderValue}
-                          onChange={e => setNewOffer({...newOffer, minOrderValue: Number(e.target.value)})}
-                          placeholder="Min Order"
-                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4 pt-4">
-                      <button 
-                        type="button"
-                        onClick={() => setShowAddOffer(false)}
-                        className="flex-1 bg-gray-100 text-gray-600 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all"
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        type="submit"
-                        className="flex-1 bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
-                      >
-                        Create Offer
-                      </button>
-                    </div>
-                  </form>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Category</label>
+                  <input 
+                    required
+                    type="text"
+                    value={newMenuItem.category}
+                    onChange={e => setNewMenuItem({...newMenuItem, category: e.target.value})}
+                    placeholder="E.g. Main Course"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
+                  />
                 </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Description</label>
+                <textarea 
+                  required
+                  rows={3}
+                  value={newMenuItem.description}
+                  onChange={e => setNewMenuItem({...newMenuItem, description: e.target.value})}
+                  placeholder="Describe your dish..."
+                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Price (₹)</label>
+                  <input 
+                    required
+                    type="number"
+                    value={newMenuItem.price}
+                    onChange={e => setNewMenuItem({...newMenuItem, price: Number(e.target.value)})}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Type</label>
+                  <div className="flex bg-gray-50 p-1 rounded-2xl border border-gray-100">
+                    <button 
+                      type="button"
+                      onClick={() => setNewMenuItem({...newMenuItem, isVeg: true})}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${newMenuItem.isVeg ? 'bg-green-500 text-white shadow-md' : 'text-gray-400'}`}
+                    >
+                      Veg
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setNewMenuItem({...newMenuItem, isVeg: false})}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${!newMenuItem.isVeg ? 'bg-red-500 text-white shadow-md' : 'text-gray-400'}`}
+                    >
+                      Non-Veg
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Image URL</label>
+                  <input 
+                    required
+                    type="url"
+                    value={newMenuItem.imageUrl}
+                    onChange={e => setNewMenuItem({...newMenuItem, imageUrl: e.target.value})}
+                    placeholder="https://..."
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button 
+                  type="button"
+                  onClick={() => setShowAddMenuItem(false)}
+                  className="flex-1 bg-gray-100 text-gray-600 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+                >
+                  {editingMenuItem ? 'Update Item' : 'Add Item'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Add Offer Form */}
+        {showAddOffer && (
+          <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100 mb-8">
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight mb-2">Create New Offer</h2>
+            <p className="text-gray-500 font-medium mb-8">Fill in the details to create a new promotional coupon.</p>
+
+            <form onSubmit={handleAddOffer} className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Coupon Code</label>
+                  <input 
+                    required
+                    type="text"
+                    value={newOffer.code}
+                    onChange={e => setNewOffer({...newOffer, code: e.target.value.toUpperCase()})}
+                    placeholder="E.g. WELCOME50"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Discount Type</label>
+                  <select 
+                    value={newOffer.discountType}
+                    onChange={e => setNewOffer({...newOffer, discountType: e.target.value as any})}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all appearance-none"
+                  >
+                    <option value="PERCENTAGE">Percentage (%)</option>
+                    <option value="FIXED">Fixed Amount (₹)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Description</label>
+                <input 
+                  required
+                  type="text"
+                  value={newOffer.description}
+                  onChange={e => setNewOffer({...newOffer, description: e.target.value})}
+                  placeholder="E.g. Get 50% off on your first order"
+                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Discount Value</label>
+                  <input 
+                    required
+                    type="number"
+                    value={newOffer.discountValue}
+                    onChange={e => setNewOffer({...newOffer, discountValue: Number(e.target.value)})}
+                    placeholder="Value"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Min Order Value</label>
+                  <input 
+                    required
+                    type="number"
+                    value={newOffer.minOrderValue}
+                    onChange={e => setNewOffer({...newOffer, minOrderValue: Number(e.target.value)})}
+                    placeholder="Min Order"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button 
+                  type="button"
+                  onClick={() => setShowAddOffer(false)}
+                  className="flex-1 bg-gray-100 text-gray-600 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+                >
+                  Create Offer
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Dashboard Content */}
         {activeTab === 'dashboard' && (

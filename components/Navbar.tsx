@@ -100,7 +100,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-100 flex items-center w-full h-20 sticky top-0 z-[1000]">
+    <nav className="bg-white border-b border-gray-100 flex items-center w-full h-20 z-[1000]">
       <div className="container mx-auto px-4 max-w-7xl flex items-center justify-between">
         {/* Logo Section */}
         <Link to="/" className="flex items-center gap-2 group mr-2 flex-shrink-0">
@@ -174,11 +174,11 @@ const Navbar: React.FC = () => {
         )}
 
         {/* Nav Links */}
-        <div className="flex items-center gap-4 sm:gap-8 ml-auto">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <div className="flex items-center gap-4 sm:gap-8 ml-auto overflow-x-auto no-scrollbar">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="hidden md:flex">
             <Link to="/search" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors whitespace-nowrap">
               <Search className="w-5 h-5" />
-              <span className="hidden md:inline">Search</span>
+              <span>Search</span>
             </Link>
           </motion.div>
           
@@ -191,14 +191,20 @@ const Navbar: React.FC = () => {
 
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="hidden md:flex">
             <Link to="/cart" className="flex items-center gap-2 text-dark hover:text-primary font-medium transition-colors relative whitespace-nowrap">
-              <div className={`relative transition-transform duration-300 ${animateCart ? 'scale-125' : 'scale-100'}`}>
+              <motion.div 
+                animate={animateCart ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative"
+              >
                 <ShoppingBag className="w-6 h-6" />
                 {cartCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-secondary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                     {cartCount}
                   </span>
                 )}
-              </div>
+              </motion.div>
               <span className="hidden md:inline">Cart</span>
             </Link>
           </motion.div>

@@ -13,6 +13,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     city: "Delhi",
     isPureVeg: false,
     isNew: true,
+    isOffline: true,
     aggregatedDiscountInfo: {
       header: "50% OFF",
       subHeader: "UPTO ₹100"
@@ -29,6 +30,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     location: "Sector 18",
     city: "Noida",
     isPureVeg: false,
+    isOffline: false,
     aggregatedDiscountInfo: {
       header: "FREE ITEM",
       subHeader: "ON ORDERS ABOVE ₹500"
@@ -45,7 +47,8 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     location: "Chandni Chowk",
     city: "Delhi",
     isPureVeg: true,
-    isNew: true
+    isNew: true,
+    isOffline: true
   },
   {
     id: 4,
@@ -150,7 +153,9 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     cuisines: ["Biryani", "Hyderabadi", "Mughlai"],
     location: "Secunderabad",
     city: "Hyderabad",
-    isPureVeg: false
+    isPureVeg: false,
+    latitude: 17.4486,
+    longitude: 78.3908
   },
   {
     id: 12,
@@ -162,7 +167,9 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     cuisines: ["North Indian", "Mughlai", "Kebabs"],
     location: "Colaba",
     city: "Mumbai",
-    isPureVeg: false
+    isPureVeg: false,
+    latitude: 18.9218,
+    longitude: 72.8333
   },
   {
     id: 13,
@@ -175,6 +182,8 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     location: "Gachibowli",
     city: "Hyderabad",
     isPureVeg: false,
+    latitude: 17.4401,
+    longitude: 78.3489,
     aggregatedDiscountInfo: {
       header: "20% OFF",
       subHeader: "UPTO ₹120"
@@ -190,7 +199,9 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     cuisines: ["Biryani", "Andhra", "South Indian"],
     location: "Koramangala",
     city: "Bangalore",
-    isPureVeg: false
+    isPureVeg: false,
+    latitude: 12.9352,
+    longitude: 77.6245
   },
   {
     id: 15,
@@ -203,7 +214,149 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     location: "Indiranagar",
     city: "Bangalore",
     isPureVeg: false,
+    latitude: 12.9719,
+    longitude: 77.6412,
     isNew: true
+  },
+  {
+    id: 30,
+    name: "Hyderabad Biryani House",
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    rating: 4.5,
+    deliveryTime: "30-40 mins",
+    costForTwo: "₹500 for two",
+    cuisines: ["Biryani", "Hyderabadi"],
+    location: "Madhapur",
+    city: "Hyderabad",
+    isPureVeg: false,
+    latitude: 17.4486,
+    longitude: 78.3908
+  },
+  {
+    id: 32,
+    name: "Pista House - Biryani",
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    rating: 4.4,
+    deliveryTime: "35-45 mins",
+    costForTwo: "₹500 for two",
+    cuisines: ["Biryani", "Hyderabadi", "Mughlai"],
+    location: "Tolichowki",
+    city: "Hyderabad",
+    isPureVeg: false,
+    latitude: 17.4067,
+    longitude: 78.4116
+  },
+  {
+    id: 33,
+    name: "Cream Stone",
+    imageUrl: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=1974&auto=format&fit=crop",
+    rating: 4.6,
+    deliveryTime: "20-30 mins",
+    costForTwo: "₹300 for two",
+    cuisines: ["Desserts", "Ice Cream"],
+    location: "Jubilee Hills",
+    city: "Hyderabad",
+    isPureVeg: true,
+    latitude: 17.4275,
+    longitude: 78.4087
+  },
+  {
+    id: 34,
+    name: "Kritunga Restaurant",
+    imageUrl: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=1974&auto=format&fit=crop",
+    rating: 4.3,
+    deliveryTime: "30-40 mins",
+    costForTwo: "₹600 for two",
+    cuisines: ["Andhra", "South Indian", "Spicy"],
+    location: "Kondapur",
+    city: "Hyderabad",
+    isPureVeg: false,
+    latitude: 17.4603,
+    longitude: 78.3562
+  },
+  {
+    id: 31,
+    name: "Bangalore Breakfast Club",
+    imageUrl: "https://images.unsplash.com/photo-1630383249896-424e482df921?q=80&w=1974&auto=format&fit=crop",
+    rating: 4.7,
+    deliveryTime: "20-30 mins",
+    costForTwo: "₹300 for two",
+    cuisines: ["South Indian", "Breakfast"],
+    location: "MG Road",
+    city: "Bangalore",
+    isPureVeg: true,
+    latitude: 12.9716,
+    longitude: 77.5946
+  },
+  {
+    id: 40,
+    name: "Hyderabad Spice Kitchen",
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    rating: 4.5,
+    deliveryTime: "30-40 mins",
+    costForTwo: "₹500 for two",
+    cuisines: ["Biryani", "North Indian"],
+    location: "Banjara Hills",
+    city: "Hyderabad",
+    isPureVeg: false,
+    latitude: 17.4143,
+    longitude: 78.4355
+  },
+  {
+    id: 41,
+    name: "The Dosa Corner",
+    imageUrl: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.2,
+    deliveryTime: "15-25 mins",
+    costForTwo: "₹200 for two",
+    cuisines: ["South Indian"],
+    location: "Ameerpet",
+    city: "Hyderabad",
+    isPureVeg: true,
+    latitude: 17.4375,
+    longitude: 78.4483
+  },
+  {
+    id: 42,
+    name: "Royal Mughlai",
+    imageUrl: "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.6,
+    deliveryTime: "35-45 mins",
+    costForTwo: "₹700 for two",
+    cuisines: ["Mughlai", "Kebabs"],
+    location: "Tolichowki",
+    city: "Hyderabad",
+    isPureVeg: false,
+    latitude: 17.4067,
+    longitude: 78.4116
+  },
+  {
+    id: 43,
+    name: "Healthy Bites",
+    imageUrl: "https://images.unsplash.com/photo-1534422298391-e4f8c170db76?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.4,
+    deliveryTime: "25-35 mins",
+    costForTwo: "₹400 for two",
+    cuisines: ["Healthy", "Salads"],
+    location: "Gachibowli",
+    city: "Hyderabad",
+    isPureVeg: true,
+    latitude: 17.4401,
+    longitude: 78.3489
+  },
+  {
+    id: 44,
+    name: "Sweet Tooth",
+    imageUrl: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=1974&auto=format&fit=crop",
+    rating: 4.8,
+    deliveryTime: "10-20 mins",
+    costForTwo: "₹250 for two",
+    cuisines: ["Desserts", "Sweets"],
+    location: "Jubilee Hills",
+    city: "Hyderabad",
+    isPureVeg: true,
+    latitude: 17.4275,
+    longitude: 78.4087
   },
   {
     id: 16,
@@ -329,6 +482,54 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     location: "Kukatpally",
     city: "Hyderabad",
     isPureVeg: false
+  },
+  {
+    id: 26,
+    name: "Chutneys",
+    imageUrl: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=1974&auto=format&fit=crop",
+    rating: 4.5,
+    deliveryTime: "30-40 mins",
+    costForTwo: "₹600 for two",
+    cuisines: ["South Indian", "Andhra"],
+    location: "Banjara Hills",
+    city: "Hyderabad",
+    isPureVeg: true
+  },
+  {
+    id: 27,
+    name: "Ohri's",
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    rating: 4.3,
+    deliveryTime: "40-50 mins",
+    costForTwo: "₹1000 for two",
+    cuisines: ["North Indian", "Continental", "Chinese"],
+    location: "Jubilee Hills",
+    city: "Hyderabad",
+    isPureVeg: false
+  },
+  {
+    id: 28,
+    name: "CTR - Central Tiffin Room",
+    imageUrl: "https://images.unsplash.com/photo-1630383249896-424e482df921?q=80&w=1974&auto=format&fit=crop",
+    rating: 4.8,
+    deliveryTime: "15-25 mins",
+    costForTwo: "₹200 for two",
+    cuisines: ["South Indian", "Karnataka"],
+    location: "Malleshwaram",
+    city: "Bangalore",
+    isPureVeg: true
+  },
+  {
+    id: 29,
+    name: "Vidyarthi Bhavan",
+    imageUrl: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.7,
+    deliveryTime: "20-30 mins",
+    costForTwo: "₹250 for two",
+    cuisines: ["South Indian", "Karnataka"],
+    location: "Basavanagudi",
+    city: "Bangalore",
+    isPureVeg: true
   }
 ];
 
@@ -694,6 +895,193 @@ export const MOCK_MENU_ITEMS: MenuItem[] = [
     isVeg: false,
     category: "Poultry",
     restaurantId: 25,
+    inStock: true
+  },
+  {
+    id: 2601,
+    name: "Masala Dosa",
+    description: "Crispy dosa filled with potato masala.",
+    price: 150,
+    imageUrl: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=2070&auto=format&fit=crop",
+    isVeg: true,
+    category: "Dosa",
+    restaurantId: 26,
+    inStock: true
+  },
+  {
+    id: 2701,
+    name: "Butter Chicken",
+    description: "Tender chicken in a rich, creamy tomato gravy.",
+    price: 450,
+    imageUrl: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=2070&auto=format&fit=crop",
+    isVeg: false,
+    category: "Main Course",
+    restaurantId: 27,
+    inStock: true
+  },
+  {
+    id: 2801,
+    name: "Benne Masala Dosa",
+    description: "Iconic butter-laden dosa filled with potato masala.",
+    price: 120,
+    imageUrl: "https://images.unsplash.com/photo-1630383249896-424e482df921?q=80&w=1974&auto=format&fit=crop",
+    isVeg: true,
+    category: "Dosa",
+    restaurantId: 28,
+    inStock: true
+  },
+  {
+    id: 2901,
+    name: "Masala Dosa",
+    description: "Famous crispy dosa with potato filling.",
+    price: 130,
+    imageUrl: "https://images.unsplash.com/photo-1630383249896-424e482df921?q=80&w=1974&auto=format&fit=crop",
+    isVeg: true,
+    category: "Dosa",
+    restaurantId: 29,
+    inStock: true
+  },
+  {
+    id: 3001,
+    name: "Chicken Biryani",
+    description: "Spicy and flavorful Hyderabadi chicken biryani.",
+    price: 300,
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    isVeg: false,
+    category: "Biryani",
+    restaurantId: 40,
+    inStock: true
+  },
+  {
+    id: 3002,
+    name: "Veg Biryani",
+    description: "Aromatic rice cooked with fresh vegetables and spices.",
+    price: 250,
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    isVeg: true,
+    category: "Biryani",
+    restaurantId: 40,
+    inStock: true
+  },
+  {
+    id: 3003,
+    name: "Masala Dosa",
+    description: "Crispy dosa stuffed with spiced potato filling.",
+    price: 100,
+    imageUrl: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=2070&auto=format&fit=crop",
+    isVeg: true,
+    category: "Dosa",
+    restaurantId: 41,
+    inStock: true
+  },
+  {
+    id: 3004,
+    name: "Idli",
+    description: "Soft and fluffy steamed rice cakes.",
+    price: 60,
+    imageUrl: "https://images.unsplash.com/photo-1630383249896-424e482df921?q=80&w=1974&auto=format&fit=crop",
+    isVeg: true,
+    category: "Breakfast",
+    restaurantId: 41,
+    inStock: true
+  },
+  {
+    id: 3005,
+    name: "Chicken Kebab",
+    description: "Tender chicken pieces marinated in spices and grilled.",
+    price: 250,
+    imageUrl: "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=2070&auto=format&fit=crop",
+    isVeg: false,
+    category: "Starters",
+    restaurantId: 42,
+    inStock: true
+  },
+  {
+    id: 3006,
+    name: "Mutton Rogan Josh",
+    description: "A rich and aromatic mutton curry.",
+    price: 400,
+    imageUrl: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?q=80&w=2070&auto=format&fit=crop",
+    isVeg: false,
+    category: "Main Course",
+    restaurantId: 42,
+    inStock: true
+  },
+  {
+    id: 3007,
+    name: "Caesar Salad",
+    description: "Fresh romaine lettuce with parmesan cheese and croutons.",
+    price: 200,
+    imageUrl: "https://images.unsplash.com/photo-1534422298391-e4f8c170db76?q=80&w=2070&auto=format&fit=crop",
+    isVeg: true,
+    category: "Salads",
+    restaurantId: 43,
+    inStock: true
+  },
+  {
+    id: 3008,
+    name: "Fruit Bowl",
+    description: "A bowl of fresh seasonal fruits.",
+    price: 150,
+    imageUrl: "https://images.unsplash.com/photo-1534422298391-e4f8c170db76?q=80&w=2070&auto=format&fit=crop",
+    isVeg: true,
+    category: "Healthy",
+    restaurantId: 43,
+    inStock: true
+  },
+  {
+    id: 3009,
+    name: "Chocolate Cake",
+    description: "Rich and moist chocolate cake.",
+    price: 150,
+    imageUrl: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=1974&auto=format&fit=crop",
+    isVeg: true,
+    category: "Desserts",
+    restaurantId: 44,
+    inStock: true
+  },
+  {
+    id: 3010,
+    name: "Gulab Jamun",
+    description: "Soft milk solids dumplings in sugar syrup.",
+    price: 80,
+    imageUrl: "https://images.unsplash.com/photo-1589119908995-c6837fa14848?q=80&w=2070&auto=format&fit=crop",
+    isVeg: true,
+    category: "Desserts",
+    restaurantId: 44,
+    inStock: true
+  },
+  {
+    id: 3011,
+    name: "Chicken Biryani",
+    description: "Spicy and flavorful Hyderabadi chicken biryani.",
+    price: 350,
+    imageUrl: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=1974&auto=format&fit=crop",
+    isVeg: false,
+    category: "Main Course",
+    restaurantId: 6,
+    inStock: true
+  },
+  {
+    id: 3012,
+    name: "Mutton Biryani",
+    description: "Authentic Hyderabadi mutton biryani served with salan and raita.",
+    price: 450,
+    imageUrl: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=1974&auto=format&fit=crop",
+    isVeg: false,
+    category: "Main Course",
+    restaurantId: 7,
+    inStock: true
+  },
+  {
+    id: 3013,
+    name: "Haleem",
+    description: "Traditional Hyderabadi Haleem made with pure ghee and tender mutton.",
+    price: 300,
+    imageUrl: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=1974&auto=format&fit=crop",
+    isVeg: false,
+    category: "Main Course",
+    restaurantId: 8,
     inStock: true
   }
 ];

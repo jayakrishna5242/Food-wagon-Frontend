@@ -26,11 +26,6 @@ const BottomNav: React.FC = () => {
   const location = useLocation();
   const { cartCount } = useCart();
   const { user } = useAuth();
-  const [pickupMode, setPickupMode] = useState(() => localStorage.getItem('pickupMode') === 'true');
-
-  useEffect(() => {
-    localStorage.setItem('pickupMode', String(pickupMode));
-  }, [pickupMode]);
 
   const isPartner = location.pathname.startsWith('/partner');
   const isAdmin = location.pathname.startsWith('/admin');
@@ -38,10 +33,8 @@ const BottomNav: React.FC = () => {
 
   let navItems = [
     { label: 'Home', icon: Home, path: '/' },
-    pickupMode 
-      ? { label: 'History', icon: History, path: '/pickup-history' } 
-      : { label: 'Food', icon: Utensils, path: '/restaurants' },
-    { label: 'Pickup', icon: Bike, path: '#', onClick: () => setPickupMode(!pickupMode) },
+    { label: 'Food', icon: Utensils, path: '/restaurants' },
+    { label: 'Pickup', icon: Bike, path: '/delivery-service' },
     { label: 'Cart', icon: ShoppingBag, path: '/cart', badge: cartCount },
     { label: 'Account', icon: User, path: user ? (user.role === 'partner' ? '/partner/dashboard' : user.role === 'admin' ? '/admin/dashboard' : user.role === 'delivery' ? '/delivery/dashboard' : '/profile') : '/login' },
   ];
@@ -66,7 +59,6 @@ const BottomNav: React.FC = () => {
     navItems = [
       { label: 'Home', icon: Home, path: '/' },
       { label: 'Pickups', icon: Truck, path: '/delivery/dashboard' },
-      { label: 'History', icon: Clock, path: '/delivery/dashboard?tab=history' },
       { label: 'Profile', icon: User, path: '/profile' },
     ];
   }
@@ -76,8 +68,12 @@ const BottomNav: React.FC = () => {
       {navItems.map((item) => {
         const isActive = location.pathname === item.path || (item.path.includes('?') && location.pathname + location.search === item.path);
         
-        const content = (
-          <div className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-gray-400'}`}>
+        return (
+          <Link 
+            key={item.path} 
+            to={item.path} 
+            className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-gray-400'}`}
+          >
             <motion.div 
               whileTap={{ scale: 0.8 }}
               className="relative"
@@ -92,23 +88,6 @@ const BottomNav: React.FC = () => {
             <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-primary' : 'text-gray-400'}`}>
               {item.label}
             </span>
-          </div>
-        );
-
-        if (item.onClick) {
-          return (
-            <button key={item.label} onClick={item.onClick} className="focus:outline-none">
-              {content}
-            </button>
-          );
-        }
-
-        return (
-          <Link 
-            key={item.path} 
-            to={item.path} 
-          >
-            {content}
           </Link>
         );
       })}

@@ -182,7 +182,7 @@ const Restaurants: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pb-20">
       {/* Header with Search */}
-      <div className="bg-white sticky top-20 z-50 border-b border-gray-100 shadow-sm">
+      <div className="bg-white z-50 border-b border-gray-100 shadow-sm">
         <div className="container mx-auto max-w-7xl px-4 py-4">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex-1 relative">
@@ -247,14 +247,14 @@ const Restaurants: React.FC = () => {
               </div>
 
               {/* Filters & Sort */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2 md:pb-0">
                 <div className="relative" ref={sortRef}>
                   <button 
                     onClick={() => setIsSortOpen(!isSortOpen)}
-                    className={`flex items-center gap-2 border rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm whitespace-nowrap transition-all ${sortBy !== 'Relevance' ? 'bg-dark text-white border-dark' : 'bg-white text-dark border-gray-200 hover:bg-gray-50'}`}
+                    className={`flex items-center gap-1.5 border rounded-lg px-3 py-1.5 text-xs font-bold shadow-sm whitespace-nowrap transition-all ${sortBy !== 'Relevance' ? 'bg-dark text-white border-dark' : 'bg-white text-dark border-gray-200 hover:bg-gray-50'}`}
                   >
                     <span>{sortBy === 'Relevance' ? 'Sort By' : sortBy}</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${isSortOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isSortOpen ? 'rotate-180' : ''}`} />
                   </button>
                   
                   <AnimatePresence>
@@ -263,13 +263,13 @@ const Restaurants: React.FC = () => {
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 overflow-hidden z-[60]"
+                        className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 overflow-hidden z-[60]"
                       >
                         {sortOptions.map((option) => (
                           <button
                             key={option}
                             onClick={() => handleSortChange(option)}
-                            className={`w-full text-left px-5 py-3.5 text-sm hover:bg-gray-50 border-b last:border-0 border-gray-50 font-bold ${sortBy === option ? 'text-primary' : 'text-dark'}`}
+                            className={`w-full text-left px-4 py-2.5 text-xs hover:bg-gray-50 border-b last:border-0 border-gray-50 font-bold ${sortBy === option ? 'text-primary' : 'text-dark'}`}
                           >
                             {option}
                           </button>
@@ -279,7 +279,7 @@ const Restaurants: React.FC = () => {
                   </AnimatePresence>
                 </div>
 
-                <div className="h-8 w-[1px] bg-gray-200 mx-1"></div>
+                <div className="h-6 w-[1px] bg-gray-200 mx-0.5"></div>
 
                 {filters.map((filter, index) => {
                   const isActive = activeFilters.includes(filter);
@@ -287,7 +287,7 @@ const Restaurants: React.FC = () => {
                     <button 
                       key={index}
                       onClick={() => toggleFilter(filter)}
-                      className={`border rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm whitespace-nowrap transition-all ${
+                      className={`border rounded-lg px-3 py-1.5 text-xs font-bold shadow-sm whitespace-nowrap transition-all ${
                         isActive 
                           ? 'bg-primary text-white border-primary' 
                           : 'bg-white text-dark border-gray-200 hover:bg-gray-50'
@@ -301,7 +301,7 @@ const Restaurants: React.FC = () => {
             </div>
 
             {loading ? (
-               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 gap-y-10">
+               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 gap-y-6 md:gap-y-10">
                  {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                    <RestaurantCardSkeleton key={i} />
                  ))}

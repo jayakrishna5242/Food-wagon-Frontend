@@ -44,6 +44,7 @@ export interface Restaurant {
   isNew?: boolean;
   isPureVeg?: boolean;
   isVerified?: boolean;
+  isOffline?: boolean;
   operatingHours?: string;
   aggregatedDiscountInfo?: {
     header: string;

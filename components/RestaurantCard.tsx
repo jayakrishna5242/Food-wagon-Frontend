@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Heart, MapPin, Clock } from 'lucide-react';
+import { Star, Heart, MapPin, Clock, Leaf } from 'lucide-react';
 import { Restaurant } from '../types';
 import { useFavorites } from '../context/FavoritesContext';
 import { useLocationContext } from '../context/LocationContext';
@@ -30,6 +30,15 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
     return null;
   }, [coordinates, restaurant.latitude, restaurant.longitude]);
 
+  const calculatedDeliveryTime = useMemo(() => {
+    if (distance !== null) {
+      // Assume 20km/h average speed + 10 mins prep time
+      const minutes = Math.round((distance / 20) * 60) + 10;
+      return `${minutes} mins`;
+    }
+    return restaurant.deliveryTime;
+  }, [distance, restaurant.deliveryTime]);
+
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -38,12 +47,22 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
 
   return (
     <motion.div
-      whileHover={{ y: -5, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100 flex flex-col h-full"
+      whileHover={!restaurant.isOffline ? { y: -5, scale: 1.02 } : {}}
+      whileTap={!restaurant.isOffline ? { scale: 0.98 } : {}}
+      className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100 flex flex-col h-full ${restaurant.isOffline ? 'grayscale opacity-70' : ''}`}
     >
-      <Link to={`/restaurant/${restaurant.id}`} className="block group h-full">
+      <Link to={!restaurant.isOffline ? `/restaurant/${restaurant.id}` : '#'} className={`block group h-full ${restaurant.isOffline ? 'pointer-events-none' : ''}`}>
         <div className="relative h-48 w-full overflow-hidden">
+          <span className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-[10px] font-bold text-gray-800 shadow-sm flex items-center gap-1">
+            <div className={`w-1.5 h-1.5 rounded-full ${restaurant.isOffline ? 'bg-red-500' : 'bg-green-500'}`} />
+            {restaurant.isOffline ? 'CLOSED' : 'OPEN'}
+            <span className="text-gray-300">|</span>
+            <MapPin className="w-3 h-3 text-primary" />
+            {distance !== null ? `${distance.toFixed(1)} km` : restaurant.location}
+            <span className="text-gray-300">|</span>
+            <Clock className="w-3 h-3 text-gray-500" />
+            {calculatedDeliveryTime}
+          </span>
           <img 
             src={restaurant.imageUrl} 
             alt={restaurant.name} 
@@ -52,17 +71,19 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
           />
           
           {/* Favorite Toggle */}
-          <motion.button 
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleFavoriteClick}
-            className="absolute top-4 right-4 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all"
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-          >
-            <Heart className={`w-4 h-4 transition-colors ${favorited ? 'fill-primary text-primary' : 'text-gray-400'}`} />
-          </motion.button>
+          {!restaurant.isOffline && (
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleFavoriteClick}
+              className="absolute top-4 right-4 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all"
+              aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+            >
+              <Heart className={`w-4 h-4 transition-colors ${favorited ? 'fill-primary text-primary' : 'text-gray-400'}`} />
+            </motion.button>
+          )}
 
-          {restaurant.aggregatedDiscountInfo && (
+          {restaurant.aggregatedDiscountInfo && !restaurant.isOffline && (
             <div className="absolute bottom-4 left-4 bg-primary text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm">
               {restaurant.aggregatedDiscountInfo.header}
             </div>
@@ -71,26 +92,31 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
         
         <div className="p-5 flex flex-col flex-grow">
           <div className="flex justify-between items-start mb-2">
-            <h3 className="font-bold text-gray-900 text-base line-clamp-1 group-hover:text-primary transition-colors">{restaurant.name}</h3>
+            <div className="flex items-center gap-1">
+              <h3 className="font-bold text-gray-900 text-base line-clamp-1 group-hover:text-primary transition-colors">{restaurant.name}</h3>
+              {restaurant.isPureVeg && <Leaf className="w-3 h-3 text-green-600" />}
+            </div>
             <div className="flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-lg">
-              <Star className="w-3 h-3 text-green-600 fill-green-600" />
-              <span className="text-xs font-bold text-green-700">{restaurant.rating > 0 ? restaurant.rating : '4.2'}</span>
+              <Star className="w-4 h-4 text-green-600 fill-green-600" />
+              <span className="text-xs font-bold text-green-700">{restaurant.rating > 0 ? restaurant.rating : '--'}</span>
             </div>
           </div>
           
           <p className="text-gray-500 text-xs mb-2 line-clamp-1">
             {restaurant.cuisines.join(', ')}
           </p>
+          <p className="text-gray-900 text-xs font-bold mb-2">
+            {restaurant.costForTwo} for two
+          </p>
 
-          <div className="flex items-center gap-1 text-[10px] font-bold text-primary uppercase tracking-widest mb-3">
-            <Clock className="w-3 h-3" />
-            <span>{restaurant.deliveryTime}</span>
-          </div>
-
-          <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-            <div className="flex items-center gap-1">
-              <MapPin className="w-3 h-3 text-primary" />
-              <span>{distance !== null ? `${distance} km` : restaurant.location}</span>
+          <div className="mt-auto pt-3 border-t border-gray-50 flex flex-col gap-3">
+            {distance !== null && (
+              <div className="text-primary font-bold text-[10px]">
+                Delivery Fee: ₹{(distance * 15).toFixed(0)}
+              </div>
+            )}
+            <div className="w-full text-center bg-primary text-white py-2 rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors">
+              View Menu
             </div>
           </div>
         </div>
