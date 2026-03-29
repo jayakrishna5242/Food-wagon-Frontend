@@ -21,6 +21,7 @@ import { LocationProvider } from './context/LocationContext';
 import { AddressProvider } from './context/AddressContext';
 import { ToastProvider } from './context/ToastContext';
 import { FavoritesProvider } from './context/FavoritesContext';
+import { TasksProvider } from './context/TasksContext';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import DeliveryDashboard from './pages/rider/DeliveryDashboard';
@@ -74,8 +75,9 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <ToastProvider>
-        <FavoritesProvider>
-          <CartProvider>
+        <TasksProvider>
+          <FavoritesProvider>
+            <CartProvider>
             <LocationProvider>
               <AddressProvider>
                 <HashRouter>
@@ -106,8 +108,9 @@ const App: React.FC = () => {
             </LocationProvider>
           </CartProvider>
         </FavoritesProvider>
-      </ToastProvider>
-    </AuthProvider>
+      </TasksProvider>
+    </ToastProvider>
+  </AuthProvider>
   );
 };
 

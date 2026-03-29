@@ -150,3 +150,14 @@ export interface GenieBooking {
   date: string;
   status: 'PENDING' | 'ASSIGNED' | 'COMPLETED' | 'CANCELLED';
 }
+
+export interface Task {
+  _id: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  priority: 'low' | 'medium' | 'high';
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+}

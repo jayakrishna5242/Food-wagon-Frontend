@@ -18,15 +18,15 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="flex justify-between items-center py-6 border-b border-gray-50 last:border-0 group"
+      className="flex justify-between items-center py-6 border-b border-gray-50 last:border-0 group min-w-0"
     >
-      <div className="flex-1 pr-6">
+      <div className="flex-1 pr-6 min-w-0">
         <div className="flex items-center gap-2 mb-2">
           <div className={`w-3 h-3 border ${item.isVeg ? 'border-green-600' : 'border-red-600'} flex items-center justify-center p-[1.5px]`}>
             <div className={`w-full h-full rounded-full ${item.isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
           </div>
         </div>
-        <h3 className="text-base font-bold text-gray-900 mb-1 group-hover:text-primary transition-colors">{item.name}</h3>
+        <h3 className="text-base font-bold text-gray-900 mb-1 group-hover:text-primary transition-colors truncate">{item.name}</h3>
         <p className="text-sm font-bold text-gray-900 mb-2">₹{item.price}</p>
         <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{item.description}</p>
       </div>
@@ -35,11 +35,12 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
         <img 
           src={item.imageUrl} 
           alt={item.name} 
+          loading="lazy"
           className={`w-full h-full object-cover rounded-2xl shadow-sm transition-all duration-500 group-hover:scale-105 ${item.inStock === false ? 'grayscale opacity-60' : ''}`} 
           referrerPolicy="no-referrer"
         />
         
-        <motion.div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24">
+        <motion.div className="absolute -bottom-2 inset-x-0 mx-auto w-24">
           {item.inStock === false ? (
             <div className="bg-gray-100 text-gray-400 py-2 rounded-xl text-[10px] font-bold uppercase text-center shadow-sm border border-gray-200">
               Sold Out

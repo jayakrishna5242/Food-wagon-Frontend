@@ -13,6 +13,9 @@ interface Toast {
 
 interface ToastContextType {
   showToast: (message: string, type?: ToastType) => void;
+  success: (message: string) => void;
+  error: (message: string) => void;
+  info: (message: string) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -22,30 +25,34 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
   const showToast = useCallback((message: string, type: ToastType = 'success') => {
     const id = Math.random().toString(36).substr(2, 9);
-    setToasts([{ id, message, type }]);
+    setToasts((prev) => [...prev.slice(-2), { id, message, type }]);
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 3000);
   }, []);
 
+  const success = useCallback((message: string) => showToast(message, 'success'), [showToast]);
+  const error = useCallback((message: string) => showToast(message, 'error'), [showToast]);
+  const info = useCallback((message: string) => showToast(message, 'info'), [showToast]);
+
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  const contextValue = useMemo(() => ({ showToast }), [showToast]);
+  const contextValue = useMemo(() => ({ showToast, success, error, info }), [showToast, success, error, info]);
 
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-3 pointer-events-none w-full items-center px-4">
+      <div className="fixed bottom-24 md:bottom-auto md:top-6 left-0 right-0 z-[9999] flex flex-col-reverse md:flex-col gap-3 pointer-events-none items-center px-4">
         <AnimatePresence mode="popLayout">
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, y: -40, scale: 0.9, filter: 'blur(10px)' }}
+              initial={{ opacity: 0, y: 20, scale: 0.9, filter: 'blur(10px)' }}
               animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, scale: 0.9, y: -20, filter: 'blur(10px)' }}
+              exit={{ opacity: 0, scale: 0.9, y: 20, filter: 'blur(10px)' }}
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               className="pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-[24px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] bg-white border border-gray-100 w-full max-w-[380px]"
             >

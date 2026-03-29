@@ -6,6 +6,51 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  app.use(express.json());
+
+  // API routes
+  let mockTasks = [
+    { _id: '1', title: 'Deliver Order #123', description: 'Pick up from Burger King', completed: false, priority: 'high', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), userId: '1' },
+    { _id: '2', title: 'Complete Profile', description: 'Add vehicle details', completed: true, priority: 'medium', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), userId: '1' }
+  ];
+
+  app.get("/api/v1/tasks", (req, res) => {
+    res.json({ tasks: mockTasks });
+  });
+
+  app.get("/api/v1/task/:id", (req, res) => {
+    const task = mockTasks.find(t => t._id === req.params.id);
+    if (task) res.json(task);
+    else res.status(404).json({ message: 'Task not found' });
+  });
+
+  app.post("/api/v1/task/create", (req, res) => {
+    const newTask = {
+      ...req.body,
+      _id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      completed: false
+    };
+    mockTasks.push(newTask);
+    res.json(newTask);
+  });
+
+  app.patch("/api/v1/task/:id", (req, res) => {
+    const index = mockTasks.findIndex(t => t._id === req.params.id);
+    if (index !== -1) {
+      mockTasks[index] = { ...mockTasks[index], ...req.body, updatedAt: new Date().toISOString() };
+      res.json(mockTasks[index]);
+    } else {
+      res.status(404).json({ message: 'Task not found' });
+    }
+  });
+
+  app.delete("/api/v1/task/:id", (req, res) => {
+    mockTasks = mockTasks.filter(t => t._id !== req.params.id);
+    res.json({ message: 'Task deleted' });
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

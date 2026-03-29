@@ -52,7 +52,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
       className={`bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100 flex flex-col h-full ${restaurant.isOffline ? 'grayscale opacity-70' : ''}`}
     >
       <Link to={!restaurant.isOffline ? `/restaurant/${restaurant.id}` : '#'} className={`block group h-full ${restaurant.isOffline ? 'pointer-events-none' : ''}`}>
-        <div className="relative h-48 w-full overflow-hidden">
+        <div className="relative h-48 w-full overflow-hidden bg-gray-100">
           <span className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-bold text-gray-800 shadow-sm flex items-center gap-1">
             <MapPin className="w-3 h-3 text-primary" />
             {distance !== null ? `${distance.toFixed(1)} km` : restaurant.location}
@@ -63,6 +63,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
           <img 
             src={restaurant.imageUrl} 
             alt={restaurant.name} 
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             referrerPolicy="no-referrer"
           />
