@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -12,10 +14,18 @@ L.Icon.Default.mergeOptions({
 });
 
 const GeniePage: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [pickup, setPickup] = useState<[number, number] | null>(null);
   const [dropoff, setDropoff] = useState<[number, number] | null>(null);
   const [distance, setDistance] = useState<number>(0);
   const [price, setPrice] = useState<number>(0);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
 
   const MapEvents = () => {
     useMapEvents({
