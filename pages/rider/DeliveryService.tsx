@@ -2,15 +2,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Bike, Package, MapPin, Clock, ShieldCheck, ArrowRight, X, Loader2, CheckCircle2, Info, AlertTriangle, Navigation, ChevronLeft, History } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { useLocationContext } from '../../context/LocationContext';
 import { GenieBooking } from '../../types';
 import { placeGenieBooking, fetchGenieBookings } from '../../services/api';
+import MapComponent from '../../components/MapComponent';
+import LocationSearch from '../../components/LocationSearch';
 
 type BookingType = 'pickup' | 'buy';
 
 const DeliveryService: React.FC = () => {
   const { address } = useLocationContext();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [step, setStep] = useState(1);
   const [bookingType, setBookingType] = useState<BookingType>('pickup');
@@ -18,14 +23,90 @@ const DeliveryService: React.FC = () => {
   const [dropLocation, setDropLocation] = useState('');
   const [itemDescription, setItemDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [bookings, setBookings] = useState<GenieBooking[]>([]);
   const formRef = useRef<HTMLDivElement>(null);
   
-  // Mock state for step 2
+  // New state
+  const [pickupCoords, setPickupCoords] = useState<[number, number] | undefined>();
+  const [dropCoords, setDropCoords] = useState<[number, number] | undefined>();
+  const [routePoints, setRoutePoints] = useState<[number, number][]>([]);
+  const [distance, setDistance] = useState('');
   const [estimatedTime, setEstimatedTime] = useState('');
   const [estimatedPrice, setEstimatedPrice] = useState('');
+
+  const geocode = async (address: string): Promise<[number, number] | null> => {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
+      const data = await response.json();
+      if (data && data.length > 0) {
+        return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+      }
+    } catch (error) {
+      console.error("Geocoding failed:", error);
+    }
+    return null;
+  };
+
+  const calculateDistance = (coords1: [number, number], coords2: [number, number]): number => {
+    const R = 6371; // km
+    const dLat = (coords2[0] - coords1[0]) * Math.PI / 180;
+    const dLon = (coords2[1] - coords1[1]) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(coords1[0] * Math.PI / 180) * Math.cos(coords2[0] * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const updateCalculations = async (pCoords: [number, number], dCoords: [number, number]): Promise<boolean> => {
+    setIsCalculating(true);
+    setErrors(prev => {
+      const { general, pickup, drop, ...rest } = prev;
+      return rest;
+    });
+
+    try {
+      // Fetch route from OSRM
+      const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${pCoords[1]},${pCoords[0]};${dCoords[1]},${dCoords[0]}?overview=full&geometries=geojson`;
+      const routeResponse = await fetch(osrmUrl);
+      const routeData = await routeResponse.json();
+
+      if (routeData.routes && routeData.routes.length > 0) {
+        const route = routeData.routes[0];
+        const coordinates = route.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+        setRoutePoints(coordinates);
+        
+        const distKm = route.distance / 1000;
+        const durationMins = Math.round(route.duration / 60);
+        
+        setDistance(`${distKm.toFixed(1)} km`);
+        setEstimatedTime(`${durationMins} - ${Math.round(durationMins * 1.2)} mins`);
+        setEstimatedPrice(`₹${Math.round(distKm * 25 + 30)}`);
+      } else {
+        // Fallback to straight line
+        const dist = calculateDistance(pCoords, dCoords);
+        setRoutePoints([pCoords, dCoords]);
+        setDistance(`${dist.toFixed(1)} km`);
+        setEstimatedTime(`${Math.round(dist * 3)} - ${Math.round(dist * 5)} mins`);
+        setEstimatedPrice(`₹${Math.round(dist * 25 + 30)}`);
+      }
+      return true;
+    } catch (routeError) {
+      console.error("Routing failed:", routeError);
+      return false;
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  useEffect(() => {
+    if (pickupLocation && dropLocation) {
+      updateCalculations(pickupLocation, dropLocation);
+    }
+  }, [pickupLocation, dropLocation]);
 
   useEffect(() => {
     const loadBookings = async () => {
@@ -53,6 +134,10 @@ const DeliveryService: React.FC = () => {
   ];
 
   const handleOpenForm = (type: BookingType) => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
     setBookingType(type);
     setShowForm(true);
     setIsSuccess(false);
@@ -63,13 +148,22 @@ const DeliveryService: React.FC = () => {
     }, 100);
   };
 
-  const handleUseCurrentLocation = () => {
+  const handleUseCurrentLocation = async () => {
     if (address && address !== 'Detecting your location...' && address !== 'Select Location') {
       setPickupLocation(address);
+      // Need to geocode the address to get coordinates for routing
+      const coords = await geocode(address);
+      if (coords) setPickupCoords(coords);
     } else {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
           setPickupLocation("Current Location (GPS)");
+          setPickupCoords([lat, lon]);
+        }, (err) => {
+          console.error("Geolocation error:", err);
+          setErrors(prev => ({ ...prev, pickup: "Could not fetch current location." }));
         });
       }
     }
@@ -88,9 +182,17 @@ const DeliveryService: React.FC = () => {
     e.preventDefault();
     if (step === 1) {
       if (!validate()) return;
-      // Mock calculation
-      setEstimatedTime('30-45 mins');
-      setEstimatedPrice('₹150');
+      
+      if (!pickupCoords || !dropCoords) {
+        setErrors({ ...errors, general: "Please select valid locations." });
+        return;
+      }
+      
+      const success = await updateCalculations(pickupCoords, dropCoords);
+      if (!success) {
+        setErrors({ ...errors, general: "Could not calculate route. Please try again." });
+        return;
+      }
       setStep(2);
     } else {
       setIsSubmitting(true);
@@ -105,6 +207,9 @@ const DeliveryService: React.FC = () => {
         setPickupLocation('');
         setDropLocation('');
         setItemDescription('');
+        setPickupCoords(undefined);
+        setDropCoords(undefined);
+        setRoutePoints([]);
         setStep(1);
       } catch (err) {
         console.error(err);
@@ -229,32 +334,29 @@ const DeliveryService: React.FC = () => {
                               Use Current
                             </button>
                           </div>
-                          <div className="relative">
-                            <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
-                            <input 
-                              type="text"
-                              value={pickupLocation}
-                              onChange={(e) => setPickupLocation(e.target.value)}
-                              placeholder={bookingType === 'pickup' ? "Enter pickup address" : "Enter store name or address"}
-                              className={`w-full bg-gray-50 border-2 ${errors.pickup ? 'border-red-500' : 'border-transparent'} focus:border-primary focus:bg-white rounded-[1.5rem] py-6 pl-16 pr-8 text-gray-900 font-bold transition-all outline-none placeholder:text-gray-300 shadow-inner`}
-                            />
-                          </div>
-                          {errors.pickup && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-3 ml-2">{errors.pickup}</p>}
+                          <LocationSearch 
+                            label=""
+                            placeholder={bookingType === 'pickup' ? "Enter pickup address" : "Enter store name or address"}
+                            initialValue={pickupLocation}
+                            onSelect={(address, coords) => {
+                              setPickupLocation(address);
+                              setPickupCoords(coords);
+                            }}
+                            error={errors.pickup}
+                          />
                         </div>
 
                         <div className="relative">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2 mb-4 block">Drop-off Location</label>
-                          <div className="relative">
-                            <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
-                            <input 
-                              type="text"
-                              value={dropLocation}
-                              onChange={(e) => setDropLocation(e.target.value)}
-                              placeholder="Enter delivery address"
-                              className={`w-full bg-gray-50 border-2 ${errors.drop ? 'border-red-500' : 'border-transparent'} focus:border-primary focus:bg-white rounded-[1.5rem] py-6 pl-16 pr-8 text-gray-900 font-bold transition-all outline-none placeholder:text-gray-300 shadow-inner`}
-                            />
-                          </div>
-                          {errors.drop && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-3 ml-2">{errors.drop}</p>}
+                          <LocationSearch 
+                            label="Drop-off Location"
+                            placeholder="Enter delivery address"
+                            initialValue={dropLocation}
+                            onSelect={(address, coords) => {
+                              setDropLocation(address);
+                              setDropCoords(coords);
+                            }}
+                            error={errors.drop}
+                          />
                         </div>
 
                         <div className="relative">
@@ -268,19 +370,37 @@ const DeliveryService: React.FC = () => {
                           />
                           {errors.description && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-3 ml-2">{errors.description}</p>}
                         </div>
+                        {errors.general && (
+                          <div className="bg-red-50 p-4 rounded-xl flex items-center gap-3 border border-red-100">
+                            <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
+                            <p className="text-xs text-red-600 font-bold uppercase tracking-wider">{errors.general}</p>
+                          </div>
+                        )}
                       </div>
 
                       <button 
                         type="submit"
-                        className="w-full bg-primary text-white font-black py-6 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center gap-4 text-sm uppercase tracking-widest"
+                        disabled={isCalculating}
+                        className="w-full bg-primary text-white font-black py-6 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] transition-all flex items-center justify-center gap-4 text-sm uppercase tracking-widest disabled:opacity-70"
                       >
-                        <span>CONTINUE</span>
-                        <ArrowRight className="w-6 h-6" />
+                        {isCalculating ? (
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                        ) : (
+                          <>
+                            <span>CONTINUE</span>
+                            <ArrowRight className="w-6 h-6" />
+                          </>
+                        )}
                       </button>
                     </form>
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-8">
+                      <MapComponent pickupCoords={pickupCoords} dropCoords={dropCoords} routePoints={routePoints} />
                       <div className="bg-gray-50 p-6 rounded-2xl space-y-4">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Distance:</span>
+                          <span className="font-bold text-dark">{distance}</span>
+                        </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Estimated Time:</span>
                           <span className="font-bold text-dark">{estimatedTime}</span>
@@ -295,14 +415,14 @@ const DeliveryService: React.FC = () => {
                         <button 
                           type="button"
                           onClick={() => setStep(1)}
-                          className="flex-1 bg-gray-200 text-dark font-bold py-6 rounded-2xl hover:bg-gray-300 transition-all text-sm uppercase tracking-widest"
+                          className="flex-1 bg-gray-200 text-dark font-bold py-6 rounded-2xl hover:bg-gray-300 hover:scale-[1.02] transition-all text-sm uppercase tracking-widest"
                         >
                           Back
                         </button>
                         <button 
                           type="submit"
                           disabled={isSubmitting}
-                          className="flex-1 bg-primary text-white font-black py-6 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center gap-4 disabled:opacity-70 text-sm uppercase tracking-widest"
+                          className="flex-1 bg-primary text-white font-black py-6 rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] transition-all flex items-center justify-center gap-4 disabled:opacity-70 text-sm uppercase tracking-widest"
                         >
                           {isSubmitting ? (
                             <Loader2 className="w-6 h-6 animate-spin" />

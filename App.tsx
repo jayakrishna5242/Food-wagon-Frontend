@@ -13,6 +13,7 @@ import Profile from './pages/user/Profile';
 import Search from './pages/user/Search';
 import Restaurants from './pages/user/Restaurants';
 import PartnerDashboard from './pages/partner/PartnerDashboard';
+import Genie from './pages/user/Genie';
 import AboutUs from './pages/user/AboutUs';
 import OrderRating from './pages/user/OrderRating';
 import { AuthProvider } from './context/AuthContext';
@@ -100,6 +101,7 @@ const App: React.FC = () => {
                       <Route path="/supermarket" element={<Supermarket />} />
                       <Route path="/delivery-service" element={<DeliveryService />} />
                       <Route path="/about" element={<AboutUs />} />
+                      <Route path="/genie" element={<Genie />} />
                       <Route path="/order-rating/:orderId" element={<OrderRating />} />
                     </Routes>
                   </Layout>

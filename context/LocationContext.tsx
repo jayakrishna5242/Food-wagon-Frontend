@@ -22,28 +22,29 @@ export const LocationProvider = ({ children }: { children?: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      setIsLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setCoordinates({ latitude, longitude });
-          setAddress('Location detected');
-          setCity('Hyderabad'); // Mock city detection for now
-          setIsLoading(false);
-        },
-        (err) => {
-          setError(err.message);
-          setAddress('Location detection failed');
-          setIsLoading(false);
-        }
-      );
-    } else {
-      setError('Geolocation is not supported by this browser.');
-      setAddress('Geolocation not supported');
-    }
-  }, []);
+  // Removed automatic location fetching on mount
+  // useEffect(() => {
+  //   if (navigator.geolocation) {
+  //     setIsLoading(true);
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         const { latitude, longitude } = position.coords;
+  //         setCoordinates({ latitude, longitude });
+  //         setAddress('Location detected');
+  //         setCity('Hyderabad'); // Mock city detection for now
+  //         setIsLoading(false);
+  //       },
+  //       (err) => {
+  //         setError(err.message);
+  //         setAddress('Location detection failed');
+  //         setIsLoading(false);
+  //       }
+  //     );
+  //   } else {
+  //     setError('Geolocation is not supported by this browser.');
+  //     setAddress('Geolocation not supported');
+  //   }
+  // }, []);
 
   return (
     <LocationContext.Provider 

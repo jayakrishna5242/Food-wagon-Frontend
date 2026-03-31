@@ -22,22 +22,22 @@ const Restaurants: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const sortRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (navigator.geolocation && !coordinates) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoordinates({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-          setSortBy('Nearest');
-        },
-        (error) => {
-          console.error("Error detecting location:", error);
-        }
-      );
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (navigator.geolocation && !coordinates) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         setCoordinates({
+  //           latitude: position.coords.latitude,
+  //           longitude: position.coords.longitude
+  //         });
+  //         setSortBy('Nearest');
+  //       },
+  //       (error) => {
+  //         console.error("Error detecting location:", error);
+  //       }
+  //     );
+  //   }
+  // }, []);
 
   useEffect(() => {
     const loadData = async () => {

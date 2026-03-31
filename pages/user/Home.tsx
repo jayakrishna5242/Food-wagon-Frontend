@@ -45,7 +45,7 @@ const Home: React.FC = () => {
       subtitle: 'SEND & RECEIVE',
       icon: Bike,
       image: 'https://picsum.photos/seed/delivery-bike/800/800',
-      link: '/delivery-service',
+      link: '/genie',
       gradient: 'from-pink-600/90 to-rose-700/90',
       actionText: 'BOOK NOW'
     }

@@ -83,9 +83,9 @@ const Navbar: React.FC = () => {
         console.error("Error detecting location:", error.message);
         let errorMsg = 'Location detection failed';
         switch (error.code) {
-          case 1: errorMsg = 'Permission denied'; break;
-          case 2: errorMsg = 'Position unavailable'; break;
-          case 3: errorMsg = 'Request timed out'; break;
+          case 1: errorMsg = 'Location access denied. Please enable it in browser settings or select city manually.'; break;
+          case 2: errorMsg = 'Position unavailable. Please select city manually.'; break;
+          case 3: errorMsg = 'Location request timed out. Please try again or select city manually.'; break;
           default: errorMsg = error.message || 'Unknown error';
         }
         setIsLoading(false);

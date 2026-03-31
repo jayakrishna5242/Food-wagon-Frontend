@@ -24,6 +24,22 @@ async function startServer() {
     else res.status(404).json({ message: 'Task not found' });
   });
 
+  app.get("/api/geocode", async (req, res) => {
+    const { address } = req.query;
+    if (!address) return res.status(400).json({ message: 'Address required' });
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address as string)}`, {
+        headers: {
+          'User-Agent': 'FoodWagonApp/1.0 (contact: jayakrishna5242@gmail.com)'
+        }
+      });
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: 'Geocoding failed' });
+    }
+  });
+
   app.post("/api/v1/task/create", (req, res) => {
     const newTask = {
       ...req.body,
