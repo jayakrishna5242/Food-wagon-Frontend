@@ -36,7 +36,7 @@ const BottomNav: React.FC = () => {
     { label: 'Food', icon: Utensils, path: '/restaurants' },
     { label: 'Pickup', icon: Bike, path: '/delivery-service' },
     { label: 'Cart', icon: ShoppingBag, path: '/cart', badge: cartCount },
-    { label: 'Account', icon: User, path: user ? (user.role === 'partner' ? '/partner/dashboard' : user.role === 'admin' ? '/admin/dashboard' : user.role === 'delivery' ? '/delivery/dashboard' : '/profile') : '/login' },
+    { label: 'Account', icon: User, path: user ? (user.role === 'PARTNER' ? '/partner/dashboard' : user.role === 'ADMIN' ? '/admin/dashboard' : user.role === 'DELIVERY' ? '/delivery/dashboard' : '/profile') : '/login' },
   ];
 
   if (isPartner) {

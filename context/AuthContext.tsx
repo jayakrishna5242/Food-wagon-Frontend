@@ -18,12 +18,19 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session on mount
-    const storedUser = getStoredUser();
-    if (storedUser) {
-      setUser(storedUser);
-    }
-    setIsLoading(false);
+    // Check for existing session on mount with a small delay for stability
+    const initAuth = async () => {
+      const storedUser = getStoredUser();
+      if (storedUser) {
+        setUser(storedUser);
+      }
+      // Robust initialization delay
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+    };
+
+    initAuth();
   }, []);
 
   const login = (userData: User) => {

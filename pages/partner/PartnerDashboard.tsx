@@ -65,7 +65,7 @@ const PartnerDashboard: React.FC = () => {
   const activeTab = searchParams.get('tab') || 'overview';
   const setActiveTab = (tab: string) => setSearchParams({ tab });
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -97,7 +97,6 @@ const PartnerDashboard: React.FC = () => {
     imageUrl: '',
     operatingHours: ''
   });
-  const user = getStoredUser();
 
   useEffect(() => {
     const loadData = async () => {
