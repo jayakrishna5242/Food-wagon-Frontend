@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Restaurant } from '../types';
-import { useToast } from './ToastContext';
 
 interface FavoritesContextType {
   favorites: Restaurant[];
@@ -13,7 +12,6 @@ const FavoritesContext = createContext<FavoritesContextType | undefined>(undefin
 
 export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
   const [favorites, setFavorites] = useState<Restaurant[]>([]);
-  const { showToast } = useToast();
 
   // Load favorites on mount
   useEffect(() => {
@@ -36,10 +34,10 @@ export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
     const exists = favorites.some(f => f.id === restaurant.id);
     if (exists) {
       setFavorites(prev => prev.filter(f => f.id !== restaurant.id));
-      showToast(`Removed ${restaurant.name} from favorites`, 'info');
+      console.log(`Removed ${restaurant.name} from favorites`);
     } else {
       setFavorites(prev => [...prev, restaurant]);
-      showToast(`Added ${restaurant.name} to favorites`, 'success');
+      console.log(`Added ${restaurant.name} to favorites`);
     }
   };
 

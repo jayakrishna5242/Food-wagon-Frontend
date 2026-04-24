@@ -41,7 +41,6 @@ import {
   Area 
 } from 'recharts';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { 
   fetchOrders, 
@@ -66,7 +65,6 @@ const PartnerDashboard: React.FC = () => {
   const activeTab = searchParams.get('tab') || 'overview';
   const setActiveTab = (tab: string) => setSearchParams({ tab });
   const navigate = useNavigate();
-  const { showToast } = useToast();
   const { logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -140,29 +138,29 @@ const PartnerDashboard: React.FC = () => {
 
     // Validations
     if (!newMenuItem.name || newMenuItem.name.length < 3) {
-      showToast('Item name must be at least 3 characters', 'error');
+      console.error('Item name must be at least 3 characters');
       return;
     }
     if (!newMenuItem.price || newMenuItem.price <= 0) {
-      showToast('Price must be greater than 0', 'error');
+      console.error('Price must be greater than 0');
       return;
     }
     if (!newMenuItem.category) {
-      showToast('Category is required', 'error');
+      console.error('Category is required');
       return;
     }
     if (!newMenuItem.imageUrl) {
-      showToast('Image URL is required', 'error');
+      console.error('Image URL is required');
       return;
     }
 
     try {
       if (editingMenuItem) {
         await updateMenuItem(editingMenuItem.id, newMenuItem);
-        showToast('Menu item updated', 'success');
+        console.log('Menu item updated');
       } else {
         await addMenuItem({ ...newMenuItem, restaurantId: user.restaurantId });
-        showToast('Menu item added', 'success');
+        console.log('Menu item added');
       }
       const updated = await fetchMenu(user.restaurantId);
       setMenuItems(updated);
@@ -170,7 +168,7 @@ const PartnerDashboard: React.FC = () => {
       setEditingMenuItem(null);
       setNewMenuItem({ name: '', description: '', price: 0, imageUrl: '', isVeg: true, category: '' });
     } catch (err) {
-      showToast('Action failed', 'error');
+      console.error('Action failed');
     }
   };
 
@@ -180,9 +178,9 @@ const PartnerDashboard: React.FC = () => {
       await deleteMenuItem(id);
       const updated = await fetchMenu(user.restaurantId);
       setMenuItems(updated);
-      showToast('Item deleted', 'success');
+      console.log('Item deleted');
     } catch (err) {
-      showToast('Failed to delete item', 'error');
+      console.error('Failed to delete item');
     }
   };
 
@@ -193,7 +191,7 @@ const PartnerDashboard: React.FC = () => {
       const updated = await fetchMenu(user.restaurantId);
       setMenuItems(updated);
     } catch (err) {
-      showToast('Failed to update stock', 'error');
+      console.error('Failed to update stock');
     }
   };
 
@@ -203,11 +201,11 @@ const PartnerDashboard: React.FC = () => {
 
     // Validations
     if (settingsForm.name.length < 3) {
-      showToast('Restaurant name must be at least 3 characters', 'error');
+      console.error('Restaurant name must be at least 3 characters');
       return;
     }
     if (!settingsForm.cuisines) {
-      showToast('Cuisines are required', 'error');
+      console.error('Cuisines are required');
       return;
     }
 
@@ -218,9 +216,9 @@ const PartnerDashboard: React.FC = () => {
       });
       const updated = await fetchPartnerRestaurant(user.restaurantId);
       setRestaurant(updated);
-      showToast('Settings updated successfully', 'success');
+      console.log('Settings updated successfully');
     } catch (err) {
-      showToast('Failed to update settings', 'error');
+      console.error('Failed to update settings');
     }
   };
 
@@ -230,11 +228,11 @@ const PartnerDashboard: React.FC = () => {
 
     // Validations
     if (!newOffer.code || newOffer.code.length < 3) {
-      showToast('Coupon code must be at least 3 characters', 'error');
+      console.error('Coupon code must be at least 3 characters');
       return;
     }
     if (!newOffer.discountValue || newOffer.discountValue <= 0) {
-      showToast('Discount value must be greater than 0', 'error');
+      console.error('Discount value must be greater than 0');
       return;
     }
 
@@ -244,9 +242,9 @@ const PartnerDashboard: React.FC = () => {
       setOffers(updated);
       setShowAddOffer(false);
       setNewOffer({ code: '', description: '', discountType: 'PERCENTAGE', discountValue: 0, minOrderValue: 0 });
-      showToast('Offer added successfully', 'success');
+      console.log('Offer added successfully');
     } catch (err) {
-      showToast('Failed to add offer', 'error');
+      console.error('Failed to add offer');
     }
   };
 
@@ -256,9 +254,9 @@ const PartnerDashboard: React.FC = () => {
       await deleteOffer(id);
       const updated = await fetchOffers(user.restaurantId);
       setOffers(updated);
-      showToast('Offer deleted', 'success');
+      console.log('Offer deleted');
     } catch (err) {
-      showToast('Failed to delete offer', 'error');
+      console.error('Failed to delete offer');
     }
   };
 
@@ -267,9 +265,9 @@ const PartnerDashboard: React.FC = () => {
       await updateOrderStatus(orderId, status);
       const updated = await fetchOrders();
       setOrders(updated);
-      showToast(`Order status updated to ${status}`, 'success');
+      console.log(`Order status updated to ${status}`);
     } catch (err) {
-      showToast('Failed to update status', 'error');
+      console.error('Failed to update status');
     }
   };
 
@@ -295,7 +293,7 @@ const PartnerDashboard: React.FC = () => {
   const handleLogout = () => {
     clearStoredUser();
     logout();
-    showToast('Logged out successfully', 'info');
+    console.log('Logged out successfully');
     navigate('/login');
   };
 

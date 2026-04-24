@@ -20,7 +20,6 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { LocationProvider } from './context/LocationContext';
 import { AddressProvider } from './context/AddressContext';
-import { ToastProvider } from './context/ToastContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { TasksProvider } from './context/TasksContext';
 
@@ -75,7 +74,6 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <ToastProvider>
         <TasksProvider>
           <FavoritesProvider>
             <CartProvider>
@@ -111,7 +109,6 @@ const App: React.FC = () => {
           </CartProvider>
         </FavoritesProvider>
       </TasksProvider>
-    </ToastProvider>
   </AuthProvider>
   );
 };

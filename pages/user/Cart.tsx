@@ -5,7 +5,6 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useAddresses } from '../../context/AddressContext';
 import { useLocationContext } from '../../context/LocationContext';
-import { useToast } from '../../context/ToastContext';
 import { placeOrder, fetchOffers, getRestaurantsDB, calculateDistance, calculateDeliveryTime } from '../../services/api';
 import { Minus, Plus, ArrowRight, MapPin, Plus as PlusIcon, CheckCircle2, Loader2, Banknote, CreditCard, Tag, Ticket, X, User, Clock, ChevronLeft, ShoppingBag, Home, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -19,7 +18,6 @@ const Cart: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const { addresses, addAddress, selectedAddressId, setSelectedAddressId } = useAddresses();
   const { coordinates } = useLocationContext();
-  const { showToast } = useToast();
   const navigate = useNavigate();
   
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -94,7 +92,7 @@ const Cart: React.FC = () => {
   useEffect(() => {
     if (selectedOffer && cartTotal < selectedOffer.minOrderValue) {
       setSelectedOffer(null);
-      showToast(`Offer ${selectedOffer.code} removed as cart total is below ₹${selectedOffer.minOrderValue}`, 'info');
+      console.log(`Offer ${selectedOffer.code} removed as cart total is below ₹${selectedOffer.minOrderValue}`);
     }
   }, [cartTotal, selectedOffer]);
 
@@ -116,14 +114,14 @@ const Cart: React.FC = () => {
 
     setSelectedOffer(offer);
     setCouponInput('');
-    showToast(`Coupon ${offer.code} applied!`, 'success');
+    console.log(`Coupon ${offer.code} applied!`);
   };
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
 
     if (!selectedAddressId) {
-      showToast('Please select a delivery address first.', 'error');
+      console.error('Please select a delivery address first.');
       return;
     }
     
@@ -144,7 +142,7 @@ const Cart: React.FC = () => {
         appliedOffer: selectedOffer?.code
       });
       
-      showToast('Order placed successfully!', 'success');
+      console.log('Order placed successfully!');
       clearCart();
       
       setTimeout(() => {
@@ -152,7 +150,7 @@ const Cart: React.FC = () => {
         else navigate('/');
       }, 800);
     } catch (error: any) {
-      showToast(error.message || 'Failed to place order. Please try again.', 'error');
+      console.error(error.message || 'Failed to place order. Please try again.');
       setIsPlacingOrder(false);
     }
   };
@@ -280,7 +278,7 @@ const Cart: React.FC = () => {
                       onClose={() => setIsAddressModalOpen(false)} 
                       onSave={(newAddr) => {
                         addAddress(newAddr);
-                        showToast(`Address saved.`, "success");
+                        console.log(`Address saved.`);
                         setIsAddressModalOpen(false);
                       }} 
                     />

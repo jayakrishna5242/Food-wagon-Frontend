@@ -4,7 +4,6 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Utensils, ArrowLeft, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
 
 const PRIMARY = 'bg-[#fc8019]';
 const PRIMARY_HOVER = 'hover:bg-[#e66f0f]';
@@ -20,7 +19,6 @@ const VerifyOTP: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-  const { showToast } = useToast();
 
   const phoneNumber = location.state?.phone || 'your phone number';
   const userData = location.state?.userData;
@@ -93,11 +91,11 @@ const VerifyOTP: React.FC = () => {
       
       if (userData) {
         login(userData);
-        showToast('Verification successful!', 'success');
+        console.log('Verification successful!');
         navigate('/');
       } else {
         // If we don't have user data (e.g. direct access), just show success and go home
-        showToast('Verification successful!', 'success');
+        console.log('Verification successful!');
         navigate('/login');
       }
     } catch (err: any) {
@@ -118,9 +116,9 @@ const VerifyOTP: React.FC = () => {
       setCanResend(false);
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
-      showToast('OTP resent successfully!', 'success');
+      console.log('OTP resent successfully!');
     } catch (err: any) {
-      showToast('Failed to resend OTP. Please try again.', 'error');
+      console.error('Failed to resend OTP. Please try again.');
     } finally {
       setLoading(false);
     }

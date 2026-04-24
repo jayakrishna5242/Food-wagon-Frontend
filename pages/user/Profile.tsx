@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useAddresses } from '../../context/AddressContext';
-import { useToast } from '../../context/ToastContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchOrders, rateOrder, updateUser, fetchGenieBookings, fetchEarningsSummary, fetchTrips } from '../../services/api';
@@ -49,7 +48,6 @@ const Profile: React.FC = () => {
   const { user, logout, login, isLoading: authLoading } = useAuth();
   const { addresses, addAddress, removeAddress } = useAddresses();
   const { favorites } = useFavorites();
-  const { showToast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'menu');
@@ -78,7 +76,7 @@ const Profile: React.FC = () => {
     if (!orderToCancel) return;
     // Update order status to CANCELLED
     setOrders(prev => prev.map(o => o.id === orderToCancel.id ? { ...o, status: 'CANCELLED' } : o));
-    showToast('Order cancelled successfully', 'success');
+    console.log('Order cancelled successfully');
     setIsCancelModalOpen(false);
     setOrderToCancel(null);
   };
@@ -116,21 +114,21 @@ const Profile: React.FC = () => {
       if (selectedOrder?.id === orderId) {
         setSelectedOrder(prev => prev ? { ...prev, rating } : null);
       }
-      showToast('Thank you for your rating!', 'success');
+      console.log('Thank you for your rating!');
     } catch (error) {
-      showToast('Failed to submit rating', 'error');
+      console.error('Failed to submit rating');
     }
   };
 
   const handleLogout = () => {
     logout();
-    showToast('Logged out successfully. See you soon!', 'info');
+    console.log('Logged out successfully. See you soon!');
     navigate('/');
   };
 
   const handleRemoveAddress = (id: string) => {
     removeAddress(id);
-    showToast('Address removed successfully.', 'info');
+    console.log('Address removed successfully.');
   };
 
   const handleTabChange = (tabId: Tab) => {
@@ -156,11 +154,11 @@ const Profile: React.FC = () => {
 
   const handleUpdateProfile = async () => {
     if (profileForm.name.trim().length < 3) {
-      showToast('Name must be at least 3 characters', 'error');
+      console.error('Name must be at least 3 characters');
       return;
     }
     if (profileForm.phone.length !== 10) {
-      showToast('Phone number must be 10 digits', 'error');
+      console.error('Phone number must be 10 digits');
       return;
     }
     
@@ -173,9 +171,9 @@ const Profile: React.FC = () => {
         phone: profileForm.phone
       });
       login(updated);
-      showToast('Profile updated successfully!', 'success');
+      console.log('Profile updated successfully!');
     } catch (error) {
-      showToast('Failed to update profile', 'error');
+      console.error('Failed to update profile');
     } finally {
       setIsUpdating(false);
     }
@@ -348,6 +346,11 @@ const Profile: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Account actions placeholder for deleted/logouts */}
+      <div className="px-6 space-y-4">
+          {/* We could add some logic here if needed but let's stick to the prompt */}
       </div>
 
       {/* Help & FAQs Section */}
@@ -528,7 +531,7 @@ const Profile: React.FC = () => {
                   {isAddingAddress && (
                     <AddressForm onSave={(newAddr) => {
                         addAddress(newAddr);
-                        showToast(`Address "${newAddr.type}" added successfully.`, "success");
+                        console.log(`Address "${newAddr.type}" added successfully.`);
                         setIsAddingAddress(false);
                     }} className="mb-6" />
                   )}
@@ -613,7 +616,7 @@ const Profile: React.FC = () => {
                       </div>
                       
                       <button 
-                        onClick={() => showToast('Withdrawal request submitted successfully!', 'success')}
+                        onClick={() => console.log('Withdrawal request submitted successfully!')}
                         className="w-full bg-primary text-white font-black py-4 rounded-xl shadow-lg shadow-orange-500/20"
                       >
                         Withdraw Funds
@@ -958,7 +961,7 @@ const Profile: React.FC = () => {
               <div className="space-y-3">
                 <button 
                   onClick={() => {
-                    showToast('Account deletion request submitted', 'info');
+                    console.log('Account deletion request submitted');
                     setIsDeleteModalOpen(false);
                   }}
                   className="w-full py-4 bg-red-500 text-white font-black rounded-2xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"

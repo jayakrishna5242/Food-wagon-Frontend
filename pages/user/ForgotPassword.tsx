@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useToast } from '../../context/ToastContext';
 import { generateOtp, resetPassword } from '../../services/api';
 import { ArrowLeft, Utensils, Mail, Lock, Key, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -14,7 +13,6 @@ const ForgotPassword: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const handleGenerateOtp = async (e: React.FormEvent) => {
@@ -23,7 +21,7 @@ const ForgotPassword: React.FC = () => {
     setLoading(true);
     try {
       await generateOtp(email);
-      showToast('OTP sent to your email!', 'success');
+      console.log('OTP sent to your email!');
       setStep(2);
     } catch (err: any) {
       setError(err.message || 'Failed to generate OTP');
@@ -47,7 +45,7 @@ const ForgotPassword: React.FC = () => {
     setLoading(true);
     try {
       await resetPassword(email, otp, newPassword);
-      showToast('Password updated successfully!', 'success');
+      console.log('Password updated successfully!');
       navigate('/login');
     } catch (err: any) {
       setError(err.message || 'Failed to reset password');

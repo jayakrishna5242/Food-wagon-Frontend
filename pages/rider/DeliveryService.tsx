@@ -103,10 +103,10 @@ const DeliveryService: React.FC = () => {
   };
 
   useEffect(() => {
-    if (pickupLocation && dropLocation) {
-      updateCalculations(pickupLocation, dropLocation);
+    if (pickupCoords && dropCoords) {
+      updateCalculations(pickupCoords, dropCoords);
     }
-  }, [pickupLocation, dropLocation]);
+  }, [pickupCoords, dropCoords]);
 
   useEffect(() => {
     const loadBookings = async () => {
@@ -148,24 +148,64 @@ const DeliveryService: React.FC = () => {
     }, 100);
   };
 
+  const simplifyAddress = (address: string) => {
+    const parts = address.split(', ');
+    if (parts.length > 3) {
+      return parts.slice(0, 3).join(', ');
+    }
+    return address;
+  };
+
   const handleUseCurrentLocation = async () => {
-    if (address && address !== 'Detecting your location...' && address !== 'Select Location') {
-      setPickupLocation(address);
-      // Need to geocode the address to get coordinates for routing
-      const coords = await geocode(address);
-      if (coords) setPickupCoords(coords);
-    } else {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-          setPickupLocation("Current Location (GPS)");
-          setPickupCoords([lat, lon]);
-        }, (err) => {
-          console.error("Geolocation error:", err);
-          setErrors(prev => ({ ...prev, pickup: "Could not fetch current location." }));
-        });
+    setIsCalculating(true);
+    setErrors(prev => ({ ...prev, pickup: undefined }));
+
+    const onSuccess = async (lat: number, lon: number) => {
+      setPickupCoords([lat, lon]);
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+        const data = await response.json();
+        
+        if (data && data.address) {
+          const addr = data.address;
+          const road = addr.road || addr.pedestrian || addr.suburb || addr.neighbourhood || '';
+          const city = addr.city || addr.town || addr.village || addr.state_district || '';
+          const state = addr.state || '';
+          
+          let simplified = '';
+          if (road && city) simplified = `${road}, ${city}`;
+          else if (city) simplified = city;
+          else simplified = data.display_name.split(', ').slice(0, 2).join(', ');
+
+          setPickupLocation(simplified);
+        } else if (data && data.display_name) {
+          setPickupLocation(simplifyAddress(data.display_name));
+        } else {
+          setPickupLocation(`Pinned Location (${lat.toFixed(4)}, ${lon.toFixed(4)})`);
+        }
+      } catch (error) {
+        console.error("Reverse geocoding failed:", error);
+        setPickupLocation(`Pinned Location (${lat.toFixed(4)}, ${lon.toFixed(4)})`);
+      } finally {
+        setIsCalculating(false);
       }
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          onSuccess(position.coords.latitude, position.coords.longitude);
+        },
+        (err) => {
+          console.error("Geolocation error:", err);
+          setErrors(prev => ({ ...prev, pickup: "Could not fetch current location. Please check your browser permissions." }));
+          setIsCalculating(false);
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    } else {
+      setErrors(prev => ({ ...prev, pickup: "Geolocation is not supported by your browser." }));
+      setIsCalculating(false);
     }
   };
 

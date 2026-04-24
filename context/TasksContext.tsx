@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { createContext, useEffect, useState, useContext } from "react";
 import { useAuth } from "./AuthContext";
-import { useToast } from "./ToastContext";
 import { Task } from "../types";
 
 interface TasksContextType {
@@ -35,7 +34,6 @@ const serverUrl = "/api/v1";
 export const TasksProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const userId = user?.id;
-  const { success, error: showError } = useToast();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
@@ -101,10 +99,10 @@ export const TasksProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       const res = await axios.post(`${serverUrl}/task/create`, taskData);
       setTasks([...tasks, res.data]);
-      success("Task created successfully");
+      console.log("Task created successfully");
     } catch (err) {
       console.log("Error creating task", err);
-      showError("Failed to create task");
+      console.error("Failed to create task");
     }
     setLoading(false);
   };
@@ -116,11 +114,11 @@ export const TasksProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const newTasks = tasks.map((tsk) => {
         return tsk._id === res.data._id ? res.data : tsk;
       });
-      success("Task updated successfully");
+      console.log("Task updated successfully");
       setTasks(newTasks);
     } catch (err) {
       console.log("Error updating task", err);
-      showError("Failed to update task");
+      console.error("Failed to update task");
     }
     setLoading(false);
   };
@@ -131,10 +129,10 @@ export const TasksProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       await axios.delete(`${serverUrl}/task/${taskId}`);
       const newTasks = tasks.filter((tsk) => tsk._id !== taskId);
       setTasks(newTasks);
-      success("Task deleted successfully");
+      console.log("Task deleted successfully");
     } catch (err) {
       console.log("Error deleting task", err);
-      showError("Failed to delete task");
+      console.error("Failed to delete task");
     }
     setLoading(false);
   };

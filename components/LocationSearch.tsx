@@ -21,15 +21,41 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ label, placeholder, onS
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const skipSearch = useRef(false);
 
   useEffect(() => {
+    if (initialValue && initialValue !== query) {
+      skipSearch.current = true;
+      setQuery(initialValue);
+      setShowResults(false);
+    }
+  }, [initialValue]);
+
+  useEffect(() => {
+    if (skipSearch.current) {
+      skipSearch.current = false;
+      return;
+    }
     const delayDebounceFn = setTimeout(async () => {
       if (query.length > 2) {
         setIsSearching(true);
         try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+          // Add addressdetails=1 to get more structured data if needed, but for now simple split is better
+          const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
           const data = await response.json();
-          setResults(data);
+          
+          // Simplify names
+          const simplifiedData = data.map((item: any) => {
+            const parts = item.display_name.split(', ');
+            // Usually the first 2-3 parts are enough for a "simple" address
+            const simplifiedName = parts.length > 3 ? parts.slice(0, 3).join(', ') : item.display_name;
+            return {
+              ...item,
+              display_name: simplifiedName
+            };
+          });
+          
+          setResults(simplifiedData);
           setShowResults(true);
         } catch (error) {
           console.error("Search failed:", error);

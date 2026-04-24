@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bike, ArrowRight, User, Phone, Mail, ShieldCheck } from 'lucide-react';
 import { registerDelivery } from '../../src/rider/api';
-import { useToast } from '../../context/ToastContext';
 import { motion } from 'motion/react';
 
 const RiderRegistration: React.FC = () => {
   const navigate = useNavigate();
-  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [riderForm, setRiderForm] = useState({
     name: '',
@@ -23,10 +21,10 @@ const RiderRegistration: React.FC = () => {
     setLoading(true);
     try {
       await registerDelivery(riderForm);
-      showToast('Rider registration successful!', 'success');
+      console.log('Rider registration successful!');
       navigate('/delivery/dashboard');
     } catch (error) {
-      showToast('Registration failed', 'error');
+      console.error('Registration failed');
     } finally {
       setLoading(false);
     }

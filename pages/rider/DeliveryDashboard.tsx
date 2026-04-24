@@ -32,7 +32,6 @@ import {
 } from '../../services/api';
 import { Order, Trip, EarningsSummary, OrderRequest } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
 import { motion, AnimatePresence } from 'motion/react';
 
 const DeliveryDashboard: React.FC = () => {
@@ -41,7 +40,6 @@ const DeliveryDashboard: React.FC = () => {
   const setActiveTab = (tab: string) => setSearchParams({ tab });
   const navigate = useNavigate();
   const { user: currentUser, logout } = useAuth();
-  const { showToast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [earnings, setEarnings] = useState<EarningsSummary | null>(null);
@@ -124,10 +122,10 @@ const DeliveryDashboard: React.FC = () => {
   const handleStatusUpdate = async (orderId: number, status: Order['status']) => {
     try {
       await updateOrderStatus(orderId, status, currentUser?.id, currentUser?.name);
-      showToast(`Order status updated to ${status.replace('_', ' ')}`, 'success');
+      console.log(`Order status updated to ${status.replace('_', ' ')}`);
       loadData();
     } catch (err) {
-      showToast('Failed to update status', 'error');
+      console.error('Failed to update status');
     }
   };
 
@@ -137,10 +135,10 @@ const DeliveryDashboard: React.FC = () => {
       // Optimistically remove from UI
       setOrderRequests(prev => prev.filter(r => r.id !== requestId));
       await acceptOrderRequest(requestId, currentUser.id);
-      showToast('Order accepted! Head to the restaurant.', 'success');
+      console.log('Order accepted! Head to the restaurant.');
       loadData();
     } catch (err) {
-      showToast('Failed to accept order', 'error');
+      console.error('Failed to accept order');
       loadData(); // Re-fetch on error
     }
   };
@@ -151,9 +149,9 @@ const DeliveryDashboard: React.FC = () => {
       // Optimistically remove from UI
       setOrderRequests(prev => prev.filter(r => r.id !== requestId));
       await rejectOrderRequest(requestId, currentUser.id);
-      showToast('Order request rejected', 'info');
+      console.log('Order request rejected');
     } catch (err) {
-      showToast('Failed to reject order', 'error');
+      console.error('Failed to reject order');
       loadData();
     }
   };

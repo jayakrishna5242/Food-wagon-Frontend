@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { registerPartner } from '../../src/partner/api';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
 import { motion } from 'motion/react';
 
 const DEFAULT_RESTAURANT_IMAGES = [
@@ -27,7 +26,6 @@ const DEFAULT_RESTAURANT_IMAGES = [
 
 const PartnerRegistration: React.FC = () => {
   const navigate = useNavigate();
-  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -55,11 +53,11 @@ const PartnerRegistration: React.FC = () => {
         },
         (error) => {
           console.error("Error getting location:", error);
-          showToast('Could not fetch location. Please enable location services.', 'error');
+          console.error('Could not fetch location. Please enable location services.');
         }
       );
     } else {
-      showToast('Geolocation is not supported by this browser.', 'error');
+      console.error('Geolocation is not supported by this browser.');
     }
   };
 
@@ -68,31 +66,31 @@ const PartnerRegistration: React.FC = () => {
     
     // Validations
     if (partnerForm.name.trim().length < 3) {
-      showToast('Name must be at least 3 characters', 'error');
+      console.error('Name must be at least 3 characters');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(partnerForm.email)) {
-      showToast('Please enter a valid email address', 'error');
+      console.error('Please enter a valid email address');
       return;
     }
     if (partnerForm.phone.length !== 10) {
-      showToast('Phone number must be 10 digits', 'error');
+      console.error('Phone number must be 10 digits');
       return;
     }
     if (partnerForm.restaurantName.trim().length < 3) {
-      showToast('Restaurant name must be at least 3 characters', 'error');
+      console.error('Restaurant name must be at least 3 characters');
       return;
     }
     if (partnerForm.fssaiLicense.length !== 14) {
-      showToast('FSSAI License must be 14 digits', 'error');
+      console.error('FSSAI License must be 14 digits');
       return;
     }
     if (!partnerForm.imageUrl) {
-      showToast('Please select or provide a restaurant image', 'error');
+      console.error('Please select or provide a restaurant image');
       return;
     }
     if (!partnerForm.locationCoordinates) {
-      showToast('Please fetch your location', 'error');
+      console.error('Please fetch your location');
       return;
     }
 
@@ -109,7 +107,7 @@ const PartnerRegistration: React.FC = () => {
       setSuccess(true);
       setTimeout(() => navigate('/login'), 3000);
     } catch (err: any) {
-      showToast(err.message || 'Registration failed', 'error');
+      console.error(err.message || 'Registration failed');
     } finally {
       setLoading(false);
     }

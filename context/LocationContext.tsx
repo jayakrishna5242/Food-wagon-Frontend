@@ -17,7 +17,7 @@ const LocationContext = createContext<LocationContextType | undefined>(undefined
 
 export const LocationProvider = ({ children }: { children?: ReactNode }) => {
   const [city, setCity] = useState<string>('Select Location');
-  const [address, setAddress] = useState<string>('Detecting your location...');
+  const [address, setAddress] = useState<string>('Please select your city');
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

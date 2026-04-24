@@ -83,13 +83,14 @@ const Navbar: React.FC = () => {
         console.error("Error detecting location:", error.message);
         let errorMsg = 'Location detection failed';
         switch (error.code) {
-          case 1: errorMsg = 'Location access denied. Please enable it in browser settings or select city manually.'; break;
-          case 2: errorMsg = 'Position unavailable. Please select city manually.'; break;
-          case 3: errorMsg = 'Location request timed out. Please try again or select city manually.'; break;
-          default: errorMsg = error.message || 'Unknown error';
+          case 1: errorMsg = '📍 Location access denied. Please allow location access in your browser settings or select a city below.'; break;
+          case 2: errorMsg = '⚠️ Position unavailable. We couldn\'t determine your GPS location. Please choose manually.'; break;
+          case 3: errorMsg = '🕒 Request timed out. Your connection might be slow. Please try again or pick a city.'; break;
+          default: errorMsg = error.message || 'Unknown error occurred while detecting location.';
         }
         setIsLoading(false);
         setError(errorMsg);
+        // Ensure we don't automatically select if it fails
       },
       {
         enableHighAccuracy: true,
@@ -159,13 +160,15 @@ const Navbar: React.FC = () => {
                     </div>
                     
                     <div className="max-h-64 overflow-y-auto no-scrollbar">
-                       <button
-                          onClick={() => setShowCityDropdown(false)}
-                          className="w-full text-left px-5 py-3 hover:bg-gray-50 text-sm font-medium flex items-center gap-3 transition-colors bg-orange-50 text-primary"
-                       >
-                          <MapPin className="w-4 h-4 text-primary" />
-                          {city}
-                       </button>
+                       {city !== 'Select Location' && (
+                         <button
+                            onClick={() => setShowCityDropdown(false)}
+                            className="w-full text-left px-5 py-3 hover:bg-gray-50 text-sm font-medium flex items-center gap-3 transition-colors bg-orange-50 text-primary border-b border-gray-100"
+                         >
+                            <MapPin className="w-4 h-4 text-primary" />
+                            {city}
+                         </button>
+                       )}
                     </div>
                  </div>
                )}

@@ -30,7 +30,6 @@ import { Order, Restaurant, User } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
 
 const AdminDashboard: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,7 +37,6 @@ const AdminDashboard: React.FC = () => {
   const setActiveTab = (tab: string) => setSearchParams({ tab });
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { showToast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -75,9 +73,9 @@ const AdminDashboard: React.FC = () => {
         setRestaurants(prev => prev.map(r => r.id === user.restaurantId ? { ...r, isVerified: true } : r));
       }
       
-      showToast('User verified successfully', 'success');
+      console.log('User verified successfully');
     } catch (err) {
-      showToast('Failed to verify user', 'error');
+      console.error('Failed to verify user');
     }
   };
 
@@ -89,9 +87,9 @@ const AdminDashboard: React.FC = () => {
       // Update the partner user in state too
       setUsers(prev => prev.map(u => u.restaurantId === restaurantId ? { ...u, isVerified: true } : u));
       
-      showToast('Restaurant verified successfully', 'success');
+      console.log('Restaurant verified successfully');
     } catch (err) {
-      showToast('Failed to verify restaurant', 'error');
+      console.error('Failed to verify restaurant');
     }
   };
 

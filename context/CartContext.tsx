@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect, useCallback } from 'react';
 import { CartItem, MenuItem } from '../types';
-import { useToast } from './ToastContext';
 
 interface CartContextType {
   items: CartItem[];
@@ -30,7 +29,6 @@ export const CartProvider = ({ children }: { children?: ReactNode }) => {
     const saved = localStorage.getItem('foodwagon_discount');
     return saved ? Number(saved) : 0;
   });
-  const { showToast } = useToast();
 
   useEffect(() => {
     localStorage.setItem('foodwagon_cart', JSON.stringify(items));
@@ -51,7 +49,7 @@ export const CartProvider = ({ children }: { children?: ReactNode }) => {
   const addToCart = useCallback((item: MenuItem) => {
     const existingItem = items.find((i) => i.id === item.id);
     if (!existingItem) {
-      showToast(`Added ${item.name} to cart`, 'success');
+      console.log(`Added ${item.name} to cart`);
     }
     setItems((prevItems) => {
       const isAlreadyInCart = prevItems.some((i) => i.id === item.id);
@@ -62,12 +60,12 @@ export const CartProvider = ({ children }: { children?: ReactNode }) => {
       }
       return [...prevItems, { ...item, quantity: 1 }];
     });
-  }, [items, showToast]);
+  }, [items]);
 
   const removeFromCart = useCallback((itemId: number) => {
     const itemToRemove = items.find(i => i.id === itemId);
     if (itemToRemove && itemToRemove.quantity === 1) {
-      showToast(`Removed ${itemToRemove.name} from cart`, 'info');
+      console.log(`Removed ${itemToRemove.name} from cart`);
     }
     setItems((prevItems) => {
       const existingItem = prevItems.find((i) => i.id === itemId);
@@ -78,7 +76,7 @@ export const CartProvider = ({ children }: { children?: ReactNode }) => {
       }
       return prevItems.filter((i) => i.id !== itemId);
     });
-  }, [items, showToast]);
+  }, [items]);
 
   const clearCart = useCallback(() => {
     setItems([]);
@@ -101,30 +99,30 @@ export const CartProvider = ({ children }: { children?: ReactNode }) => {
     if (normalizedCode === 'WELCOME50' && cartTotal >= 200) {
       setAppliedCoupon(normalizedCode);
       setDiscount(50);
-      showToast('Coupon applied successfully! ₹50 off', 'success');
+      console.log('Coupon applied successfully! ₹50 off');
       return true;
     } else if (normalizedCode === 'FOODIE100' && cartTotal >= 500) {
       setAppliedCoupon(normalizedCode);
       setDiscount(100);
-      showToast('Coupon applied successfully! ₹100 off', 'success');
+      console.log('Coupon applied successfully! ₹100 off');
       return true;
     } else if (normalizedCode === 'SAVE20' && cartTotal >= 300) {
       const disc = Math.round(cartTotal * 0.2);
       setAppliedCoupon(normalizedCode);
       setDiscount(disc);
-      showToast(`Coupon applied successfully! ₹${disc} off`, 'success');
+      console.log(`Coupon applied successfully! ₹${disc} off`);
       return true;
     }
     
-    showToast('Invalid coupon code or minimum order value not met', 'error');
+    console.log('Invalid coupon code or minimum order value not met');
     return false;
-  }, [cartTotal, showToast]);
+  }, [cartTotal]);
 
   const removeCoupon = useCallback(() => {
     setAppliedCoupon(null);
     setDiscount(0);
-    showToast('Coupon removed', 'info');
-  }, [showToast]);
+    console.log('Coupon removed');
+  }, []);
 
   const contextValue = useMemo(() => ({
     items, 

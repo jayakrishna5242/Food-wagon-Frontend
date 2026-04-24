@@ -2,7 +2,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
 import { loginUser, registerUser } from '../../services/api';
 import { X, Utensils, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -38,7 +37,6 @@ const Login: React.FC = () => {
   const [remember, setRemember] = useState(false);
 
   const { login } = useAuth();
-  const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -114,10 +112,10 @@ const Login: React.FC = () => {
           // My dashboard updates already handle this.
         }
         
-        showToast(`Welcome back, ${authResponse.user.name}!`, 'success');
+        console.log(`Welcome back, ${authResponse.user.name}!`);
       } else {
         authResponse = await registerUser(name.trim(), email.trim(), phone.trim(), password);
-        showToast(`Account created successfully! Welcome to FoodWagon.`, 'success');
+        console.log(`Account created successfully! Welcome to FoodWagon.`);
       }
       
       login(authResponse.user);

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { X, Home, Briefcase, MapPin, Crosshair, Loader2, CheckCircle2 } from 'lucide-react';
 import { UserAddress } from '../types';
 import { useLocationContext } from '../context/LocationContext';
-import { useToast } from '../context/ToastContext';
 
 interface AddressFormProps {
   onSave: (address: Omit<UserAddress, 'id'>) => void;
@@ -13,7 +12,6 @@ interface AddressFormProps {
 
 const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = '' }) => {
   const { city: currentCity, address: currentAddress, setCity: setGlobalCity, setAddress: setGlobalAddress } = useLocationContext();
-  const { showToast } = useToast();
   
   const [flatNo, setFlatNo] = useState('');
   const [area, setArea] = useState('');
@@ -43,7 +41,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = 
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
-      showToast("Geolocation is not supported by your browser", "error");
+      console.error("Geolocation is not supported by your browser");
       return;
     }
     
@@ -67,10 +65,10 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = 
           // Also update global context for consistency
           setGlobalCity(detectedCity);
           setGlobalAddress(detectedArea ? `${detectedArea}, ${detectedCity}` : detectedCity);
-          showToast("Location detected successfully", "success");
+          console.log("Location detected successfully");
         } catch (error) {
           console.error("Detection failed", error);
-          showToast("Could not determine your exact address. Please enter manually.", "info");
+          console.log("Could not determine your exact address. Please enter manually.");
         } finally {
           setIsDetecting(false);
         }
@@ -78,7 +76,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = 
       (error) => {
         console.error("Geolocation error", error);
         setIsDetecting(false);
-        showToast("Location access denied or unavailable", "error");
+        console.error("Location access denied or unavailable");
       },
       { enableHighAccuracy: true, timeout: 5000 }
     );
@@ -92,19 +90,19 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = 
     const trimmedCity = city.trim();
 
     if (trimmedFlatNo.length < 2) {
-      showToast("Flat/House No. must be at least 2 characters", "error");
+      console.error("Flat/House No. must be at least 2 characters");
       return;
     }
     if (trimmedArea.length < 3) {
-      showToast("Area must be at least 3 characters", "error");
+      console.error("Area must be at least 3 characters");
       return;
     }
     if (trimmedCity.length < 3) {
-      showToast("City must be at least 3 characters", "error");
+      console.error("City must be at least 3 characters");
       return;
     }
     if (!/^[a-zA-Z\s]+$/.test(trimmedCity)) {
-      showToast("City should only contain letters and spaces", "error");
+      console.error("City should only contain letters and spaces");
       return;
     }
     
@@ -117,7 +115,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSave, onClose, className = 
       setArea('');
       setCity('');
     } catch (err) {
-      showToast("Failed to save address", "error");
+      console.error("Failed to save address");
     } finally {
       setIsSaving(false);
     }
