@@ -1,10 +1,11 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Restaurant } from '../types';
+import { fetchFavorites, toggleFavorite as apiToggleFavorite } from '../services/api';
 
 interface FavoritesContextType {
   favorites: Restaurant[];
-  toggleFavorite: (restaurant: Restaurant) => void;
+  toggleFavorite: (restaurant: Restaurant) => Promise<void>;
   isFavorite: (restaurantId: number) => boolean;
 }
 
@@ -15,28 +16,20 @@ export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
 
   // Load favorites on mount
   useEffect(() => {
-    const saved = localStorage.getItem('foodwagon_favorites');
-    if (saved) {
-      try {
-        setFavorites(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse favorites", e);
-      }
-    }
+    const load = async () => {
+      const data = await fetchFavorites();
+      setFavorites(data);
+    };
+    load();
   }, []);
 
-  // Save favorites whenever they change
-  useEffect(() => {
-    localStorage.setItem('foodwagon_favorites', JSON.stringify(favorites));
-  }, [favorites]);
-
-  const toggleFavorite = (restaurant: Restaurant) => {
-    const exists = favorites.some(f => f.id === restaurant.id);
-    if (exists) {
-      setFavorites(prev => prev.filter(f => f.id !== restaurant.id));
+  const toggleFavorite = async (restaurant: Restaurant) => {
+    const updated = await apiToggleFavorite(restaurant);
+    setFavorites(updated);
+    const exists = updated.some(f => f.id === restaurant.id);
+    if (!exists) {
       console.log(`Removed ${restaurant.name} from favorites`);
     } else {
-      setFavorites(prev => [...prev, restaurant]);
       console.log(`Added ${restaurant.name} to favorites`);
     }
   };

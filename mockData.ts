@@ -530,6 +530,62 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     location: "Basavanagudi",
     city: "Bangalore",
     isPureVeg: true
+  },
+  {
+    id: 50,
+    name: "Santosh Dhaba",
+    imageUrl: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.4,
+    deliveryTime: "25-30 mins",
+    costForTwo: "₹500 for two",
+    cuisines: ["North Indian", "Chinese", "Biryani"],
+    location: "Abids",
+    city: "Hyderabad",
+    isPureVeg: true,
+    latitude: 17.3916,
+    longitude: 78.4741
+  },
+  {
+    id: 51,
+    name: "Cafe Niloufer",
+    imageUrl: "https://images.unsplash.com/photo-1544787210-228394c3d3e0?q=80&w=2044&auto=format&fit=crop",
+    rating: 4.8,
+    deliveryTime: "15-20 mins",
+    costForTwo: "₹200 for two",
+    cuisines: ["Bakery", "Beverages", "Snacks"],
+    location: "Red Hills",
+    city: "Hyderabad",
+    isPureVeg: true,
+    latitude: 17.4045,
+    longitude: 78.4597
+  },
+  {
+    id: 52,
+    name: "Sarvi Restaurant",
+    imageUrl: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?q=80&w=2070&auto=format&fit=crop",
+    rating: 4.3,
+    deliveryTime: "30-40 mins",
+    costForTwo: "₹700 for two",
+    cuisines: ["Mughlai", "North Indian", "Kebabs"],
+    location: "Banjara Hills",
+    city: "Hyderabad",
+    isPureVeg: false,
+    latitude: 17.4143,
+    longitude: 78.4415
+  },
+  {
+    id: 53,
+    name: "Minerva Coffee Shop",
+    imageUrl: "https://images.unsplash.com/photo-1630383249896-424e482df921?q=80&w=1974&auto=format&fit=crop",
+    rating: 4.5,
+    deliveryTime: "20-25 mins",
+    costForTwo: "₹400 for two",
+    cuisines: ["South Indian", "North Indian", "Chinese"],
+    location: "Himayatnagar",
+    city: "Hyderabad",
+    isPureVeg: true,
+    latitude: 17.3995,
+    longitude: 78.4831
   }
 ];
 
@@ -1082,6 +1138,94 @@ export const MOCK_MENU_ITEMS: MenuItem[] = [
     isVeg: false,
     category: "Main Course",
     restaurantId: 8,
+    inStock: true
+  },
+  {
+    id: 5001,
+    name: "Special Veg Biryani",
+    description: "Fragrant basmati rice cooked with fresh seasonal vegetables and aromatic spices.",
+    price: 280,
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    isVeg: true,
+    category: "Biryani",
+    restaurantId: 50,
+    inStock: true
+  },
+  {
+    id: 5002,
+    name: "Paneer Butter Masala",
+    description: "Soft paneer cubes in a rich, creamy tomato gravy with a touch of butter.",
+    price: 320,
+    imageUrl: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=2070&auto=format&fit=crop",
+    isVeg: true,
+    category: "Main Course",
+    restaurantId: 50,
+    inStock: true
+  },
+  {
+    id: 5101,
+    name: "Bun Maska",
+    description: "Freshly baked bun with a generous layer of butter, best served with Osmania biscuits.",
+    price: 60,
+    imageUrl: "https://images.unsplash.com/photo-1544787210-228394c3d3e0?q=80&w=2044&auto=format&fit=crop",
+    isVeg: true,
+    category: "Bakery",
+    restaurantId: 51,
+    inStock: true
+  },
+  {
+    id: 5102,
+    name: "Irani Chai",
+    description: "Traditional Hyderabadi Irani tea, rich and creamy.",
+    price: 40,
+    imageUrl: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?q=80&w=1974&auto=format&fit=crop",
+    isVeg: true,
+    category: "Beverages",
+    restaurantId: 51,
+    inStock: true
+  },
+  {
+    id: 5201,
+    name: "Pathar Ka Gosht",
+    description: "Mutton marinated in spices and cooked over a flat stone.",
+    price: 450,
+    imageUrl: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?q=80&w=2070&auto=format&fit=crop",
+    isVeg: false,
+    category: "Kebabs",
+    restaurantId: 52,
+    inStock: true
+  },
+  {
+    id: 5202,
+    name: "Sarvi Mutton Biryani",
+    description: "Premium mutton biryani with aromatic saffron-infused rice.",
+    price: 480,
+    imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2020&auto=format&fit=crop",
+    isVeg: false,
+    category: "Biryani",
+    restaurantId: 52,
+    inStock: true
+  },
+  {
+    id: 5301,
+    name: "Minerva Special Thali",
+    description: "A complete South Indian meal with variety of curries, dal, sambar, rasam, curd and sweets.",
+    price: 350,
+    imageUrl: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=1974&auto=format&fit=crop",
+    isVeg: true,
+    category: "Meals",
+    restaurantId: 53,
+    inStock: true
+  },
+  {
+    id: 5302,
+    name: "Ghee Roast Masala Dosa",
+    description: "Extra crispy dosa roasted with pure ghee and served with spicy potato masala.",
+    price: 180,
+    imageUrl: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=2070&auto=format&fit=crop",
+    isVeg: true,
+    category: "Dosa",
+    restaurantId: 53,
     inStock: true
   }
 ];

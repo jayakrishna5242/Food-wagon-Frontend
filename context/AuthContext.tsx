@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
+import { getStoredUser, clearStoredUser } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -18,18 +19,9 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
 
   useEffect(() => {
     // Check for existing session on mount
-    const storedUser = localStorage.getItem('foodwagon_user');
-
-    if (storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser && typeof parsedUser === 'object') {
-          setUser(parsedUser);
-        }
-      } catch (e) {
-        console.error("Failed to parse user data", e);
-        localStorage.removeItem('foodwagon_user');
-      }
+    const storedUser = getStoredUser();
+    if (storedUser) {
+      setUser(storedUser);
     }
     setIsLoading(false);
   }, []);
@@ -42,7 +34,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('foodwagon_user');
+    clearStoredUser();
   };
 
   return (

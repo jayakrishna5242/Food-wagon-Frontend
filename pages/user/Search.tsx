@@ -2,13 +2,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search as SearchIcon, X, ChevronRight, ArrowLeft, History, Star, Clock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { searchGlobal, calculateDistance, calculateDeliveryTime } from '../../services/api';
+import { searchGlobal, calculateDistance, calculateDeliveryTime, fetchRecentSearches, saveRecentSearchToDB, removeSearchFromDB, clearSearchHistoryInDB } from '../../services/api';
 import { Restaurant, MenuItem } from '../../types';
 import RestaurantCard from '../../components/RestaurantCard';
 import MenuItemComponent from '../../components/MenuItem';
 import { useLocationContext } from '../../context/LocationContext';
-
-const RECENT_SEARCHES_KEY = 'foodwagon_recent_searches';
 
 const Search: React.FC = () => {
   const navigate = useNavigate();
@@ -29,32 +27,29 @@ const Search: React.FC = () => {
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
-    if (saved) {
-      setRecentSearches(JSON.parse(saved));
-    }
+    const load = async () => {
+      const saved = await fetchRecentSearches();
+      setRecentSearches(saved);
+    };
+    load();
   }, []);
 
-  const saveSearch = (searchTerm: string) => {
-    if (!searchTerm.trim()) return;
-    const updated = [
-      searchTerm,
-      ...recentSearches.filter(s => s !== searchTerm)
-    ].slice(0, 5); // Keep last 5 searches
+  const saveSearch = async (searchTerm: string) => {
+    await saveRecentSearchToDB(searchTerm);
+    const updated = await fetchRecentSearches();
     setRecentSearches(updated);
-    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
   };
 
-  const removeRecentSearch = (e: React.MouseEvent, searchTerm: string) => {
+  const removeRecentSearch = async (e: React.MouseEvent, searchTerm: string) => {
     e.stopPropagation();
-    const updated = recentSearches.filter(s => s !== searchTerm);
+    await removeSearchFromDB(searchTerm);
+    const updated = await fetchRecentSearches();
     setRecentSearches(updated);
-    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
   };
 
-  const clearAllRecent = () => {
+  const clearAllRecent = async () => {
+    await clearSearchHistoryInDB();
     setRecentSearches([]);
-    localStorage.removeItem(RECENT_SEARCHES_KEY);
   };
 
   useEffect(() => {

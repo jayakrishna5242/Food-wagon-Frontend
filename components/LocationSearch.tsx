@@ -106,6 +106,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ label, placeholder, onS
                 type="button"
                 className="w-full text-left p-4 hover:bg-gray-50 flex items-start gap-3 border-b border-gray-50 last:border-0"
                 onClick={() => {
+                  skipSearch.current = true;
                   setQuery(result.display_name);
                   onSelect(result.display_name, [parseFloat(result.lat), parseFloat(result.lon)]);
                   setShowResults(false);

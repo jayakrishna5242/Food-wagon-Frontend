@@ -5,7 +5,7 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useAddresses } from '../../context/AddressContext';
 import { useLocationContext } from '../../context/LocationContext';
-import { placeOrder, fetchOffers, getRestaurantsDB, calculateDistance, calculateDeliveryTime } from '../../services/api';
+import { placeOrder, fetchOffers, fetchRestaurants, calculateDistance, calculateDeliveryTime } from '../../services/api';
 import { Minus, Plus, ArrowRight, MapPin, Plus as PlusIcon, CheckCircle2, Loader2, Banknote, CreditCard, Tag, Ticket, X, User, Clock, ChevronLeft, ShoppingBag, Home, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import AddressForm from '../../components/AddressForm';
@@ -35,25 +35,28 @@ const Cart: React.FC = () => {
   const gst = Math.round(cartTotal * 0.05);
   
   useEffect(() => {
-    if (items.length > 0) {
-      const restaurantId = items[0].restaurantId;
-      const restaurants = getRestaurantsDB();
-      const restaurant = restaurants.find(r => r.id === restaurantId);
-      
-      if (restaurant && coordinates && restaurant.latitude && restaurant.longitude) {
-        const distance = calculateDistance(
-          coordinates.latitude,
-          coordinates.longitude,
-          restaurant.latitude,
-          restaurant.longitude
-        );
-        setDeliveryTime(calculateDeliveryTime(distance));
-      } else if (restaurant) {
-        setDeliveryTime(restaurant.deliveryTime);
-      } else {
-        setDeliveryTime('30-40 mins');
+    const calculateTime = async () => {
+      if (items.length > 0) {
+        const restaurantId = items[0].restaurantId;
+        const restaurants = await fetchRestaurants();
+        const restaurant = restaurants.find(r => r.id === restaurantId);
+        
+        if (restaurant && coordinates && restaurant.latitude && restaurant.longitude) {
+          const distance = calculateDistance(
+            coordinates.latitude,
+            coordinates.longitude,
+            restaurant.latitude,
+            restaurant.longitude
+          );
+          setDeliveryTime(calculateDeliveryTime(distance));
+        } else if (restaurant) {
+          setDeliveryTime(restaurant.deliveryTime);
+        } else {
+          setDeliveryTime('30-40 mins');
+        }
       }
-    }
+    };
+    calculateTime();
   }, [items, coordinates]);
   
   const calculateDiscount = () => {

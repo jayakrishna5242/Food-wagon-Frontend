@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect, useCallback } from 'react';
 import { CartItem, MenuItem } from '../types';
+import { fetchCart, saveCart, fetchAppliedCoupon, saveAppliedCoupon, fetchCartDiscount, saveCartDiscount } from '../services/api';
 
 interface CartContextType {
   items: CartItem[];
@@ -18,32 +19,33 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children?: ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('foodwagon_cart');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(() => {
-    return localStorage.getItem('foodwagon_coupon');
-  });
-  const [discount, setDiscount] = useState<number>(() => {
-    const saved = localStorage.getItem('foodwagon_discount');
-    return saved ? Number(saved) : 0;
-  });
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [discount, setDiscount] = useState<number>(0);
+
+  // Initial load
+  useEffect(() => {
+    const load = async () => {
+      const savedItems = await fetchCart();
+      const savedCoupon = await fetchAppliedCoupon();
+      const savedDiscount = await fetchCartDiscount();
+      setItems(savedItems);
+      setAppliedCoupon(savedCoupon);
+      setDiscount(savedDiscount);
+    };
+    load();
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('foodwagon_cart', JSON.stringify(items));
+    saveCart(items);
   }, [items]);
 
   useEffect(() => {
-    if (appliedCoupon) {
-      localStorage.setItem('foodwagon_coupon', appliedCoupon);
-    } else {
-      localStorage.removeItem('foodwagon_coupon');
-    }
+    saveAppliedCoupon(appliedCoupon);
   }, [appliedCoupon]);
 
   useEffect(() => {
-    localStorage.setItem('foodwagon_discount', discount.toString());
+    saveCartDiscount(discount);
   }, [discount]);
 
   const addToCart = useCallback((item: MenuItem) => {

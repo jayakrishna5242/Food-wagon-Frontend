@@ -101,7 +101,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-100 flex items-center w-full h-20 z-[1000]">
+    <nav className="fixed top-0 left-0 bg-white border-b border-gray-100 flex items-center w-full h-20 z-[1000] shadow-sm">
       <div className="container mx-auto px-4 max-w-7xl flex items-center justify-between">
         {/* Logo Section */}
         <Link to="/" className="flex items-center gap-2 group mr-2 flex-shrink-0">

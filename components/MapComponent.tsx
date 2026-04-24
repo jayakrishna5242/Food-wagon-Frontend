@@ -41,7 +41,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ pickupCoords, dropCoords, r
   const center: [number, number] = pickupCoords || [12.9716, 77.5946]; // Default to Bangalore
 
   return (
-    <MapContainer center={center} zoom={13} zoomControl={false} style={{ height: '300px', width: '100%', borderRadius: '1rem' }}>
+    <MapContainer center={center} zoom={13} zoomControl={false} attributionControl={false} style={{ height: '300px', width: '100%', borderRadius: '1rem' }}>
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'

@@ -2,11 +2,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UserAddress } from '../types';
 import { useAuth } from './AuthContext';
+import { fetchAddresses, saveAddress, removeAddress as apiRemoveAddress } from '../services/api';
 
 interface AddressContextType {
   addresses: UserAddress[];
-  addAddress: (address: Omit<UserAddress, 'id'>) => void;
-  removeAddress: (id: string) => void;
+  addAddress: (address: Omit<UserAddress, 'id'>) => Promise<void>;
+  removeAddress: (id: string) => Promise<void>;
   selectedAddressId: string | null;
   setSelectedAddressId: (id: string) => void;
 }
@@ -18,51 +19,30 @@ export const AddressProvider = ({ children }: { children?: ReactNode }) => {
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
-  // Key for localStorage, unique per user if logged in
-  const storageKey = user ? `foodwagon_addresses_${user.id}` : 'foodwagon_addresses_guest';
-
   // Initial load when user changes
   useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setAddresses(parsed);
-        if (parsed.length > 0) {
-          setSelectedAddressId(parsed[0].id);
-        } else {
-          setSelectedAddressId(null);
-        }
-      } catch (e) {
-        console.error("Failed to parse addresses", e);
-        setAddresses([]);
+    const load = async () => {
+      const data = await fetchAddresses();
+      setAddresses(data);
+      if (data.length > 0) {
+        setSelectedAddressId(data[0].id);
+      } else {
         setSelectedAddressId(null);
       }
-    } else {
-      setAddresses([]);
-      setSelectedAddressId(null);
-    }
-  }, [storageKey]);
-
-  const addAddress = (newAddr: Omit<UserAddress, 'id'>) => {
-    const addressWithId: UserAddress = {
-      ...newAddr,
-      id: Math.random().toString(36).substring(2, 11)
     };
-    
-    setAddresses(prev => {
-      const updated = [...prev, addressWithId];
-      localStorage.setItem(storageKey, JSON.stringify(updated));
-      return updated;
-    });
-    
-    setSelectedAddressId(addressWithId.id);
+    load();
+  }, [user?.id]);
+
+  const addAddress = async (newAddr: Omit<UserAddress, 'id'>) => {
+    const saved = await saveAddress(newAddr);
+    setAddresses(prev => [...prev, saved]);
+    setSelectedAddressId(saved.id);
   };
 
-  const removeAddress = (id: string) => {
+  const removeAddress = async (id: string) => {
+    await apiRemoveAddress(id);
     const updated = addresses.filter(a => a.id !== id);
     setAddresses(updated);
-    localStorage.setItem(storageKey, JSON.stringify(updated));
     
     if (selectedAddressId === id) {
       setSelectedAddressId(updated.length > 0 ? updated[0].id : null);

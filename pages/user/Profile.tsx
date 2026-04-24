@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useAddresses } from '../../context/AddressContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchOrders, rateOrder, updateUser, fetchGenieBookings, fetchEarningsSummary, fetchTrips } from '../../services/api';
+import { fetchOrders, rateOrder, updateUser, fetchGenieBookings, fetchEarningsSummary, fetchTrips, cancelOrder, cancelGenieBooking } from '../../services/api';
 import { Order, EarningsSummary, Trip } from '../../types';
 import AddressForm from '../../components/AddressForm';
 import OrderDetailView from '../../components/OrderDetailView';
@@ -59,6 +59,8 @@ const Profile: React.FC = () => {
   const [dateRangeFilter, setDateRangeFilter] = useState<'ALL' | '7' | '30'>('ALL');
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+  const [isCancelBookingModalOpen, setIsCancelBookingModalOpen] = useState(false);
+  const [bookingToCancelId, setBookingToCancelId] = useState<number | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const filteredOrders = orders.filter(order => {
@@ -74,11 +76,30 @@ const Profile: React.FC = () => {
 
   const handleCancelOrder = async () => {
     if (!orderToCancel) return;
-    // Update order status to CANCELLED
-    setOrders(prev => prev.map(o => o.id === orderToCancel.id ? { ...o, status: 'CANCELLED' } : o));
-    console.log('Order cancelled successfully');
-    setIsCancelModalOpen(false);
-    setOrderToCancel(null);
+    try {
+      await cancelOrder(orderToCancel.id);
+      setOrders(prev => prev.map(o => o.id === orderToCancel.id ? { ...o, status: 'CANCELLED' } : o));
+      console.log('Order cancelled successfully');
+    } catch (error) {
+      console.error('Failed to cancel order');
+    } finally {
+      setIsCancelModalOpen(false);
+      setOrderToCancel(null);
+    }
+  };
+
+  const handleCancelBooking = async () => {
+    if (bookingToCancelId === null) return;
+    try {
+      await cancelGenieBooking(bookingToCancelId);
+      setBookings(prev => prev.map(b => b.id === bookingToCancelId ? { ...b, status: 'CANCELLED' } : b));
+      console.log('Pickup cancelled successfully');
+    } catch (error) {
+      console.error('Failed to cancel pickup');
+    } finally {
+      setIsCancelBookingModalOpen(false);
+      setBookingToCancelId(null);
+    }
   };
 
   useEffect(() => {
@@ -704,13 +725,27 @@ const Profile: React.FC = () => {
                               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{new Date(booking.date).toLocaleDateString()}</p>
                             </div>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                            booking.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
-                            booking.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
-                            'bg-blue-100 text-blue-700'
-                          }`}>
-                            {booking.status}
-                          </span>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                              booking.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
+                              booking.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
+                              booking.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
+                              'bg-blue-100 text-blue-700'
+                            }`}>
+                              {booking.status}
+                            </span>
+                            {booking.status === 'PENDING' && (new Date().getTime() - new Date(booking.date).getTime()) <= 60000 && (
+                              <button 
+                                onClick={() => {
+                                  setBookingToCancelId(booking.id);
+                                  setIsCancelBookingModalOpen(true);
+                                }}
+                                className="text-red-500 text-[10px] font-bold hover:underline uppercase tracking-tight"
+                              >
+                                Cancel
+                              </button>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -941,6 +976,39 @@ const Profile: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* Cancel Pickup Modal */}
+      <AnimatePresence>
+        {isCancelBookingModalOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 text-center shadow-2xl"
+            >
+              <h3 className="text-2xl font-black text-dark tracking-tight mb-2">Cancel Pickup?</h3>
+              <p className="text-graytext text-sm font-medium mb-8 leading-relaxed">
+                Are you sure you want to cancel this pickup request?
+              </p>
+              <div className="space-y-3">
+                <button 
+                  onClick={handleCancelBooking}
+                  className="w-full py-4 bg-red-500 text-white font-black rounded-2xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
+                >
+                  Yes, Cancel Pickup
+                </button>
+                <button 
+                  onClick={() => setIsCancelBookingModalOpen(false)}
+                  className="w-full py-4 bg-gray-50 text-dark font-black rounded-2xl hover:bg-gray-100 transition-all"
+                >
+                  No, Keep It
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      
       {/* Delete Account Modal */}
       <AnimatePresence>
         {isDeleteModalOpen && (

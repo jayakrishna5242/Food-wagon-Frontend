@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, MapPin } from 'lucide-react';
+import { X, MapPin, CheckCircle2 } from 'lucide-react';
 import { Order } from '../types';
 
 interface OrderDetailViewProps {
@@ -69,32 +69,76 @@ const OrderDetailView: React.FC<OrderDetailViewProps> = ({ order, onBack }) => {
         </div>
 
         {/* Tracking Status */}
-        <div>
-          <h5 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-            <div className="w-1 h-4 bg-primary rounded-full"></div>
-            Order Tracking
-          </h5>
-          <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-            <div className="flex justify-between mb-3">
-              {['Placed', 'Preparing', 'Dispatched', 'Delivered'].map((step, index) => {
-                const currentStep = order.status === 'DELIVERED' ? 3 : order.status === 'PENDING' ? 1 : 0;
-                return (
-                  <span key={step} className={`text-[10px] font-black uppercase tracking-widest ${index <= currentStep ? 'text-primary' : 'text-gray-300'}`}>
-                    {step}
-                  </span>
-                );
-              })}
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full flex">
-              {['Placed', 'Preparing', 'Dispatched', 'Delivered'].map((_, index) => {
-                const currentStep = order.status === 'DELIVERED' ? 3 : order.status === 'PENDING' ? 1 : 0;
-                return (
-                  <div key={index} className={`flex-1 ${index <= currentStep ? 'bg-primary' : 'bg-transparent'}`}></div>
-                );
-              })}
+        {order.status !== 'CANCELLED' && (
+          <div>
+            <h5 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+              <div className="w-1 h-4 bg-primary rounded-full"></div>
+              Order Tracking
+            </h5>
+            <div className="bg-gray-50 p-8 rounded-3xl border border-gray-100 relative">
+              <div className="flex justify-between relative z-10">
+                {['Placed', 'Preparing', 'Dispatched', 'Delivered'].map((step, index) => {
+                  const statusSteps: Record<string, number> = {
+                    'PENDING': 0,
+                    'PREPARING': 1,
+                    'READY': 1,
+                    'DISPATCHED': 2,
+                    'DELIVERED': 3
+                  };
+                  const currentStep = statusSteps[order.status] ?? -1;
+                  const isActive = index <= currentStep;
+                  
+                  return (
+                    <div key={step} className="flex flex-col items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 transition-all duration-500 shadow-sm ${
+                        isActive 
+                          ? 'bg-primary border-orange-100 text-white' 
+                          : 'bg-white border-gray-100 text-gray-300'
+                      }`}>
+                        {isActive && index < currentStep ? (
+                          <CheckCircle2 className="w-5 h-5 !stroke-[3]" />
+                        ) : (
+                          <span className="text-[10px] font-black">{index + 1}</span>
+                        )}
+                      </div>
+                      <span className={`text-[10px] font-black uppercase tracking-widest text-center max-w-[60px] ${
+                        isActive ? 'text-dark' : 'text-gray-300'
+                      }`}>
+                        {step}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {/* Progress Line */}
+                <div className="absolute top-5 left-8 right-8 h-1 bg-gray-200 -z-10 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all duration-700 ease-out"
+                    style={{ 
+                      width: `${
+                        order.status === 'DELIVERED' ? 100 : 
+                        order.status === 'DISPATCHED' ? 66.6 : 
+                        (order.status === 'PREPARING' || order.status === 'READY') ? 33.3 : 0
+                      }%` 
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {order.status === 'CANCELLED' && (
+          <div className="bg-red-50 p-6 rounded-3xl border border-red-100 flex items-center gap-4">
+             <div className="p-3 bg-red-100 rounded-2xl text-red-600">
+               <X className="w-6 h-6" />
+             </div>
+             <div>
+               <h5 className="font-black text-red-600 uppercase tracking-widest text-xs">Order Cancelled</h5>
+               <p className="text-red-500/70 text-sm font-medium">This order was cancelled and will not be processed further.</p>
+             </div>
+          </div>
+        )}
       </div>
     </div>
   );

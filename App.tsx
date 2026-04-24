@@ -63,7 +63,7 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
   return (
     <div className="flex flex-col min-h-screen">
       {!shouldHide && <Navbar />}
-      <main className="flex-grow pb-20 md:pb-0">
+      <main className="flex-grow pt-20 pb-20 md:pb-0">
         {children}
       </main>
       {!shouldHide && <BottomNav />}

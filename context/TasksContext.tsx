@@ -1,7 +1,7 @@
-import axios from "axios";
 import React, { createContext, useEffect, useState, useContext } from "react";
 import { useAuth } from "./AuthContext";
 import { Task } from "../types";
+import { fetchTasks, fetchTaskById, createTask as apiCreateTask, updateTask as apiUpdateTask, deleteTask as apiDeleteTask } from "../services/api";
 
 interface TasksContextType {
   tasks: Task[];
@@ -28,8 +28,6 @@ interface TasksContextType {
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
-
-const serverUrl = "/api/v1";
 
 export const TasksProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
@@ -74,8 +72,8 @@ export const TasksProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!userId) return;
     setLoading(true);
     try {
-      const response = await axios.get(`${serverUrl}/tasks`);
-      setTasks(response.data.tasks || []);
+      const data = await fetchTasks();
+      setTasks(data || []);
     } catch (err) {
       console.log("Error getting tasks", err);
     }
@@ -86,8 +84,8 @@ export const TasksProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const getTask = async (taskId: string) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${serverUrl}/task/${taskId}`);
-      setTask(response.data);
+      const data = await fetchTaskById(taskId);
+      if (data) setTask(data);
     } catch (err) {
       console.log("Error getting task", err);
     }
@@ -97,8 +95,8 @@ export const TasksProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const createTask = async (taskData: Partial<Task>) => {
     setLoading(true);
     try {
-      const res = await axios.post(`${serverUrl}/task/create`, taskData);
-      setTasks([...tasks, res.data]);
+      const data = await apiCreateTask(taskData);
+      setTasks([...tasks, data]);
       console.log("Task created successfully");
     } catch (err) {
       console.log("Error creating task", err);
@@ -110,9 +108,9 @@ export const TasksProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateTask = async (taskData: Task) => {
     setLoading(true);
     try {
-      const res = await axios.patch(`${serverUrl}/task/${taskData._id}`, taskData);
+      const data = await apiUpdateTask(taskData._id, taskData);
       const newTasks = tasks.map((tsk) => {
-        return tsk._id === res.data._id ? res.data : tsk;
+        return tsk._id === data._id ? data : tsk;
       });
       console.log("Task updated successfully");
       setTasks(newTasks);
@@ -126,7 +124,7 @@ export const TasksProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const deleteTask = async (taskId: string) => {
     setLoading(true);
     try {
-      await axios.delete(`${serverUrl}/task/${taskId}`);
+      await apiDeleteTask(taskId);
       const newTasks = tasks.filter((tsk) => tsk._id !== taskId);
       setTasks(newTasks);
       console.log("Task deleted successfully");

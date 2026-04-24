@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, Clock, MapPin, Search, Heart, ArrowLeft } from 'lucide-react';
 import MenuItem from '../../components/MenuItem';
-import { fetchMenu, fetchRestaurants, calculateDistance, calculateDeliveryTime } from '../../services/api';
+import { fetchMenu, fetchRestaurantById, calculateDistance, calculateDeliveryTime } from '../../services/api';
 import { Restaurant, MenuItem as MenuItemType } from '../../types';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useLocationContext } from '../../context/LocationContext';
@@ -49,10 +49,8 @@ const RestaurantDetail: React.FC = () => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // In a real app, we'd have a separate endpoint for fetching restaurant by ID
-        const allRestaurants = await fetchRestaurants();
-        const found = allRestaurants.find(r => r.id === Number(id));
-        setRestaurant(found || null);
+        const found = await fetchRestaurantById(Number(id));
+        setRestaurant(found);
         
         if (found) {
           const menu = await fetchMenu(Number(id));
@@ -70,7 +68,7 @@ const RestaurantDetail: React.FC = () => {
   useEffect(() => {
     const observerOptions = {
       root: null,
-      rootMargin: '-100px 0px -70% 0px',
+      rootMargin: '-150px 0px -70% 0px',
       threshold: 0
     };
 
@@ -120,10 +118,8 @@ const RestaurantDetail: React.FC = () => {
   const scrollToCategory = (category: string) => {
     const element = document.getElementById(`category-${category}`);
     if (element) {
-      const offset = 100; // Account for sticky header
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const elementRect = element.getBoundingClientRect().top;
-      const elementPosition = elementRect - bodyRect;
+      const offset = 145; // Account for sticky Navbar (80px) + Category bar (~65px)
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
       const offsetPosition = elementPosition - offset;
 
       window.scrollTo({

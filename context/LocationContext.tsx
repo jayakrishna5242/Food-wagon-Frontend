@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { fetchLocationFromDB, saveLocationToDB } from '../services/api';
 
 interface LocationContextType {
   city: string;
@@ -22,29 +23,23 @@ export const LocationProvider = ({ children }: { children?: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Removed automatic location fetching on mount
-  // useEffect(() => {
-  //   if (navigator.geolocation) {
-  //     setIsLoading(true);
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         const { latitude, longitude } = position.coords;
-  //         setCoordinates({ latitude, longitude });
-  //         setAddress('Location detected');
-  //         setCity('Hyderabad'); // Mock city detection for now
-  //         setIsLoading(false);
-  //       },
-  //       (err) => {
-  //         setError(err.message);
-  //         setAddress('Location detection failed');
-  //         setIsLoading(false);
-  //       }
-  //     );
-  //   } else {
-  //     setError('Geolocation is not supported by this browser.');
-  //     setAddress('Geolocation not supported');
-  //   }
-  // }, []);
+  // Initial load
+  useEffect(() => {
+    const load = async () => {
+      const data = await fetchLocationFromDB();
+      setCity(data.city);
+      setAddress(data.address);
+      setCoordinates(data.coordinates);
+    };
+    load();
+  }, []);
+
+  // Sync with localStorage
+  useEffect(() => {
+    if (city !== 'Select Location') {
+      saveLocationToDB(city, address, coordinates);
+    }
+  }, [city, address, coordinates]);
 
   return (
     <LocationContext.Provider 

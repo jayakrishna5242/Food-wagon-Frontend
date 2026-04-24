@@ -1,55 +1,22 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Utensils, Store, ShoppingBag, Bike, ArrowRight, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLocationContext } from '../../context/LocationContext';
 import { motion } from 'motion/react';
+import { fetchHomeCategories } from '../../services/api';
 
 const Home: React.FC = () => {
   const { city } = useLocationContext();
+  const [categories, setCategories] = useState<any[]>([]);
 
-  const categories = [
-    {
-      id: 'food',
-      title: 'Food',
-      subtitle: 'UP TO 20% OFF',
-      icon: Utensils,
-      image: 'https://picsum.photos/seed/food-delivery/800/800',
-      link: '/restaurants',
-      gradient: 'from-orange-600/90 to-red-700/90',
-      actionText: 'ORDER NOW'
-    },
-    {
-      id: 'stores',
-      title: 'Stores',
-      subtitle: 'CLEAN & FRESH',
-      icon: Store,
-      image: 'https://picsum.photos/seed/fresh-grocery/800/800',
-      link: '/fresh-stores',
-      gradient: 'from-emerald-600/90 to-teal-700/90',
-      actionText: 'SHOP NOW'
-    },
-    {
-      id: 'mart',
-      title: 'Mart',
-      subtitle: 'GROCERY DELIVERY',
-      icon: ShoppingBag,
-      image: 'https://picsum.photos/seed/mart-shopping/800/800',
-      link: '/supermarket',
-      gradient: 'from-blue-600/90 to-indigo-700/90',
-      actionText: 'ORDER NOW'
-    },
-    {
-      id: 'genie',
-      title: 'Genie',
-      subtitle: 'SEND & RECEIVE',
-      icon: Bike,
-      image: 'https://picsum.photos/seed/delivery-bike/800/800',
-      link: '/delivery-service',
-      gradient: 'from-pink-600/90 to-rose-700/90',
-      actionText: 'BOOK NOW'
-    }
-  ];
+  useEffect(() => {
+    const load = async () => {
+      const data = await fetchHomeCategories();
+      setCategories(data);
+    };
+    load();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white overflow-y-auto">

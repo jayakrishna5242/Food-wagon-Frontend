@@ -1,25 +1,38 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, Search, ChevronRight, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { SUPERMARKET_ITEMS } from '../../supermarketData';
+import { fetchFeastMartCategories, fetchFeastMartItems } from '../../services/api';
 import MenuItem from '../../components/MenuItem';
 import { useCart } from '../../context/CartContext';
+import { MenuItem as MenuItemType } from '../../types';
 
 const Supermarket: React.FC = () => {
   const { cartCount } = useCart();
+  const [categories, setCategories] = useState<string[]>([]);
+  const [items, setItems] = useState<MenuItemType[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const categories = Array.from(new Set(SUPERMARKET_ITEMS.map(item => item.category)));
+  useEffect(() => {
+    const loadCategories = async () => {
+      const cats = await fetchFeastMartCategories();
+      setCategories(cats);
+    };
+    loadCategories();
+  }, []);
 
-  const filteredItems = SUPERMARKET_ITEMS.filter(item => {
-    const matchesCategory = selectedCategory ? item.category === selectedCategory : true;
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  useEffect(() => {
+    const loadItems = async () => {
+      setLoading(true);
+      const data = await fetchFeastMartItems(selectedCategory, searchQuery);
+      setItems(data);
+      setLoading(false);
+    };
+    loadItems();
+  }, [selectedCategory, searchQuery]);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -80,20 +93,26 @@ const Supermarket: React.FC = () => {
         {/* Items */}
         <div>
           <h2 className="text-xl font-semibold text-dark mb-6 uppercase">{selectedCategory || 'All Items'}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredItems.map((item) => (
-              <MenuItem 
-                key={item.id} 
-                item={{
-                  ...item,
-                  id: item.id.toString(),
-                  image: item.imageUrl,
-                  restaurantName: 'Feasti Mart',
-                  restaurantId: item.restaurantId.toString()
-                }} 
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {items.map((item) => (
+                <MenuItem 
+                  key={item.id} 
+                  item={{
+                    ...item,
+                    id: item.id.toString(),
+                    image: item.imageUrl,
+                    restaurantName: 'Feasti Mart',
+                    restaurantId: item.restaurantId.toString()
+                  }} 
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

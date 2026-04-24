@@ -1,5 +1,5 @@
 
-import { Restaurant, MenuItem, Order, AuthResponse, User, Offer, Trip, EarningsSummary, OrderRequest, GenieBooking } from '../types';
+import { Restaurant, MenuItem, Order, AuthResponse, User, Offer, Trip, EarningsSummary, OrderRequest, GenieBooking, Task, CartItem } from '../types';
 import { MOCK_OFFERS } from '../mockData';
 
 /* =====================================================
@@ -15,6 +15,7 @@ const OFFERS_DB_KEY = 'foodwagon_offers_db_v4';
 const TRIPS_DB_KEY = 'foodwagon_trips_db_v4';
 const ORDER_REQUESTS_DB_KEY = 'foodwagon_order_requests_db_v4';
 const GENIE_BOOKINGS_DB_KEY = 'foodwagon_genie_bookings_db_v4';
+const TASKS_DB_KEY = 'foodwagon_tasks_db_v4';
 
 export const storeUser = (user: User) => {
   if (!user) return;
@@ -497,6 +498,28 @@ export const fetchOrders = async (): Promise<Order[]> => {
   return orders.filter(o => o.userId === user.id).sort((a, b) => b.id - a.id);
 };
 
+export const cancelOrder = async (orderId: number): Promise<void> => {
+  const orders = getOrdersDB();
+  const updated = orders.map(o => {
+    if (o.id === orderId) {
+      return { ...o, status: 'CANCELLED' as const };
+    }
+    return o;
+  });
+  saveOrdersDB(updated);
+};
+
+export const cancelGenieBooking = async (bookingId: number): Promise<void> => {
+  const bookings = getGenieBookingsDB();
+  const updated = bookings.map(b => {
+    if (b.id === bookingId) {
+      return { ...b, status: 'CANCELLED' as const };
+    }
+    return b;
+  });
+  saveGenieBookingsDB(updated);
+};
+
 export const updateOrderStatus = async (orderId: number, status: Order['status'], deliveryBoyId?: number, deliveryBoyName?: string): Promise<void> => {
   const orders = getOrdersDB();
   const updated = orders.map(o => {
@@ -867,4 +890,307 @@ export const rateOrder = async (
     });
     saveTripsDB(updatedTrips);
   }
+};
+
+/* =====================================================
+   TASKS (Local Storage Mock - Used by TasksContext)
+ ===================================================== */
+
+const getTasksDB = (): Task[] => {
+  const data = localStorage.getItem(TASKS_DB_KEY);
+  return data ? JSON.parse(data) : [];
+};
+
+const saveTasksDB = (tasks: Task[]) => {
+  localStorage.setItem(TASKS_DB_KEY, JSON.stringify(tasks));
+};
+
+export const fetchTasks = async (): Promise<Task[]> => {
+  const user = getStoredUser();
+  if (!user) return [];
+  const tasks = getTasksDB();
+  return tasks.filter(t => t.userId === user.id.toString());
+};
+
+export const fetchTaskById = async (id: string): Promise<Task | null> => {
+  const tasks = getTasksDB();
+  return tasks.find(t => t._id === id) || null;
+};
+
+export const createTask = async (taskData: Partial<Task>): Promise<Task> => {
+  const user = getStoredUser();
+  const tasks = getTasksDB();
+  const newTask: Task = {
+    _id: Date.now().toString(),
+    title: taskData.title || '',
+    description: taskData.description || '',
+    completed: false,
+    priority: taskData.priority as any || 'low',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    userId: user?.id.toString() || 'guest'
+  };
+  tasks.push(newTask);
+  saveTasksDB(tasks);
+  return newTask;
+};
+
+export const updateTask = async (id: string, updates: Partial<Task>): Promise<Task> => {
+  const tasks = getTasksDB();
+  let updatedTask: Task | null = null;
+  const updated = tasks.map(t => {
+    if (t._id === id) {
+      updatedTask = { ...t, ...updates, updatedAt: new Date().toISOString() };
+      return updatedTask;
+    }
+    return t;
+  });
+  if (!updatedTask) throw new Error('Task not found');
+  saveTasksDB(updated);
+  return updatedTask;
+};
+
+export const deleteTask = async (id: string): Promise<void> => {
+  const tasks = getTasksDB();
+  const updated = tasks.filter(t => t._id !== id);
+  saveTasksDB(updated);
+};
+
+/* =====================================================
+   ADDRESSES & FAVORITES (Mock wrapper around localStorage)
+ ===================================================== */
+
+const ADDRESSES_DB_KEY = 'foodwagon_addresses';
+const FAVORITES_DB_KEY = 'foodwagon_favorites';
+
+export const fetchAddresses = async (): Promise<any[]> => {
+  const user = getStoredUser();
+  const key = user ? `${ADDRESSES_DB_KEY}_${user.id}` : ADDRESSES_DB_KEY;
+  const data = localStorage.getItem(key);
+  return data ? JSON.parse(data) : [];
+};
+
+export const saveAddress = async (address: any): Promise<any> => {
+  const user = getStoredUser();
+  const key = user ? `${ADDRESSES_DB_KEY}_${user.id}` : ADDRESSES_DB_KEY;
+  const data = await fetchAddresses();
+  const newAddr = { ...address, id: Math.random().toString(36).substring(2, 11) };
+  const updated = [...data, newAddr];
+  localStorage.setItem(key, JSON.stringify(updated));
+  return newAddr;
+};
+
+export const removeAddress = async (id: string): Promise<void> => {
+  const user = getStoredUser();
+  const key = user ? `${ADDRESSES_DB_KEY}_${user.id}` : ADDRESSES_DB_KEY;
+  const data = await fetchAddresses();
+  const updated = data.filter((a: any) => a.id !== id);
+  localStorage.setItem(key, JSON.stringify(updated));
+};
+
+export const fetchFavorites = async (): Promise<Restaurant[]> => {
+  const data = localStorage.getItem(FAVORITES_DB_KEY);
+  return data ? JSON.parse(data) : [];
+};
+
+export const toggleFavorite = async (restaurant: Restaurant): Promise<Restaurant[]> => {
+  const favorites = await fetchFavorites();
+  const exists = favorites.some(f => f.id === restaurant.id);
+  let updated;
+  if (exists) {
+    updated = favorites.filter(f => f.id !== restaurant.id);
+  } else {
+    updated = [...favorites, restaurant];
+  }
+  localStorage.setItem(FAVORITES_DB_KEY, JSON.stringify(updated));
+  return updated;
+};
+
+/* =====================================================
+   FEAST MART & FRESH STORES (Local Storage Mock)
+ ===================================================== */
+import { SUPERMARKET_ITEMS } from '../supermarketData';
+
+export const fetchFeastMartCategories = async (): Promise<string[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return Array.from(new Set(SUPERMARKET_ITEMS.map(item => item.category)));
+};
+
+export const fetchFeastMartItems = async (category: string | null = null, query: string = ''): Promise<MenuItem[]> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return SUPERMARKET_ITEMS.filter(item => {
+    const matchesCategory = category ? item.category === category : true;
+    const matchesSearch = item.name.toLowerCase().includes(query.toLowerCase()) || 
+                          item.description.toLowerCase().includes(query.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+};
+
+export const fetchFreshStoreCategories = async (): Promise<{name: string, image: string}[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return [
+    { name: 'Chicken', image: 'https://picsum.photos/seed/chicken/400/300' },
+    { name: 'Fish', image: 'https://picsum.photos/seed/fish/400/300' },
+    { name: 'Mutton', image: 'https://picsum.photos/seed/mutton/400/300' },
+    { name: 'Prawns', image: 'https://picsum.photos/seed/prawns/400/300' },
+  ];
+};
+
+export const fetchFreshStores = async (): Promise<any[]> => {
+  await new Promise(resolve => setTimeout(resolve, 400));
+  return [
+    { id: 1, name: 'Fresh Meat Hub', rating: 4.5, time: '20-30 mins', distance: '2.5 km', items: ['Chicken', 'Mutton'], image: 'https://picsum.photos/seed/meatstore/800/600' },
+    { id: 2, name: 'Ocean Catch', rating: 4.8, time: '30-45 mins', distance: '4.1 km', items: ['Fish', 'Prawns'], image: 'https://picsum.photos/seed/fishstore/800/600' },
+    { id: 3, name: 'Daily Fresh Meats', rating: 4.2, time: '15-25 mins', distance: '1.2 km', items: ['Chicken', 'Eggs'], image: 'https://picsum.photos/seed/freshmeat/800/600' },
+    { id: 4, name: 'Green Valley Farms', rating: 4.6, time: '25-35 mins', distance: '3.0 km', items: ['Organic Veggies', 'Fruits'], image: 'https://picsum.photos/seed/greenvalley/800/600' },
+    { id: 5, name: 'The Dairy Barn', rating: 4.7, time: '10-20 mins', distance: '0.8 km', items: ['Milk', 'Cheese', 'Butter'], image: 'https://picsum.photos/seed/dairybarn/800/600' },
+  ];
+};
+
+export const clearAllData = () => {
+  localStorage.clear();
+  window.location.reload();
+};
+
+/* =====================================================
+   SEARCH & HISTORY (Local Storage Mock)
+ ===================================================== */
+const RECENT_SEARCHES_KEY = 'foodwagon_recent_searches';
+
+export const fetchRecentSearches = async (): Promise<string[]> => {
+  const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
+  return saved ? JSON.parse(saved) : [];
+};
+
+export const saveRecentSearchToDB = async (searchTerm: string): Promise<void> => {
+  if (!searchTerm.trim()) return;
+  const recent = await fetchRecentSearches();
+  const updated = [
+    searchTerm,
+    ...recent.filter(s => s !== searchTerm)
+  ].slice(0, 5);
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+};
+
+export const removeSearchFromDB = async (searchTerm: string): Promise<void> => {
+  const recent = await fetchRecentSearches();
+  const updated = recent.filter(s => s !== searchTerm);
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+};
+
+export const clearSearchHistoryInDB = async (): Promise<void> => {
+  localStorage.removeItem(RECENT_SEARCHES_KEY);
+};
+
+export const fetchRestaurantById = async (id: number): Promise<Restaurant | null> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  const restaurants = getRestaurantsDB();
+  return restaurants.find(r => r.id === id) || null;
+};
+
+import { Utensils, Store, ShoppingBag, Bike } from 'lucide-react';
+
+export const fetchHomeCategories = async (): Promise<any[]> => {
+  await new Promise(resolve => setTimeout(resolve, 200));
+  return [
+    {
+      id: 'food',
+      title: 'Food',
+      subtitle: 'UP TO 20% OFF',
+      icon: Utensils,
+      image: 'https://picsum.photos/seed/food-delivery/800/800',
+      link: '/restaurants',
+      gradient: 'from-orange-600/90 to-red-700/90',
+      actionText: 'ORDER NOW'
+    },
+    {
+      id: 'stores',
+      title: 'Stores',
+      subtitle: 'CLEAN & FRESH',
+      icon: Store,
+      image: 'https://picsum.photos/seed/fresh-grocery/800/800',
+      link: '/fresh-stores',
+      gradient: 'from-emerald-600/90 to-teal-700/90',
+      actionText: 'SHOP NOW'
+    },
+    {
+      id: 'mart',
+      title: 'Mart',
+      subtitle: 'GROCERY DELIVERY',
+      icon: ShoppingBag,
+      image: 'https://picsum.photos/seed/mart-shopping/800/800',
+      link: '/supermarket',
+      gradient: 'from-blue-600/90 to-indigo-700/90',
+      actionText: 'ORDER NOW'
+    },
+    {
+      id: 'genie',
+      title: 'Genie',
+      subtitle: 'SEND & RECEIVE',
+      icon: Bike,
+      image: 'https://picsum.photos/seed/delivery-bike/800/800',
+      link: '/delivery-service',
+      gradient: 'from-pink-600/90 to-rose-700/90',
+      actionText: 'BOOK NOW'
+    }
+  ];
+};
+
+/* =====================================================
+   LOCATION (Local Storage Mock)
+ ===================================================== */
+const LOCATION_CITY_KEY = 'foodwagon_location_city';
+const LOCATION_ADDR_KEY = 'foodwagon_location_addr';
+const LOCATION_COORDS_KEY = 'foodwagon_location_coords';
+
+export const saveLocationToDB = async (city: string, address: string, coords: { latitude: number; longitude: number } | null): Promise<void> => {
+  localStorage.setItem(LOCATION_CITY_KEY, city);
+  localStorage.setItem(LOCATION_ADDR_KEY, address);
+  if (coords) {
+    localStorage.setItem(LOCATION_COORDS_KEY, JSON.stringify(coords));
+  } else {
+    localStorage.removeItem(LOCATION_COORDS_KEY);
+  }
+};
+
+export const fetchLocationFromDB = async (): Promise<{ city: string; address: string; coordinates: { latitude: number; longitude: number } | null }> => {
+  const city = localStorage.getItem(LOCATION_CITY_KEY) || 'Select Location';
+  const address = localStorage.getItem(LOCATION_ADDR_KEY) || 'Please select your city';
+  const coordsData = localStorage.getItem(LOCATION_COORDS_KEY);
+  const coordinates = coordsData ? JSON.parse(coordsData) : null;
+  return { city, address, coordinates };
+};
+
+/* =====================================================
+   CART (Local Storage Mock)
+ ===================================================== */
+const CART_DB_KEY = 'foodwagon_cart';
+const COUPON_DB_KEY = 'foodwagon_coupon';
+const DISCOUNT_DB_KEY = 'foodwagon_discount';
+
+export const fetchCart = async (): Promise<CartItem[]> => {
+  const data = localStorage.getItem(CART_DB_KEY);
+  return data ? JSON.parse(data) : [];
+};
+
+export const saveCart = async (items: CartItem[]): Promise<void> => {
+  localStorage.setItem(CART_DB_KEY, JSON.stringify(items));
+};
+
+export const fetchAppliedCoupon = async (): Promise<string | null> => {
+  return localStorage.getItem(COUPON_DB_KEY);
+};
+
+export const saveAppliedCoupon = async (coupon: string | null): Promise<void> => {
+  if (coupon) localStorage.setItem(COUPON_DB_KEY, coupon);
+  else localStorage.removeItem(COUPON_DB_KEY);
+};
+
+export const fetchCartDiscount = async (): Promise<number> => {
+  const data = localStorage.getItem(DISCOUNT_DB_KEY);
+  return data ? Number(data) : 0;
+};
+
+export const saveCartDiscount = async (discount: number): Promise<void> => {
+  localStorage.setItem(DISCOUNT_DB_KEY, discount.toString());
 };

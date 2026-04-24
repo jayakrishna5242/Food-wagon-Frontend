@@ -64,7 +64,7 @@ const GeniePage: React.FC = () => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Genie Delivery</h1>
       <div className="h-64 mb-4">
-        <MapContainer center={[12.9716, 77.5946]} zoom={13} className="h-full w-full">
+        <MapContainer center={[12.9716, 77.5946]} zoom={13} className="h-full w-full" attributionControl={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapEvents />
           {pickup && <Marker position={pickup} />}
