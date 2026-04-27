@@ -25,6 +25,7 @@ export interface UserAddress {
 
 export interface AuthResponse {
   user: User;
+  token?: string;
 }
 
 export interface Restaurant {
@@ -143,12 +144,15 @@ export interface Offer {
 export interface GenieBooking {
   id: number;
   userId: number;
-  type: 'pickup' | 'buy';
+  type: string;
   pickupLocation: string;
   dropLocation: string;
-  itemDescription: string;
-  date: string;
+  description: string;
   status: 'PENDING' | 'ASSIGNED' | 'COMPLETED' | 'CANCELLED';
+  estimatedCost?: number;
+  riderId?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Task {
@@ -160,4 +164,31 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
   userId: string;
+}
+
+export interface SupermarketItem {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  imageUrl: string;
+  unit: string;
+  description?: string;
+  isAvailable: boolean;
+  discountPrice?: number;
+}
+
+export interface FreshStore {
+  id: number;
+  name: string;
+  image: string;
+  rating: number;
+  time: string;
+  distance: string;
+  items: string[];
+}
+
+export interface FreshStoreCategory {
+  name: string;
+  image: string;
 }

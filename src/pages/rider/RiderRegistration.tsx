@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bike, ArrowRight, User, Phone, Mail, ShieldCheck } from 'lucide-react';
-import { registerDelivery } from '../../src/rider/api';
+import { registerDelivery } from '../../services/api';
 import { motion } from 'motion/react';
+import { useAuth } from '../../context/AuthContext';
 
 const RiderRegistration: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [riderForm, setRiderForm] = useState({
     name: '',
@@ -20,7 +22,10 @@ const RiderRegistration: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await registerDelivery(riderForm);
+      const response = await registerDelivery(riderForm);
+      if (response.user) {
+        login(response.user, response.token);
+      }
       console.log('Rider registration successful!');
       navigate('/delivery/dashboard');
     } catch (error) {

@@ -10,6 +10,7 @@ import {
   User, 
   LogOut, 
   Package, 
+  ShoppingBag,
   TrendingUp,
   ChevronRight,
   ArrowRight,
@@ -28,9 +29,12 @@ import {
   fetchTrips,
   fetchOrderRequests,
   acceptOrderRequest,
-  rejectOrderRequest
+  rejectOrderRequest,
+  fetchGenieBookings,
+  updateGenieStatus,
+  acceptGenieBooking
 } from '../../services/api';
-import { Order, Trip, EarningsSummary, OrderRequest } from '../../types';
+import { Order, Trip, EarningsSummary, OrderRequest, GenieBooking } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -44,6 +48,7 @@ const DeliveryDashboard: React.FC = () => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [earnings, setEarnings] = useState<EarningsSummary | null>(null);
   const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
+  const [genieBookings, setGenieBookings] = useState<GenieBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [requestTimers, setRequestTimers] = useState<Record<number, number>>({});
   const [startDate, setStartDate] = useState('');
@@ -53,16 +58,18 @@ const DeliveryDashboard: React.FC = () => {
   const loadData = useCallback(async () => {
     if (!currentUser) return;
     try {
-      const [o, t, e, r] = await Promise.all([
+      const [o, t, e, r, gb] = await Promise.all([
         fetchOrders(),
         fetchTrips(currentUser.id, startDate, endDate),
         fetchEarningsSummary(currentUser.id),
-        fetchOrderRequests(currentUser.id)
+        fetchOrderRequests(currentUser.id),
+        fetchGenieBookings()
       ]);
       setOrders(o);
       setTrips(t);
       setEarnings(e);
       setOrderRequests(r);
+      setGenieBookings(gb);
       
       // Initialize timers
       const timers: Record<number, number> = {};
@@ -156,10 +163,35 @@ const DeliveryDashboard: React.FC = () => {
     }
   };
 
+  const handleAcceptGenie = async (bookingId: number) => {
+    if (!currentUser) return;
+    try {
+      await acceptGenieBooking(bookingId, currentUser.id);
+      console.log('Genie task accepted!');
+      loadData();
+    } catch (err) {
+      console.error('Failed to accept genie task');
+    }
+  };
+
+  const handleUpdateGenieStatus = async (bookingId: number, status: GenieBooking['status']) => {
+    if (!currentUser) return;
+    try {
+      await updateGenieStatus(bookingId, status, currentUser.id);
+      console.log(`Genie status updated to ${status}`);
+      loadData();
+    } catch (err) {
+      console.error('Failed to update genie status');
+    }
+  };
+
   const activeDeliveries = orders.filter(o => 
     (o.status === 'READY' || o.status === 'DISPATCHED' || o.status === 'PREPARING' || o.status === 'PENDING') && 
     (o.deliveryBoyId === currentUser?.id || (o.status === 'READY' && !o.deliveryBoyId))
   );
+
+  const pendingGenie = genieBookings.filter(b => b.status === 'PENDING');
+  const myActiveGenie = genieBookings.filter(b => b.status === 'ASSIGNED' && b.riderId === currentUser?.id);
 
   if (loading) return <div className="h-screen flex items-center justify-center font-bold text-primary animate-pulse">Loading Delivery Dashboard...</div>;
 
@@ -435,6 +467,126 @@ const DeliveryDashboard: React.FC = () => {
                 ))}
               </div>
             )}
+          </section>
+
+          {/* Genie Tasks */}
+          <section className="mt-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-dark tracking-tight">Genie Tasks</h2>
+              <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
+                {pendingGenie.length + myActiveGenie.length} Tasks
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {/* My Accepted Genie Tasks */}
+              {myActiveGenie.map((booking) => (
+                <motion.div 
+                  layout
+                  key={booking.id} 
+                  className="bg-white rounded-[40px] shadow-sm border-2 border-primary overflow-hidden"
+                >
+                  <div className="p-6 border-b border-gray-50 flex items-center justify-between bg-primary/5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                        <ShoppingBag className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Genie Task #{booking.id}</p>
+                        <h4 className="text-sm font-black text-dark">{booking.type === 'pickup' ? 'Pick up & Drop' : 'Buy from Store'}</h4>
+                      </div>
+                    </div>
+                    <span className="bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                      IN PROGRESS
+                    </span>
+                  </div>
+                  
+                  <div className="p-8 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">From</p>
+                        <p className="text-sm text-dark font-bold">{booking.pickupLocation}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">To</p>
+                        <p className="text-sm text-dark font-bold">{booking.dropLocation}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Description</p>
+                      <p className="text-sm text-gray-600 font-medium bg-gray-50 p-4 rounded-2xl">{booking.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-gray-50/50 border-t border-gray-50">
+                    <div className="flex items-center justify-between mb-4">
+                       <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Payout Reward</span>
+                       <span className="text-lg font-black text-primary">₹{booking.estimatedCost}</span>
+                    </div>
+                    <button 
+                      onClick={() => handleUpdateGenieStatus(booking.id, 'COMPLETED')}
+                      className="w-full bg-green-600 text-white py-5 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-green-700 transition-all flex items-center justify-center gap-3"
+                    >
+                      <CheckCircle2 className="w-5 h-5" />
+                      Mark as Completed
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+
+              {/* Available Genie Tasks */}
+              {pendingGenie.map((booking) => (
+                <motion.div 
+                  layout
+                  key={booking.id} 
+                  className="bg-white rounded-[40px] shadow-sm border border-gray-100 overflow-hidden"
+                >
+                  <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-50 rounded-2xl flex items-center justify-center">
+                        <ShoppingBag className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">New Genie Task</p>
+                        <h4 className="text-sm font-black text-dark">{booking.type === 'pickup' ? 'Pick up & Drop' : 'Buy from Store'}</h4>
+                      </div>
+                    </div>
+                    <span className="bg-orange-100 text-orange-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                      AVAILABLE
+                    </span>
+                  </div>
+                  
+                  <div className="p-8 space-y-4">
+                    <p className="text-xs text-gray-500 font-medium">
+                      <span className="font-bold text-dark">Pickup:</span> {booking.pickupLocation}
+                    </p>
+                    <p className="text-xs text-gray-500 font-medium">
+                      <span className="font-bold text-dark">Drop:</span> {booking.dropLocation}
+                    </p>
+                    <div className="pt-2 border-t border-gray-50 flex items-center justify-between">
+                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Payout</span>
+                       <span className="text-base font-black text-primary">₹{booking.estimatedCost}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-gray-50/50 border-t border-gray-50">
+                    <button 
+                      onClick={() => handleAcceptGenie(booking.id)}
+                      className="w-full bg-primary text-white py-5 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-orange-600 transition-all flex items-center justify-center gap-3"
+                    >
+                      <ArrowRight className="w-5 h-5" />
+                      Accept Genie Task
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+
+              {pendingGenie.length === 0 && myActiveGenie.length === 0 && (
+                <div className="bg-white rounded-[40px] p-12 text-center border border-dashed border-gray-200">
+                  <p className="text-sm text-gray-400 font-medium">No Genie tasks available near you.</p>
+                </div>
+              )}
+            </div>
           </section>
         </div>
 

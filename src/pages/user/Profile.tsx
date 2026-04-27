@@ -115,7 +115,8 @@ const Profile: React.FC = () => {
     const loadOrders = async () => {
       setLoadingOrders(true);
       try {
-        const data = await fetchOrders();
+        const userIdNum = user ? Number(user.id) : undefined;
+        const data = await fetchOrders(userIdNum);
         const sorted = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setOrders(sorted);
       } catch (error) {
@@ -245,7 +246,7 @@ const Profile: React.FC = () => {
       const loadBookings = async () => {
         setLoadingBookings(true);
         try {
-          const data = await fetchGenieBookings();
+          const data = await fetchGenieBookings(user.id);
           setBookings(data);
         } catch (error) {
           console.error('Failed to fetch bookings');
@@ -486,7 +487,11 @@ const Profile: React.FC = () => {
                         >
                           <div 
                             onClick={() => {
-                              setSelectedOrder(order);
+                              if (order.status === 'DELIVERED') {
+                                navigate(`/order-rating/${order.id}`);
+                              } else {
+                                setSelectedOrder(order);
+                              }
                             }}
                             className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer"
                           >
@@ -494,7 +499,11 @@ const Profile: React.FC = () => {
                           </div>
                           <div 
                             onClick={() => {
-                              setSelectedOrder(order);
+                              if (order.status === 'DELIVERED') {
+                                navigate(`/order-rating/${order.id}`);
+                              } else {
+                                setSelectedOrder(order);
+                              }
                             }}
                             className="flex-1 cursor-pointer"
                           >
@@ -722,10 +731,14 @@ const Profile: React.FC = () => {
                             <div>
                               <h4 className="font-bold text-dark">{booking.type === 'pickup' ? 'Pick up & Drop' : 'Buy from Store'}</h4>
                               <p className="text-xs text-gray-500">{booking.pickupLocation} → {booking.dropLocation}</p>
-                              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{new Date(booking.date).toLocaleDateString()}</p>
+                              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{new Date(booking.createdAt).toLocaleDateString()}</p>
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-2">
+                            <div className="text-right mb-1">
+                               <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Fee</p>
+                               <p className="text-sm font-black text-dark">₹{booking.estimatedCost}</p>
+                            </div>
                             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
                               booking.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
                               booking.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
@@ -734,7 +747,7 @@ const Profile: React.FC = () => {
                             }`}>
                               {booking.status}
                             </span>
-                            {booking.status === 'PENDING' && (new Date().getTime() - new Date(booking.date).getTime()) <= 60000 && (
+                            {booking.status === 'PENDING' && (new Date().getTime() - new Date(booking.createdAt).getTime()) <= 60000 && (
                               <button 
                                 onClick={() => {
                                   setBookingToCancelId(booking.id);
@@ -835,8 +848,15 @@ const Profile: React.FC = () => {
                   </h5>
                   <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
                     <div className="flex justify-between mb-3">
-                      {['Placed', 'Preparing', 'Dispatched', 'Delivered'].map((step, index) => {
-                        const currentStep = selectedOrder.status === 'DELIVERED' ? 3 : selectedOrder.status === 'PENDING' ? 1 : 0;
+                      {['Placed', 'Preparing', 'Out for Delivery', 'Delivered'].map((step, index) => {
+                        const statusMapping: Record<string, number> = {
+                          'PLACED': 0,
+                          'PREPARING': 1,
+                          'READY': 1,
+                          'DISPATCHED': 2,
+                          'DELIVERED': 3
+                        };
+                        const currentStep = statusMapping[selectedOrder.status] ?? (selectedOrder.status === 'CANCELLED' ? -1 : 0);
                         return (
                           <span key={step} className={`text-[10px] font-black uppercase tracking-widest ${index <= currentStep ? 'text-primary' : 'text-gray-300'}`}>
                             {step}
@@ -845,8 +865,15 @@ const Profile: React.FC = () => {
                       })}
                     </div>
                     <div className="h-2 bg-gray-200 rounded-full flex">
-                      {['Placed', 'Preparing', 'Dispatched', 'Delivered'].map((_, index) => {
-                        const currentStep = selectedOrder.status === 'DELIVERED' ? 3 : selectedOrder.status === 'PENDING' ? 1 : 0;
+                      {['Placed', 'Preparing', 'Out for Delivery', 'Delivered'].map((_, index) => {
+                        const statusMapping: Record<string, number> = {
+                          'PLACED': 0,
+                          'PREPARING': 1,
+                          'READY': 1,
+                          'DISPATCHED': 2,
+                          'DELIVERED': 3
+                        };
+                        const currentStep = statusMapping[selectedOrder.status] ?? (selectedOrder.status === 'CANCELLED' ? -1 : 0);
                         return (
                           <div key={index} className={`flex-1 ${index <= currentStep ? 'bg-primary' : ''} ${index === 0 ? 'rounded-l-full' : ''} ${index === 3 ? 'rounded-r-full' : ''}`} />
                         );
@@ -859,7 +886,7 @@ const Profile: React.FC = () => {
                 {selectedOrder.status === 'DELIVERED' && (
                   <div className="bg-gray-50/50 p-8 rounded-3xl border border-gray-100 shadow-sm">
                     <div className="flex justify-between items-center mb-6">
-                      <h5 className="text-lg font-black text-dark tracking-tight">Rate your experience</h5>
+                      <h5 className="text-lg font-black text-dark tracking-tight">Rate {selectedOrder.restaurantName}</h5>
                       {!selectedOrder.rating && (
                         <button 
                           onClick={() => navigate(`/order-rating/${selectedOrder.id}`)}

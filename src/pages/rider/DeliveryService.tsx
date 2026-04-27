@@ -14,14 +14,14 @@ type BookingType = 'pickup' | 'buy';
 
 const DeliveryService: React.FC = () => {
   const { address } = useLocationContext();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [step, setStep] = useState(1);
   const [bookingType, setBookingType] = useState<BookingType>('pickup');
   const [pickupLocation, setPickupLocation] = useState('');
   const [dropLocation, setDropLocation] = useState('');
-  const [itemDescription, setItemDescription] = useState('');
+  const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -35,7 +35,7 @@ const DeliveryService: React.FC = () => {
   const [routePoints, setRoutePoints] = useState<[number, number][]>([]);
   const [distance, setDistance] = useState('');
   const [estimatedTime, setEstimatedTime] = useState('');
-  const [estimatedPrice, setEstimatedPrice] = useState('');
+  const [estimatedCost, setEstimatedCost] = useState<number>(0);
 
   const geocode = async (address: string): Promise<[number, number] | null> => {
     try {
@@ -50,7 +50,7 @@ const DeliveryService: React.FC = () => {
     return null;
   };
 
-  const calculateDistance = (coords1: [number, number], coords2: [number, number]): number => {
+  const calculateDistanceInKm = (coords1: [number, number], coords2: [number, number]): number => {
     const R = 6371; // km
     const dLat = (coords2[0] - coords1[0]) * Math.PI / 180;
     const dLon = (coords2[1] - coords1[1]) * Math.PI / 180;
@@ -74,25 +74,27 @@ const DeliveryService: React.FC = () => {
       const routeResponse = await fetch(osrmUrl);
       const routeData = await routeResponse.json();
 
+      let distKm = 0;
+      let durationMins = 0;
+
       if (routeData.routes && routeData.routes.length > 0) {
         const route = routeData.routes[0];
         const coordinates = route.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
         setRoutePoints(coordinates);
         
-        const distKm = route.distance / 1000;
-        const durationMins = Math.round(route.duration / 60);
-        
-        setDistance(`${distKm.toFixed(1)} km`);
-        setEstimatedTime(`${durationMins} - ${Math.round(durationMins * 1.2)} mins`);
-        setEstimatedPrice(`₹${Math.round(distKm * 25 + 30)}`);
+        distKm = route.distance / 1000;
+        durationMins = Math.round(route.duration / 60);
       } else {
         // Fallback to straight line
-        const dist = calculateDistance(pCoords, dCoords);
+        distKm = calculateDistanceInKm(pCoords, dCoords);
         setRoutePoints([pCoords, dCoords]);
-        setDistance(`${dist.toFixed(1)} km`);
-        setEstimatedTime(`${Math.round(dist * 3)} - ${Math.round(dist * 5)} mins`);
-        setEstimatedPrice(`₹${Math.round(dist * 25 + 30)}`);
+        durationMins = Math.round(distKm * 4);
       }
+
+      setDistance(`${distKm.toFixed(1)} km`);
+      setEstimatedTime(`${durationMins} - ${Math.round(durationMins * 1.2)} mins`);
+      setEstimatedCost(Math.round(distKm * 25 + 30));
+
       return true;
     } catch (routeError) {
       console.error("Routing failed:", routeError);
@@ -110,11 +112,13 @@ const DeliveryService: React.FC = () => {
 
   useEffect(() => {
     const loadBookings = async () => {
-      const data = await fetchGenieBookings();
-      setBookings(data);
+      if (user?.id) {
+        const data = await fetchGenieBookings(user.id);
+        setBookings(data);
+      }
     };
     loadBookings();
-  }, [isSuccess]);
+  }, [isSuccess, user]);
 
   const services = [
     { 
@@ -213,7 +217,7 @@ const DeliveryService: React.FC = () => {
     const newErrors: { [key: string]: string } = {};
     if (!pickupLocation.trim()) newErrors.pickup = 'Pickup location is required';
     if (!dropLocation.trim()) newErrors.drop = 'Drop-off location is required';
-    if (!itemDescription.trim()) newErrors.description = 'Item description is required';
+    if (!description.trim()) newErrors.description = 'Item description is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -238,15 +242,18 @@ const DeliveryService: React.FC = () => {
       setIsSubmitting(true);
       try {
         await placeGenieBooking({
+          userId: user?.id,
           type: bookingType,
           pickupLocation,
           dropLocation,
-          itemDescription
+          description,
+          status: 'PENDING',
+          estimatedCost
         });
         setIsSuccess(true);
         setPickupLocation('');
         setDropLocation('');
-        setItemDescription('');
+        setDescription('');
         setPickupCoords(undefined);
         setDropCoords(undefined);
         setRoutePoints([]);
@@ -402,8 +409,8 @@ const DeliveryService: React.FC = () => {
                         <div className="relative">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2 mb-4 block">Item Description</label>
                           <textarea 
-                            value={itemDescription}
-                            onChange={(e) => setItemDescription(e.target.value)}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
                             placeholder={bookingType === 'pickup' ? "What are we picking up? (e.g., Keys, Documents)" : "What do you want us to buy?"}
                             rows={4}
                             className={`w-full bg-gray-50 border-2 ${errors.description ? 'border-red-500' : 'border-transparent'} focus:border-primary focus:bg-white rounded-[1.5rem] py-6 px-8 text-gray-900 font-bold transition-all outline-none resize-none placeholder:text-gray-300 shadow-inner`}
@@ -447,7 +454,7 @@ const DeliveryService: React.FC = () => {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Estimated Price:</span>
-                          <span className="font-bold text-dark">{estimatedPrice}</span>
+                          <span className="font-bold text-dark">₹{estimatedCost}</span>
                         </div>
                       </div>
                       

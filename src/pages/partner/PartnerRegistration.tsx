@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   ArrowLeft
 } from 'lucide-react';
-import { registerPartner } from '../../src/partner/api';
+import { registerPartner } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'motion/react';
 
@@ -26,6 +26,7 @@ const DEFAULT_RESTAURANT_IMAGES = [
 
 const PartnerRegistration: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -98,14 +99,17 @@ const PartnerRegistration: React.FC = () => {
 
     setLoading(true);
     try {
-      await registerPartner({
+      const response = await registerPartner({
         ...partnerForm,
         latitude: lat,
         longitude: lng,
         cuisines: partnerForm.cuisines.split(',').map(c => c.trim())
       });
+      if (response.user) {
+        login(response.user, response.token);
+      }
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 3000);
+      setTimeout(() => navigate('/partner/dashboard'), 3000);
     } catch (err: any) {
       console.error(err.message || 'Registration failed');
     } finally {
